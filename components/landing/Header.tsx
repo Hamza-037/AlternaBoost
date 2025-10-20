@@ -70,6 +70,12 @@ export function Header() {
               Exemples
             </Link>
             <Link
+              href="/pricing"
+              className="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
+            >
+              Tarifs
+            </Link>
+            <Link
               href="/create-letter"
               className="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
             >
@@ -143,6 +149,13 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Exemples
+              </Link>
+              <Link
+                href="/pricing"
+                className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Tarifs
               </Link>
               <Link
                 href="/create-letter"

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { 
   Menu, 
   X, 
@@ -42,6 +43,11 @@ export function HeaderV2() {
       badge: "Nouveau"
     },
     { name: "Exemples", href: "/exemples" },
+    { 
+      name: "Tarifs", 
+      href: "/pricing",
+      badge: "7j gratuit"
+    },
   ];
 
   const features = [
@@ -123,6 +129,23 @@ export function HeaderV2() {
 
           {/* CTA Desktop */}
           <div className="hidden lg:flex items-center gap-4">
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button variant="outline">
+                  Connexion
+                </Button>
+              </SignInButton>
+            </SignedOut>
+            
+            <SignedIn>
+              <Link href="/dashboard">
+                <Button variant="outline">
+                  Dashboard
+                </Button>
+              </Link>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            
             <Link href="/create-cv">
               <Button 
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"

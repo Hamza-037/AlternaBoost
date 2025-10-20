@@ -70,24 +70,41 @@ export function CTA() {
             <span className="font-semibold text-white">Gratuit, rapide, et optimisé par l'IA.</span>
           </p>
 
-          <Link href="/create-cv">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-50 text-lg px-12 py-8 h-auto font-bold shadow-2xl hover:shadow-3xl transition-all rounded-2xl group relative overflow-hidden"
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
+            <Link href="/create-cv">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <span className="relative flex items-center gap-3">
-                  <Zap className="w-6 h-6" />
-                  Commencer maintenant
-                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-                </span>
-              </Button>
-            </motion.div>
-          </Link>
+                <Button
+                  size="lg"
+                  className="bg-white text-blue-600 hover:bg-gray-50 text-lg px-12 py-8 h-auto font-bold shadow-2xl hover:shadow-3xl transition-all rounded-2xl group relative overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="relative flex items-center gap-3">
+                    <Zap className="w-6 h-6" />
+                    Commencer maintenant
+                    <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  </span>
+                </Button>
+              </motion.div>
+            </Link>
+
+            <Link href="/pricing">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-white/10 border-2 border-white text-white hover:bg-white/20 text-lg px-12 py-8 h-auto font-bold backdrop-blur-sm rounded-2xl"
+                >
+                  Voir les tarifs
+                </Button>
+              </motion.div>
+            </Link>
+          </div>
 
           <motion.div
             initial={{ opacity: 0 }}
