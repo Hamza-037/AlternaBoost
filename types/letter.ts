@@ -10,16 +10,23 @@ export interface LetterFormData {
   entreprise: string;
   destinataire: string; // Nom du recruteur
   posteVise: string;
+  secteurActivite?: string;
+  lienOffre?: string;
 
   // Contenu
   motivations: string; // 3-4 motivations principales
   atouts: string; // Pourquoi vous êtes le bon candidat
   disponibilite: string; // Ex: "Dès que possible", "Septembre 2025"
+  descriptionPoste?: string;
+  motsClesCibles?: string;
+  tonSouhaite?: "professionnel" | "enthousiaste" | "audacieux" | "sobre";
 }
 
 export interface GeneratedLetter extends LetterFormData {
   contenuGenere: string; // Lettre complète générée par l'IA
   dateGeneration: string;
+  accrochePersonnalisee?: string;
+  recommandationsIA?: string[];
 }
 
 // Nouveau : Configuration de style pour les lettres

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
 import type { LetterFormData, GeneratedLetter } from "@/types/letter";
 
@@ -8,7 +8,6 @@ import type { LetterFormData, GeneratedLetter } from "@/types/letter";
  */
 export async function POST(request: NextRequest) {
   try {
-    // Vérifier la clé API OpenAI
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: "Configuration du serveur manquante : OPENAI_API_KEY n'est pas définie" },
@@ -18,43 +17,49 @@ export async function POST(request: NextRequest) {
 
     const formData: LetterFormData = await request.json();
 
-    // Appel à OpenAI pour générer le contenu de la lettre
+    const ton = formData.tonSouhaite ?? "professionnel et chaleureux";
+    const contexteSupplementaire = [
+      formData.secteurActivite ? `- Secteur : ${formData.secteurActivite}` : null,
+      formData.descriptionPoste ? `- Résumé de l'offre : ${formData.descriptionPoste}` : null,
+      formData.motsClesCibles ? `- Mots-clés à intégrer : ${formData.motsClesCibles}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
           content: `Vous êtes un assistant expert en rédaction de lettres de motivation professionnelles.
-Générez une lettre de motivation structurée en exactement 3 paragraphes distincts.
+Produisez un texte en EXACTEMENT trois paragraphes séparés par un double saut de ligne.
 
-**Règles strictes :**
-1. Exactement 3 paragraphes, séparés par des sauts de ligne
-2. Ton professionnel mais personnel, éviter les clichés
-3. Premier paragraphe : Introduction et contexte
-4. Deuxième paragraphe : Motivations et adéquation avec l'entreprise
-5. Troisième paragraphe : Disponibilité et ouverture à l'entretien
-6. Ne pas inclure "Madame, Monsieur" au début ni la formule de politesse finale (c'est déjà dans le template)
-7. Utiliser des phrases courtes et percutantes
-8. Inclure les atouts personnels de manière naturelle`,
+Règles strictes :
+1. Trois paragraphes seulement.
+2. Ton ${ton}, sans clichés, phrases courtes.
+3. Paragraphes : introduction accrocheuse, démonstration de valeur, conclusion avec disponibilité.
+4. N'ajoutez pas de formule d'appel ni de formule de politesse (déjà gérées ailleurs).
+5. Si des mots-clés ou un résumé d'offre sont fournis, intégrez-les naturellement.
+6. L'argumentaire doit relier motivations, atouts et besoins de l'entreprise.`,
         },
         {
           role: "user",
-          content: `Génère une lettre de motivation pour :
+          content: `Générez le corps d'une lettre de motivation pour :
 - Poste visé : ${formData.posteVise}
 - Entreprise : ${formData.entreprise}
 - Nom du candidat : ${formData.prenom} ${formData.nom}
-- Motivations : ${formData.motivations}
+${contexteSupplementaire ? `${contexteSupplementaire}\n` : ""}- Motivations : ${formData.motivations}
 - Atouts : ${formData.atouts}
 - Disponibilité : ${formData.disponibilite}
 
-Génère uniquement le corps de la lettre (3 paragraphes).`,
+Répondez uniquement par le corps de la lettre (3 paragraphes).`,
         },
       ],
-      temperature: 0.7,
+      temperature: 0.6,
       max_tokens: 1000,
     });
 
-    const contenuGenere = completion.choices[0].message?.content || "";
+    const contenuGenere = completion.choices[0].message?.content ?? "";
 
     const generatedLetter: GeneratedLetter = {
       ...formData,
@@ -76,4 +81,3 @@ Génère uniquement le corps de la lettre (3 paragraphes).`,
     );
   }
 }
-

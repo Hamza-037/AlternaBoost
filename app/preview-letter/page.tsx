@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -7,8 +7,19 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { LetterPreviewHTMLV2 } from "@/components/preview/LetterPreviewHTMLV2";
 import { LetterCustomizer } from "@/components/letter/LetterCustomizer";
+import { Header } from "@/components/landing/Header";
+import { Footer } from "@/components/landing/Footer";
 import type { GeneratedLetter, LetterStyle, LetterSection } from "@/types/letter";
 import { toast } from "sonner";
 
@@ -18,7 +29,7 @@ export default function PreviewLetterPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Style et sections personnalisées pour les lettres
+  // Style et sections personnalisÃ©es pour les lettres
   const [letterStyle, setLetterStyle] = useState<LetterStyle>({
     template: "classic",
     colorScheme: {
@@ -41,30 +52,36 @@ export default function PreviewLetterPage() {
   const [customSections, setCustomSections] = useState<LetterSection[]>([]);
 
   useEffect(() => {
-    // Récupérer les données de la lettre depuis sessionStorage
+    // RÃ©cupÃ©rer les donnÃ©es de la lettre depuis sessionStorage
     const storedData = sessionStorage.getItem("generated_letter");
     if (storedData) {
       const data = JSON.parse(storedData);
       setLetterData(data);
       
-      // Charger le style personnalisé s'il existe
+      // Charger le style personnalisÃ© s'il existe
       if (data.style) {
         setLetterStyle(data.style);
       }
       
-      // Charger les sections personnalisées s'il y en a
+      // Charger les sections personnalisÃ©es s'il y en a
       if (data.sectionsPersonnalisees) {
         setCustomSections(data.sectionsPersonnalisees);
       }
     } else {
-      // Si pas de données, rediriger vers le formulaire
+      // Si pas de donnÃ©es, rediriger vers le formulaire
       router.push("/create-letter");
     }
   }, [router]);
 
   const handleUpdate = (field: string, value: string) => {
     if (!letterData) return;
-    setLetterData({ ...letterData, [field]: value });
+    const updated = { ...letterData, [field]: value };
+    setLetterData(updated);
+    try {
+      sessionStorage.setItem("generated_letter", JSON.stringify(updated));
+    } catch {
+      // Ignorer les erreurs de stockage (mode SSR / restriction navigateur)
+    }
   };
 
   const handleDownloadPDF = async () => {
@@ -72,7 +89,7 @@ export default function PreviewLetterPage() {
 
     setIsDownloading(true);
     try {
-      // Inclure toutes les options de personnalisation dans les données envoyées
+      // Inclure toutes les options de personnalisation dans les donnÃ©es envoyÃ©es
       const dataToSend = {
         ...letterData,
         style: letterStyle,
@@ -89,10 +106,10 @@ export default function PreviewLetterPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Erreur lors de la génération du PDF");
+        throw new Error(error.error || "Erreur lors de la gÃ©nÃ©ration du PDF");
       }
 
-      // Télécharger le PDF
+      // TÃ©lÃ©charger le PDF
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -103,13 +120,13 @@ export default function PreviewLetterPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast.success("Lettre de motivation téléchargée avec succès !");
+      toast.success("Lettre de motivation tÃ©lÃ©chargÃ©e avec succÃ¨s !");
     } catch (error) {
       console.error("Erreur:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Une erreur est survenue lors du téléchargement"
+          : "Une erreur est survenue lors du tÃ©lÃ©chargement"
       );
     } finally {
       setIsDownloading(false);
@@ -128,7 +145,9 @@ export default function PreviewLetterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
+    <>
+    <Header />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 pt-20">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
@@ -141,21 +160,21 @@ export default function PreviewLetterPage() {
             <div>
               <Link href="/create-letter">
                 <Button variant="ghost" className="mb-4">
-                  ← Retour au formulaire
+                  â† Retour au formulaire
                 </Button>
               </Link>
               <h1 className="text-4xl font-bold text-gray-900">
-                Aperçu de votre lettre de motivation
+                AperÃ§u de votre lettre de motivation
               </h1>
               <p className="text-lg text-gray-600 mt-2">
-                Modifiez directement les champs ou téléchargez votre lettre
+                Modifiez directement les champs ou tÃ©lÃ©chargez votre lettre
               </p>
             </div>
             <Badge
               variant={isEditing ? "default" : "secondary"}
               className="h-8 px-4 bg-purple-600 hover:bg-purple-700 text-white"
             >
-              {isEditing ? "Mode Édition" : "Mode Aperçu"}
+              {isEditing ? "Mode Ã‰dition" : "Mode AperÃ§u"}
             </Badge>
           </div>
 
@@ -184,7 +203,7 @@ export default function PreviewLetterPage() {
                         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                         <circle cx="12" cy="12" r="3" />
                       </svg>
-                      Aperçu
+                      AperÃ§u
                     </>
                   ) : (
                     <>
@@ -233,7 +252,7 @@ export default function PreviewLetterPage() {
                     <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
                     <path d="M3 16v5h5" />
                   </svg>
-                  Réinitialiser
+                  RÃ©initialiser
                 </Button>
               </div>
 
@@ -265,7 +284,7 @@ export default function PreviewLetterPage() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Téléchargement...
+                    TÃ©lÃ©chargement...
                   </>
                 ) : (
                   <>
@@ -284,7 +303,7 @@ export default function PreviewLetterPage() {
                       <polyline points="7 10 12 15 17 10" />
                       <line x1="12" x2="12" y1="15" y2="3" />
                     </svg>
-                    Télécharger en PDF
+                    TÃ©lÃ©charger en PDF
                   </>
                 )}
               </Button>
@@ -292,7 +311,7 @@ export default function PreviewLetterPage() {
           </Card>
         </motion.div>
 
-        {/* Grille 3 colonnes : Personnalisation + Aperçu + Infos */}
+        {/* Grille 3 colonnes : Personnalisation + AperÃ§u + Infos */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Colonne gauche : Personnalisation (1/4) */}
           <motion.div
@@ -309,7 +328,7 @@ export default function PreviewLetterPage() {
             />
           </motion.div>
 
-          {/* Colonne centrale : Aperçu de la lettre (2/4) */}
+          {/* Colonne centrale : AperÃ§u de la lettre (2/4) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -319,7 +338,7 @@ export default function PreviewLetterPage() {
             {isEditing && (
               <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
                 <p className="text-sm text-purple-800">
-                  💡 <strong>Mode édition activé</strong> : Cliquez sur les
+                  ðŸ’¡ <strong>Mode Ã©dition activÃ©</strong> : Cliquez sur les
                   champs pour les modifier directement.
                 </p>
               </div>
@@ -331,6 +350,19 @@ export default function PreviewLetterPage() {
               onUpdate={handleUpdate}
               style={letterStyle}
               customSections={customSections}
+              onSectionsChange={(sections) => {
+                setCustomSections(sections);
+                setLetterData((prev) => {
+                  if (!prev) return prev;
+                  const updated = { ...prev, sectionsPersonnalisees: sections };
+                  try {
+                    sessionStorage.setItem("generated_letter", JSON.stringify(updated));
+                  } catch {
+                    // noop
+                  }
+                  return updated;
+                });
+              }}
             />
           </motion.div>
 
@@ -341,6 +373,63 @@ export default function PreviewLetterPage() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="space-y-6"
           >
+            {/* Ciblage du poste */}
+            <Card className="p-6 border-purple-100 shadow-lg">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Personnalisation pour l&apos;offre
+              </h3>
+              <div className="space-y-4 text-sm text-gray-700">
+                <div className="space-y-2">
+                  <Label htmlFor="letter-description">RÃ©sumÃ© de l&apos;offre</Label>
+                  <Textarea
+                    id="letter-description"
+                    rows={4}
+                    placeholder="Collez les Ã©lÃ©ments clÃ©s de l&apos;annonce ou vos notes sur le poste."
+                    value={letterData.descriptionPoste ?? ""}
+                    onChange={(event) => handleUpdate("descriptionPoste", event.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="letter-keywords">Mots-clÃ©s Ã  intÃ©grer</Label>
+                  <Textarea
+                    id="letter-keywords"
+                    rows={2}
+                    placeholder="Ex: relation client, gestion de projet, suite Adobe..."
+                    value={letterData.motsClesCibles ?? ""}
+                    onChange={(event) => handleUpdate("motsClesCibles", event.target.value)}
+                  />
+                  <p className="text-xs text-gray-500">
+                    SÃ©parez les mots-clÃ©s par des virgules pour les injecter automatiquement dans les paragraphes.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="letter-tone">Ton souhaitÃ©</Label>
+                  <Select
+                    value={letterData.tonSouhaite ?? ""}
+                    onValueChange={(value) => handleUpdate("tonSouhaite", value)}
+                  >
+                    <SelectTrigger id="letter-tone">
+                      <SelectValue placeholder="Choisissez un ton" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="professionnel">Professionnel</SelectItem>
+                      <SelectItem value="enthousiaste">Enthousiaste</SelectItem>
+                      <SelectItem value="audacieux">Audacieux</SelectItem>
+                      <SelectItem value="sobre">Sobre</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="rounded-lg bg-purple-50 border border-purple-100 px-4 py-3 text-xs text-purple-800 space-y-1">
+                  <p className="font-semibold">
+                    Astuce ciblage
+                  </p>
+                  <p>
+                    Ajoutez ici les missions prioritaires et le vocabulaire de l&apos;annonce : l&apos;IA les utilisera lors de la prochaine rÃ©gÃ©nÃ©ration pour renforcer l&apos;alignement.
+                  </p>
+                </div>
+              </div>
+            </Card>
+
             {/* Informations sur la lettre */}
             <Card className="p-6 shadow-lg border-2 border-purple-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -366,7 +455,7 @@ export default function PreviewLetterPage() {
               </h3>
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="font-medium text-gray-700">Poste visé :</span>
+                  <span className="font-medium text-gray-700">Poste visÃ© :</span>
                   <p className="text-gray-600">{letterData.posteVise}</p>
                 </div>
                 <div>
@@ -379,7 +468,7 @@ export default function PreviewLetterPage() {
                 </div>
                 <div>
                   <span className="font-medium text-gray-700">Sections :</span>
-                  <p className="text-gray-600">{customSections.length} personnalisées</p>
+                  <p className="text-gray-600">{customSections.length} personnalisÃ©es</p>
                 </div>
               </div>
             </Card>
@@ -387,31 +476,36 @@ export default function PreviewLetterPage() {
             {/* Conseils pour la lettre */}
             <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                ✨ Conseils d'écriture
+                âœ¨ Conseils d&apos;Ã©criture
               </h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Personnalisez pour chaque entreprise</li>
-                <li>• Mentionnez des éléments concrets</li>
-                <li>• Restez professionnel mais authentique</li>
-                <li>• Relisez avant envoi</li>
+                <li>â€¢ Personnalisez pour chaque entreprise</li>
+                <li>â€¢ Mentionnez des Ã©lÃ©ments concrets</li>
+                <li>â€¢ Restez professionnel mais authentique</li>
+                <li>â€¢ Relisez avant envoi</li>
               </ul>
             </Card>
 
-            {/* Prochaines étapes */}
+            {/* Prochaines Ã©tapes */}
             <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                🚀 Prochaines étapes
+                ðŸš€ Prochaines Ã©tapes
               </h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Personnalisez le style</li>
-                <li>• Modifiez le contenu si nécessaire</li>
-                <li>• Téléchargez votre lettre en PDF</li>
-                <li>• Envoyez avec votre CV</li>
+                <li>â€¢ Personnalisez le style</li>
+                <li>â€¢ Modifiez le contenu si nÃ©cessaire</li>
+                <li>â€¢ TÃ©lÃ©chargez votre lettre en PDF</li>
+                <li>â€¢ Envoyez avec votre CV</li>
               </ul>
             </Card>
           </motion.div>
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }
+
+
+

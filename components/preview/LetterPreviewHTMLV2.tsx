@@ -3,7 +3,6 @@
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import type { GeneratedLetter, LetterStyle, LetterSection } from "@/types/letter";
 import { PenTool, FileText, Sparkles } from "lucide-react";
 
@@ -13,6 +12,7 @@ interface LetterPreviewHTMLV2Props {
   onUpdate: (field: string, value: string) => void;
   style?: LetterStyle;
   customSections?: LetterSection[];
+  onSectionsChange?: (sections: LetterSection[]) => void;
 }
 
 export function LetterPreviewHTMLV2({
@@ -21,11 +21,10 @@ export function LetterPreviewHTMLV2({
   onUpdate,
   style,
   customSections = [],
+  onSectionsChange,
 }: LetterPreviewHTMLV2Props) {
   // Couleurs personnalisées ou par défaut
   const primaryColor = style?.colorScheme?.primary || "#2563EB";
-  const secondaryColor = style?.colorScheme?.secondary || "#3B82F6";
-  const accentColor = style?.colorScheme?.accent || "#60A5FA";
   
   // Espacement
   const spacing = style?.layout?.spacing || "normal";
@@ -237,10 +236,11 @@ export function LetterPreviewHTMLV2({
               <Textarea
                 value={section.contenu}
                 onChange={(e) => {
-                  const updatedSections = customSections.map(s => 
+                  if (!onSectionsChange) return;
+                  const updatedSections = customSections.map((s) =>
                     s.id === section.id ? { ...s, contenu: e.target.value } : s
                   );
-                  // Note: Il faudrait passer une fonction onUpdateSections
+                  onSectionsChange(updatedSections);
                 }}
                 rows={3}
                 className="w-full"

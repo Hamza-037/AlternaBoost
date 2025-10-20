@@ -2,13 +2,17 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { CVFormV2 } from "@/components/cv/CVFormV2";
+import { CVFormSteps } from "@/components/cv/CVFormSteps";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Header } from "@/components/landing/Header";
+import { Footer } from "@/components/landing/Footer";
 
 export default function CreateCVPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* En-tête */}
         <motion.div
@@ -114,7 +118,7 @@ export default function CreateCVPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <CVFormV2 />
+          <CVFormSteps />
         </motion.div>
 
         {/* Informations complémentaires */}
@@ -194,6 +198,8 @@ export default function CreateCVPage() {
         </motion.div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }
 

@@ -19,6 +19,11 @@ export const cvFormSchema = z.object({
   competences: z.string().min(10, "Listez vos compétences (min 10 caractères)"),
   objectif: z.string().min(20, "L'objectif professionnel doit être plus détaillé (min 20 caractères)"),
   entrepriseCiblee: z.string().min(2, "Le nom de l'entreprise ciblée est requis"),
+  posteCible: z.string().min(2, "Le poste visé est requis").optional(),
+  descriptionPoste: z.string().min(20, "Ajoutez au moins 20 caractères").optional(),
+  missionsPrioritaires: z.string().min(20, "Ajoutez au moins 20 caractères").optional(),
+  motsClesCibles: z.string().min(5, "Ajoutez des mots-clés pertinents").optional(),
+  tonSouhaite: z.enum(["professionnel", "enthousiaste", "percutant", "sobre"]).optional(),
 });
 
 export type CVFormValues = z.infer<typeof cvFormSchema>;

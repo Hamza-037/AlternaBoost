@@ -17,6 +17,11 @@ export interface CVFormData {
   competences: string;
   objectif: string;
   entrepriseCiblee: string;
+  posteCible?: string;
+  descriptionPoste?: string;
+  missionsPrioritaires?: string;
+  motsClesCibles?: string;
+  tonSouhaite?: "professionnel" | "enthousiaste" | "percutant" | "sobre";
 }
 
 // Sections optionnelles personnalisables
@@ -53,6 +58,8 @@ export interface GeneratedCV extends CVFormData {
   objectifAmeliore: string;
   experiencesAmeliorees: Experience[];
   competencesAmeliorees: string[];
+  pitchPersonnalise?: string;
+  recommandationsIA?: string[];
   
   // Options de personnalisation PDF
   template?: "premium" | "modern" | "creative" | "minimal";
@@ -62,4 +69,3 @@ export interface GeneratedCV extends CVFormData {
   style?: CVStyle;
   sectionsPersonnalisees?: CVSection[];
 }
-

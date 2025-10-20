@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { CVPreviewHTML } from "@/components/preview/CVPreviewHTML";
 import { CVAnalysis } from "@/components/preview/CVAnalysis";
 import { CVCustomizer } from "@/components/cv/CVCustomizer";
+import { Header } from "@/components/landing/Header";
+import { Footer } from "@/components/landing/Footer";
 import type { GeneratedCV, CVStyle, CVSection } from "@/types/cv";
 
 export default function PreviewCVPage() {
@@ -146,7 +148,9 @@ export default function PreviewCVPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
@@ -427,6 +431,8 @@ export default function PreviewCVPage() {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }
 

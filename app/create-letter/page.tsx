@@ -1,72 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { LetterFormSteps } from "@/components/letter/LetterFormSteps";
 import { Header } from "@/components/landing/Header";
-import { toast } from "sonner";
-import type { LetterFormData } from "@/types/letter";
+import { Footer } from "@/components/landing/Footer";
 
 export default function CreateLetterPage() {
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LetterFormData>();
-
-  const onSubmit = async (data: LetterFormData) => {
-    setIsGenerating(true);
-    try {
-      // Appeler l'API pour générer les données (sans PDF)
-      const response = await fetch("/api/generate-letter-data", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erreur lors de la génération");
-      }
-
-      // Récupérer les données générées
-      const generatedData = await response.json();
-
-      // Stocker dans sessionStorage pour la page de prévisualisation
-      sessionStorage.setItem("generated_letter", JSON.stringify(generatedData));
-
-      toast.success("Lettre de motivation générée avec succès !");
-
-      // Rediriger vers la page de prévisualisation
-      window.location.href = "/preview-letter";
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Une erreur est survenue"
-      );
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
+    <>
       <Header />
-      
-      <main className="container mx-auto px-4 pt-32 pb-20 max-w-5xl">
-        {/* En-tête amélioré */}
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 pt-20">
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        {/* En-tête */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -122,305 +70,24 @@ export default function CreateLetterPage() {
           </div>
 
           <p className="text-xl text-gray-600 max-w-3xl">
-            Remplissez le formulaire ci-dessous et laissez l&apos;IA rédiger une lettre
-            personnalisée et percutante. Vous pourrez la modifier avant téléchargement !
+            Suivez les étapes et laissez l&apos;IA rédiger une lettre personnalisée et percutante !
           </p>
         </motion.div>
 
-        {/* Étapes */}
+        {/* Formulaire par étapes */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8"
-        >
-          <Card className="p-6 bg-white/80 backdrop-blur-sm shadow-lg border-0">
-            <div className="flex flex-wrap justify-center gap-8 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold">
-                  1
-                </div>
-                <span className="text-gray-700 font-medium">Remplir le formulaire</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-pink-600 text-white flex items-center justify-center font-semibold">
-                  2
-                </div>
-                <span className="text-gray-700 font-medium">L&apos;IA rédige</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-semibold">
-                  3
-                </div>
-                <span className="text-gray-700 font-medium">Modifier si besoin</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-semibold">
-                  4
-                </div>
-                <span className="text-gray-700 font-medium">Télécharger en PDF</span>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Formulaire */}
-        <motion.form
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6"
         >
-          {/* Informations personnelles */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Card className="hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle>Vos informations</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="prenom">
-                      Prénom <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="prenom"
-                      {...register("prenom", { required: "Le prénom est requis" })}
-                      placeholder="Votre prénom"
-                    />
-                    {errors.prenom && (
-                      <p className="text-sm text-red-500">{errors.prenom.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="nom">
-                      Nom <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="nom"
-                      {...register("nom", { required: "Le nom est requis" })}
-                      placeholder="Votre nom"
-                    />
-                    {errors.nom && (
-                      <p className="text-sm text-red-500">{errors.nom.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">
-                      Email <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      {...register("email", { required: "L'email est requis" })}
-                      placeholder="votre.email@exemple.com"
-                    />
-                    {errors.email && (
-                      <p className="text-sm text-red-500">{errors.email.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="telephone">
-                      Téléphone <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="telephone"
-                      {...register("telephone", { required: "Le téléphone est requis" })}
-                      placeholder="06 12 34 56 78"
-                    />
-                    {errors.telephone && (
-                      <p className="text-sm text-red-500">{errors.telephone.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="adresse">
-                    Adresse complète <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="adresse"
-                    {...register("adresse", { required: "L'adresse est requise" })}
-                    placeholder="123 Rue Example, 75001 Paris"
-                  />
-                  {errors.adresse && (
-                    <p className="text-sm text-red-500">{errors.adresse.message}</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Informations sur l'entreprise */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <Card className="hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle>L&apos;entreprise et le poste</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="entreprise">
-                    Nom de l&apos;entreprise <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="entreprise"
-                    {...register("entreprise", { required: "L'entreprise est requise" })}
-                    placeholder="Ex: TechCorp SAS"
-                  />
-                  {errors.entreprise && (
-                    <p className="text-sm text-red-500">{errors.entreprise.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="destinataire">
-                    Nom du recruteur (optionnel)
-                  </Label>
-                  <Input
-                    id="destinataire"
-                    {...register("destinataire")}
-                    placeholder="Ex: M. Dupont"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="posteVise">
-                    Poste visé <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="posteVise"
-                    {...register("posteVise", { required: "Le poste est requis" })}
-                    placeholder="Ex: Développeur Full-Stack en alternance"
-                  />
-                  {errors.posteVise && (
-                    <p className="text-sm text-red-500">{errors.posteVise.message}</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Contenu de la lettre */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <Card className="hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle>Contenu de votre lettre</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="motivations">
-                    Vos motivations <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="motivations"
-                    {...register("motivations", { required: "Les motivations sont requises" })}
-                    placeholder="Ex: Passionné par le développement web, je suis attiré par votre entreprise pour son innovation et sa culture d'équipe..."
-                    rows={4}
-                  />
-                  {errors.motivations && (
-                    <p className="text-sm text-red-500">{errors.motivations.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="atouts">
-                    Vos atouts et compétences <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="atouts"
-                    {...register("atouts", { required: "Les atouts sont requis" })}
-                    placeholder="Ex: Maîtrise de React et Node.js, expérience en gestion de projet Agile, excellent esprit d'équipe..."
-                    rows={4}
-                  />
-                  {errors.atouts && (
-                    <p className="text-sm text-red-500">{errors.atouts.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="disponibilite">
-                    Disponibilité <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="disponibilite"
-                    {...register("disponibilite", { required: "La disponibilité est requise" })}
-                    placeholder="Ex: Dès que possible, Septembre 2025, Immédiatement"
-                  />
-                  {errors.disponibilite && (
-                    <p className="text-sm text-red-500">{errors.disponibilite.message}</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Bouton de soumission */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex justify-center"
-          >
-              <Button
-                type="submit"
-                size="lg"
-                disabled={isGenerating}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 w-full md:w-auto px-12 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              >
-                {isGenerating ? (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="animate-spin h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Génération en cours...
-                  </span>
-                ) : (
-                  "Générer ma lettre de motivation"
-                )}
-              </Button>
-          </motion.div>
-        </motion.form>
+          <LetterFormSteps />
+        </motion.div>
 
         {/* Informations complémentaires */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           <Card className="p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -491,8 +158,9 @@ export default function CreateLetterPage() {
             </ul>
           </Card>
         </motion.div>
-      </main>
+      </div>
     </div>
+    <Footer />
+    </>
   );
 }
-

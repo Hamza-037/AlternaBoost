@@ -1,23 +1,41 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { ameliorerContenuCV } from "@/lib/openai";
 import { cvFormSchema } from "@/lib/validations/cv-schema";
 import type { GeneratedCV } from "@/types/cv";
+import { applyRateLimit, getClientIp, rateLimitConfigs } from "@/lib/rate-limiter";
+import { 
+  ValidationError, 
+  OpenAIError, 
+  handleApiError, 
+  logger,
+  ErrorMessages 
+} from "@/lib/errors";
 
 export async function POST(request: NextRequest) {
   try {
-    // Vérifier la clé API OpenAI
+    // 1. Vérifier la clé API OpenAI
     if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        { error: "Configuration du serveur manquante : OPENAI_API_KEY n'est pas définie" },
-        { status: 500 }
-      );
+      throw new OpenAIError(ErrorMessages.OPENAI.API_KEY_MISSING);
     }
 
-    // Parse et valide les données du formulaire
+    // 2. Appliquer le rate limiting
+    const clientIp = getClientIp(request.headers);
+    const rateLimitResponse = await applyRateLimit(clientIp, rateLimitConfigs.openai);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
+    // 3. Parser et valider les données du formulaire
     const body = await request.json();
     const validatedData = cvFormSchema.parse(body);
 
-    // Appel à OpenAI pour améliorer le contenu
+    // 4. Logger l'appel API
+    logger.info("Génération de CV demandée", {
+      ip: clientIp,
+      entrepriseCiblee: validatedData.entrepriseCiblee,
+    });
+
+    // 5. Appel à OpenAI pour améliorer le contenu
     const ameliorations = await ameliorerContenuCV({
       objectif: validatedData.objectif,
       experiences: validatedData.experiences.map(exp => ({
@@ -27,32 +45,32 @@ export async function POST(request: NextRequest) {
       })),
       competences: validatedData.competences,
       entrepriseCiblee: validatedData.entrepriseCiblee,
+      posteCible: validatedData.posteCible,
+      descriptionPoste: validatedData.descriptionPoste,
+      missionsPrioritaires: validatedData.missionsPrioritaires,
+      motsClesCibles: validatedData.motsClesCibles,
+      tonSouhaite: validatedData.tonSouhaite,
     });
 
-    // Prépare les données complètes pour le CV
+    // 6. Préparer les données complètes pour le CV
     const cvData: GeneratedCV = {
       ...validatedData,
       objectifAmeliore: ameliorations.objectifAmeliore,
       experiencesAmeliorees: ameliorations.experiencesAmeliorees,
       competencesAmeliorees: ameliorations.competencesAmeliorees,
+      pitchPersonnalise: ameliorations.pitchPersonnalise,
+      recommandationsIA: ameliorations.recommandationsIA,
     };
 
-    // Retourne les données JSON
+    // 7. Logger le succès
+    logger.info("CV généré avec succès", { ip: clientIp });
+
+    // 8. Retourner les données JSON
     return NextResponse.json(cvData, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de la génération des données du CV:", error);
-
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Une erreur est survenue lors de la génération du CV" },
-      { status: 500 }
-    );
+    // Gestion centralisée des erreurs
+    return handleApiError(error);
   }
 }
+
 

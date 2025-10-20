@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
 import type { GeneratedCV } from "@/types/cv";
+import { applyRateLimit, getClientIp, rateLimitConfigs } from "@/lib/rate-limiter";
+import { 
+  OpenAIError, 
+  ValidationError,
+  handleApiError, 
+  logger,
+  ErrorMessages 
+} from "@/lib/errors";
 
 export interface CVAnalysis {
   score: number; // Score global sur 100
@@ -11,16 +19,24 @@ export interface CVAnalysis {
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Vérifier la clé API OpenAI
     if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        { error: "Configuration du serveur manquante : OPENAI_API_KEY n'est pas définie" },
-        { status: 500 }
-      );
+      throw new OpenAIError(ErrorMessages.OPENAI.API_KEY_MISSING);
     }
 
+    // 2. Appliquer le rate limiting
+    const clientIp = getClientIp(request.headers);
+    const rateLimitResponse = await applyRateLimit(clientIp, rateLimitConfigs.analysis);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
+    // 3. Parser les données du CV
     const cvData: GeneratedCV = await request.json();
 
-    // Construction du prompt pour l'analyse
+    // 4. Construction du prompt pour l'analyse
+    logger.info("Analyse de CV demandée", { ip: clientIp });
+
     const analysisPrompt = `Tu es un expert en recrutement et en rédaction de CV. Analyse le CV suivant et donne un retour détaillé.
 
 **Informations du CV :**
@@ -54,7 +70,7 @@ ${cvData.experiencesAmeliorees.map((exp, i) => `  ${i + 1}. ${exp.poste} chez ${
 
 Réponds UNIQUEMENT en JSON valide, sans texte supplémentaire.`;
 
-    // Appel à OpenAI
+    // 5. Appel à OpenAI avec timeout
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -74,35 +90,40 @@ Réponds UNIQUEMENT en JSON valide, sans texte supplémentaire.`;
     const responseContent = completion.choices[0]?.message?.content;
     
     if (!responseContent) {
-      throw new Error("Pas de réponse de l'IA");
+      throw new OpenAIError("L'IA n'a pas retourné de réponse");
     }
 
-    // Parser la réponse JSON
+    // 6. Parser la réponse JSON
     let analysis: CVAnalysis;
     try {
       analysis = JSON.parse(responseContent);
-    } catch {
-      console.error("Erreur de parsing JSON:", responseContent);
-      throw new Error("Réponse de l'IA mal formatée");
+    } catch (parseError) {
+      logger.error("Erreur de parsing JSON de l'analyse", parseError, {
+        response: responseContent.substring(0, 200)
+      });
+      throw new ValidationError("La réponse de l'IA est mal formatée");
     }
 
-    // Validation des données
+    // 7. Validation des données
     if (
       typeof analysis.score !== "number" ||
       !Array.isArray(analysis.strengths) ||
       !Array.isArray(analysis.improvements) ||
       !Array.isArray(analysis.suggestions)
     ) {
-      throw new Error("Format d'analyse invalide");
+      throw new ValidationError("Format d'analyse invalide");
     }
+
+    // 8. Logger le succès
+    logger.info("Analyse de CV réussie", { 
+      ip: clientIp, 
+      score: analysis.score 
+    });
 
     return NextResponse.json(analysis, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de l'analyse du CV:", error);
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    return NextResponse.json({ error: "Une erreur inattendue est survenue" }, { status: 500 });
+    // Gestion centralisée des erreurs
+    return handleApiError(error);
   }
 }
 

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
 import { generateLetterPDF } from "@/lib/pdf/generate-letter-pdf";
 import type { LetterFormData, GeneratedLetter } from "@/types/letter";
@@ -14,66 +14,44 @@ export async function POST(request: NextRequest) {
 
     const formData: LetterFormData = await request.json();
 
-    // Construction du prompt pour générer la lettre
-    const letterPrompt = `Tu es un expert en rédaction de lettres de motivation professionnelles.
+    const ton = formData.tonSouhaite ?? "professionnel et impactant";
+    const contexteSupplementaire = [
+      formData.secteurActivite ? `- Secteur : ${formData.secteurActivite}` : null,
+      formData.descriptionPoste ? `- Résumé de l'offre : ${formData.descriptionPoste}` : null,
+      formData.motsClesCibles ? `- Mots-clés à intégrer : ${formData.motsClesCibles}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
 
-**Informations du candidat :**
-- Nom : ${formData.prenom} ${formData.nom}
-- Poste visé : ${formData.posteVise}
-- Entreprise : ${formData.entreprise}
-${formData.destinataire ? `- Destinataire : ${formData.destinataire}` : ""}
-
-**Motivations exprimées :**
-${formData.motivations}
-
-**Atouts du candidat :**
-${formData.atouts}
-
-**Disponibilité :**
-${formData.disponibilite}
-
-**Ta mission :**
-Rédige une lettre de motivation professionnelle et percutante de 3 paragraphes :
-
-1. **Paragraphe d'introduction** (2-3 phrases) :
-   - Présentation et contexte de la candidature
-   - Mention du poste et de l'entreprise
-   - Accroche qui capte l'attention
-
-2. **Paragraphe de développement** (4-5 phrases) :
-   - Développement des motivations
-   - Mise en avant des atouts et compétences
-   - Lien entre le profil et les besoins de l'entreprise
-   - Exemples concrets si possible
-
-3. **Paragraphe de conclusion** (2-3 phrases) :
-   - Réaffirmation de l'intérêt pour le poste
-   - Mention de la disponibilité
-   - Ouverture vers un entretien
-
-**Style :**
-- Ton professionnel mais personnel
-- Phrases courtes et impactantes
-- Éviter les clichés ("Je me permets de...", "Titulaire d'un diplôme...")
-- Être direct et concret
-
-Réponds UNIQUEMENT avec le corps de la lettre (sans la formule de politesse finale, elle sera ajoutée automatiquement). Sépare les paragraphes par un double saut de ligne.`;
-
-    // Appel à OpenAI
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: "Tu es un expert en rédaction de lettres de motivation. Tu écris de manière professionnelle, percutante et personnalisée.",
+          content: `Vous êtes un expert en rédaction de lettres de motivation modernes.
+Adoptez un ton ${ton}, équilibré entre personnalisation et professionnalisme.
+Rédigez exactement trois paragraphes séparés par des doubles sauts de ligne.
+Ne générez ni formule d'appel ni formule de politesse finale.`,
         },
         {
           role: "user",
-          content: letterPrompt,
+          content: `Rédige le corps d'une lettre de motivation pour :
+- Poste visé : ${formData.posteVise}
+- Entreprise : ${formData.entreprise}
+- Candidat : ${formData.prenom} ${formData.nom}
+${contexteSupplementaire ? `${contexteSupplementaire}\n` : ""}- Motivations : ${formData.motivations}
+- Atouts : ${formData.atouts}
+- Disponibilité : ${formData.disponibilite}
+
+Paragraphe 1 : accroche + contexte.
+Paragraphe 2 : démontrer l'adéquation (compétences, mots-clés, réalisations).
+Paragraphe 3 : réaffirmer l'intérêt + disponibilité.
+
+Réponds uniquement avec ces trois paragraphes.`,
         },
       ],
-      temperature: 0.8,
-      max_tokens: 800,
+      temperature: 0.65,
+      max_tokens: 900,
     });
 
     const contenuGenere = completion.choices[0]?.message?.content;
@@ -82,17 +60,14 @@ Réponds UNIQUEMENT avec le corps de la lettre (sans la formule de politesse fin
       throw new Error("Pas de contenu généré par l'IA");
     }
 
-    // Créer l'objet GeneratedLetter
     const generatedLetter: GeneratedLetter = {
       ...formData,
       contenuGenere,
       dateGeneration: new Date().toISOString(),
     };
 
-    // Générer le PDF
     const pdfBuffer = await generateLetterPDF(generatedLetter);
 
-    // Retourner le PDF
     return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
@@ -111,4 +86,3 @@ Réponds UNIQUEMENT avec le corps de la lettre (sans la formule de politesse fin
     );
   }
 }
-

@@ -41,9 +41,9 @@ const testimonials = [
 ];
 
 const stats = [
-  { value: "2 500+", label: "CV créés", icon: "📄" },
-  { value: "94%", label: "Taux de satisfaction", icon: "⭐" },
-  { value: "< 5 min", label: "Temps moyen", icon: "⚡" },
+  { value: "10,000+", label: "CV créés", icon: "📄", gradient: "from-blue-500 to-cyan-500" },
+  { value: "4.9/5", label: "Satisfaction", icon: "⭐", gradient: "from-yellow-500 to-orange-500" },
+  { value: "2 min", label: "Temps moyen", icon: "⚡", gradient: "from-purple-500 to-pink-500" },
 ];
 
 export function Testimonials() {
@@ -69,9 +69,9 @@ export function Testimonials() {
   return (
     <section id="temoignages" className="py-20 bg-white scroll-mt-20">
       <div className="container mx-auto px-4">
-        {/* Stats */}
+        {/* Stats améliorés */}
         <div className="mb-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {stats.map((stat, index) => (
               <motion.div
                 key={index}
@@ -79,26 +79,29 @@ export function Testimonials() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-                className="text-center p-6 rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-100"
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="text-center p-8 rounded-3xl bg-gradient-to-br from-white to-gray-50 border-2 border-gray-100 shadow-lg hover:shadow-2xl transition-all relative overflow-hidden group"
               >
+                {/* Effet de fond au hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+                
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                  className="text-4xl mb-3"
+                  animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                  className="text-5xl mb-4 relative z-10"
                 >
                   {stat.icon}
                 </motion.div>
-                <div className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
+                <div className={`text-5xl md:text-6xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent mb-2 relative z-10`}>
                   {stat.value}
                 </div>
-                <div className="text-gray-600">{stat.label}</div>
+                <div className="text-gray-600 font-medium relative z-10">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </div>
 
-        {/* Testimonials Carousel */}
+        {/* Testimonials Carousel avec design amélioré */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -106,11 +109,14 @@ export function Testimonials() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-            Ce qu&apos;en disent les étudiants
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Ils ont réussi avec{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              AlternaBoost
+            </span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Des milliers d&apos;étudiants utilisent AlternaBoost pour créer leur CV.
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Rejoignez des milliers d'étudiants qui ont décroché leur alternance grâce à un CV professionnel
           </p>
         </motion.div>
 
@@ -120,33 +126,40 @@ export function Testimonials() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
+                initial={{ opacity: 0, x: 100, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -100, scale: 0.95 }}
                 transition={{ duration: 0.5 }}
               >
-                <Card className="border border-gray-200 shadow-lg bg-white">
-                  <CardContent className="pt-8 pb-8">
+                <Card className="border-2 border-gray-100 shadow-2xl bg-gradient-to-br from-white to-gray-50 relative overflow-hidden">
+                  {/* Decoration */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100/30 to-purple-100/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                  
+                  <CardContent className="pt-12 pb-12 relative z-10">
                     <div className="flex flex-col items-center text-center">
-                      {/* Avatar */}
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl font-bold mb-4">
-                        {testimonials[currentIndex].avatar}
-                      </div>
+                      {/* Avatar amélioré */}
+                      <motion.div 
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 flex items-center justify-center text-white text-3xl font-bold mb-6 shadow-xl relative"
+                      >
+                        <div className="absolute inset-0 rounded-full bg-white/20 animate-ping" />
+                        <span className="relative">{testimonials[currentIndex].avatar}</span>
+                      </motion.div>
 
-                      {/* Stars */}
+                      {/* Stars améliorées */}
                       <div className="flex gap-1 mb-6">
                         {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
                           <motion.svg
                             key={i}
-                            initial={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: i * 0.1 }}
+                            initial={{ opacity: 0, scale: 0, rotate: -180 }}
+                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                            transition={{ delay: i * 0.1, type: "spring" }}
                             xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
+                            width="24"
+                            height="24"
                             viewBox="0 0 24 24"
                             fill="currentColor"
-                            className="text-yellow-400"
+                            className="text-yellow-400 drop-shadow-sm"
                           >
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                           </motion.svg>
@@ -154,16 +167,16 @@ export function Testimonials() {
                       </div>
 
                       {/* Content */}
-                      <p className="text-lg text-gray-700 mb-6 leading-relaxed max-w-2xl">
+                      <p className="text-xl text-gray-700 mb-8 leading-relaxed max-w-2xl font-medium">
                         &quot;{testimonials[currentIndex].content}&quot;
                       </p>
 
                       {/* Author */}
                       <div>
-                        <div className="font-semibold text-gray-900 text-lg">
+                        <div className="font-bold text-gray-900 text-xl">
                           {testimonials[currentIndex].name}
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-base text-gray-600 mt-1">
                           {testimonials[currentIndex].role}
                         </div>
                       </div>
@@ -173,59 +186,65 @@ export function Testimonials() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Navigation Buttons */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handlePrevious}
-              className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full shadow-md hover:shadow-lg"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {/* Navigation Buttons améliorés */}
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handlePrevious}
+                className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full shadow-xl hover:shadow-2xl bg-white border-2 w-12 h-12 hover:border-blue-500 hover:bg-blue-50 transition-all"
               >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full shadow-md hover:shadow-lg"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleNext}
+                className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full shadow-xl hover:shadow-2xl bg-white border-2 w-12 h-12 hover:border-blue-500 hover:bg-blue-50 transition-all"
               >
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </Button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </Button>
+            </motion.div>
           </div>
 
-          {/* Dots */}
-          <div className="flex justify-center gap-2 mt-8">
+          {/* Dots améliorés */}
+          <div className="flex justify-center gap-3 mt-10">
             {testimonials.map((_, index) => (
-              <button
+              <motion.button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
+                whileHover={{ scale: 1.3 }}
+                whileTap={{ scale: 0.9 }}
+                className={`h-3 rounded-full transition-all duration-300 ${
                   index === currentIndex
-                    ? "w-8 bg-blue-600"
-                    : "w-2 bg-gray-300 hover:bg-gray-400"
+                    ? "w-10 bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
+                    : "w-3 bg-gray-300 hover:bg-gray-400"
                 }`}
                 aria-label={`Aller au témoignage ${index + 1}`}
               />
