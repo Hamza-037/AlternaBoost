@@ -45,10 +45,10 @@ import { CVCustomizationPanel } from "@/components/cv/CVCustomizationPanel";
 import { AddSectionModal } from "@/components/cv/AddSectionModal";
 import { DynamicSectionForm } from "@/components/cv/DynamicSectionForm";
 import { SectionType, SECTION_CONFIG } from "@/types/custom-sections";
-import { ModernCVTemplate } from "@/components/preview/templates/ModernCVTemplate";
-import { PremiumCVTemplate } from "@/components/preview/templates/PremiumCVTemplate";
-import { CreativeCVTemplate } from "@/components/preview/templates/CreativeCVTemplate";
-import { MinimalCVTemplate } from "@/components/preview/templates/MinimalCVTemplate";
+import { EnhancvModernTemplate } from "@/components/preview/templates/EnhancvModernTemplate";
+import { EnhancvPremiumTemplate } from "@/components/preview/templates/EnhancvPremiumTemplate";
+import { EnhancvCreativeTemplate } from "@/components/preview/templates/EnhancvCreativeTemplate";
+import { EnhancvMinimalTemplate } from "@/components/preview/templates/EnhancvMinimalTemplate";
 import { CVBuilderTemplate } from "@/components/preview/templates/CVBuilderTemplate";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -412,39 +412,48 @@ export default function CreateCVFusionPage() {
   };
 
   const renderTemplate = () => {
-    // Props pour CVBuilderTemplate
+    // Props communs pour tous les templates
+    const commonProps = {
+      prenom,
+      nom,
+      email,
+      telephone,
+      adresse,
+      posteRecherche,
+      objectif: objectifOptimise || objectif,
+      profileImage,
+      experiences,
+      formation,
+      ecole,
+      anneeFormation,
+      competences,
+      languages,
+      hobbies,
+    };
+
+    // CVBuilderTemplate a des props supplémentaires
     if (selectedTemplate === "cvbuilder") {
       return (
         <CVBuilderTemplate
-          prenom={prenom}
-          nom={nom}
-          email={email}
-          telephone={telephone}
-          adresse={adresse}
-          posteRecherche={posteRecherche}
-          objectif={objectifOptimise || objectif}
-          profileImage={profileImage}
-          experiences={experiences}
-          competences={competences}
-          languages={languages}
-          hobbies={hobbies}
-          formation={formation}
-          ecole={ecole}
-          anneeFormation={anneeFormation}
+          {...commonProps}
           customSections={customSections}
           customization={customization}
         />
       );
     }
     
-    // Props pour les autres templates
-    const props = { cvData, profileImage, customColors: { primary: "#2563EB", secondary: "#3B82F6" } };
-    
+    // Nouveaux templates Enhancv
     switch (selectedTemplate) {
-      case "premium": return <PremiumCVTemplate {...props} />;
-      case "creative": return <CreativeCVTemplate {...props} />;
-      case "minimal": return <MinimalCVTemplate {...props} />;
-      default: return <ModernCVTemplate {...props} />;
+      case "modern": 
+        return <EnhancvModernTemplate {...commonProps} />;
+      case "premium": 
+        return <EnhancvPremiumTemplate {...commonProps} />;
+      case "creative": 
+        return <EnhancvCreativeTemplate {...commonProps} />;
+      case "minimal": 
+        return <EnhancvMinimalTemplate {...commonProps} />;
+      default: 
+        return <EnhancvModernTemplate {...commonProps} />;
     }
   };
 
@@ -894,9 +903,10 @@ export default function CreateCVFusionPage() {
           </motion.div>
           )}
 
-          {/* Contrôles Zoom/Thème - DROITE */}
-          <div className="absolute top-6 right-6 z-40 space-y-3">
-            <Card className="bg-white/95 backdrop-blur-md border-gray-200 shadow-lg p-4 space-y-3">
+          {/* Contrôles Zoom/Modèle - DROITE */}
+          <div className="absolute top-6 right-6 z-40 space-y-3 w-72">
+            {/* Zoom */}
+            <Card className="bg-white/95 backdrop-blur-md border-gray-200 shadow-lg p-4">
               <div className="flex items-center gap-3">
                 <Palette className="w-4 h-4 text-blue-600" />
                 <input 
@@ -905,32 +915,48 @@ export default function CreateCVFusionPage() {
                   max="200" 
                   value={zoom}
                   onChange={(e) => setZoom(Number(e.target.value))}
-                  className="w-32"
+                  className="flex-1"
                 />
                 <span className="text-sm font-bold text-blue-600 w-12">{zoom}%</span>
               </div>
-              
-              <select 
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 text-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                {THEMES.map((t) => (
-                  <option key={t.name} value={t.name}>{t.label}</option>
+            </Card>
+
+            {/* Sélecteur de Modèle */}
+            <Card className="bg-white/95 backdrop-blur-md border-gray-200 shadow-lg p-4">
+              <h3 className="text-xs font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-blue-600" />
+                MODÈLE DE CV
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: "cvbuilder", label: "CVBuilder", icon: "🎨", color: "from-cyan-500 to-blue-500" },
+                  { value: "modern", label: "Modern", icon: "💼", color: "from-blue-500 to-indigo-500" },
+                  { value: "premium", label: "Premium", icon: "👑", color: "from-amber-500 to-orange-500" },
+                  { value: "creative", label: "Creative", icon: "✨", color: "from-purple-500 to-pink-500" },
+                  { value: "minimal", label: "Minimal", icon: "⚡", color: "from-gray-600 to-gray-800" },
+                ].map((template) => (
+                  <button
+                    key={template.value}
+                    onClick={() => setSelectedTemplate(template.value as any)}
+                    className={`
+                      relative p-3 rounded-lg border-2 transition-all text-left overflow-hidden group
+                      ${selectedTemplate === template.value 
+                        ? 'border-blue-500 bg-blue-50 shadow-md' 
+                        : 'border-gray-200 hover:border-blue-300 bg-white'
+                      }
+                    `}
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-br ${template.color} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
+                    <div className="relative z-10">
+                      <div className="text-2xl mb-1">{template.icon}</div>
+                      <div className="text-xs font-semibold text-gray-900">{template.label}</div>
+                      {selectedTemplate === template.value && (
+                        <div className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                      )}
+                    </div>
+                  </button>
                 ))}
-              </select>
-              
-              <select 
-                value={selectedTemplate}
-                onChange={(e) => setSelectedTemplate(e.target.value as any)}
-                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 text-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                <option value="cvbuilder">CVBuilder (Recommandé)</option>
-                <option value="modern">Modern</option>
-                <option value="premium">Premium</option>
-                <option value="creative">Creative</option>
-                <option value="minimal">Minimal</option>
-              </select>
+              </div>
             </Card>
           </div>
 
