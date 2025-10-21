@@ -74,16 +74,7 @@ const getStarRating = (proficiency: string) => {
       filledStars = 0;
   }
 
-  return (
-    <>
-      {Array.from({ length: filledStars }, (_, index) => (
-        <Star key={index} className="w-4 h-4 fill-cyan-500 text-cyan-500" />
-      ))}
-      {Array.from({ length: maxStars - filledStars }, (_, index) => (
-        <Star key={index + filledStars} className="w-4 h-4 text-gray-300" />
-      ))}
-    </>
-  );
+  return { filledStars, maxStars };
 };
 
 export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
@@ -127,9 +118,18 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
       }}
     >
       {/* SIDEBAR GAUCHE - 1/3 */}
-      <div className="flex flex-col w-1/3 p-8 bg-gray-50">
-        {/* PHOTO RONDE AVEC BORDURE CYAN */}
-        <div className="w-64 h-64 mx-auto rounded-full border-8 border-cyan-500 overflow-hidden bg-gray-200">
+      <div className="flex flex-col w-1/3 p-8 bg-gray-50" style={{ padding: `${spacingScale * 2}rem` }}>
+        {/* PHOTO RONDE AVEC BORDURE PERSONNALISÉE */}
+        <div 
+          className="mx-auto rounded-full overflow-hidden bg-gray-200"
+          style={{ 
+            width: `${photoSizePx}px`, 
+            height: `${photoSizePx}px`,
+            borderWidth: `${borderWidth}px`,
+            borderStyle: 'solid',
+            borderColor: customization.primaryColor
+          }}
+        >
           {profileImage ? (
             <img
               src={profileImage}
@@ -144,24 +144,24 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
         </div>
 
         {/* CONTACT */}
-        <div className="mt-8">
+        <div style={{ marginTop: `${spacingScale * 2}rem` }}>
           <h2 className="uppercase font-bold text-sm mb-3 text-gray-800">Contact</h2>
           <ul className="space-y-3">
             {telephone && (
               <li className="flex items-start text-sm">
-                <Phone className="w-5 h-5 text-cyan-500 mr-3 flex-shrink-0 mt-0.5" />
+                <Phone className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" style={{ color: customization.primaryColor }} />
                 <span className="break-all text-gray-700">{telephone}</span>
               </li>
             )}
             {email && (
               <li className="flex items-start text-sm">
-                <Mail className="w-5 h-5 text-cyan-500 mr-3 flex-shrink-0 mt-0.5" />
+                <Mail className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" style={{ color: customization.primaryColor }} />
                 <span className="break-all text-gray-700">{email}</span>
               </li>
             )}
             {adresse && (
               <li className="flex items-start text-sm">
-                <MapPinCheckInside className="w-5 h-5 text-cyan-500 mr-3 flex-shrink-0 mt-0.5" />
+                <MapPinCheckInside className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" style={{ color: customization.primaryColor }} />
                 <span className="break-all text-gray-700">{adresse}</span>
               </li>
             )}
@@ -170,13 +170,14 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
 
         {/* COMPÉTENCES */}
         {competences.length > 0 && (
-          <div className="mt-8">
+          <div style={{ marginTop: `${spacingScale * 2}rem` }}>
             <h2 className="uppercase font-bold text-sm mb-3 text-gray-800">Compétences</h2>
             <div className="flex flex-wrap gap-2">
               {competences.map((skill, index) => (
                 <span 
                   key={index} 
-                  className="px-3 py-1 bg-cyan-500 text-white text-xs uppercase rounded-full font-medium"
+                  className="px-3 py-1 text-white text-xs uppercase rounded-full font-medium"
+                  style={{ backgroundColor: customization.primaryColor }}
                 >
                   {skill}
                 </span>
@@ -187,19 +188,27 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
 
         {/* LANGUES */}
         {languages.length > 0 && (
-          <div className="mt-8">
+          <div style={{ marginTop: `${spacingScale * 2}rem` }}>
             <h2 className="uppercase font-bold text-sm mb-3 text-gray-800">Langues</h2>
             <div className="space-y-3">
-              {languages.map((lang, index) => (
-                <div key={index}>
-                  <span className="capitalize font-semibold text-sm text-gray-800">
-                    {lang.language}
-                  </span>
-                  <div className="flex mt-1 gap-0.5">
-                    {getStarRating(lang.proficiency)}
+              {languages.map((lang, index) => {
+                const { filledStars, maxStars } = getStarRating(lang.proficiency);
+                return (
+                  <div key={index}>
+                    <span className="capitalize font-semibold text-sm text-gray-800">
+                      {lang.language}
+                    </span>
+                    <div className="flex mt-1 gap-0.5">
+                      {Array.from({ length: filledStars }, (_, i) => (
+                        <Star key={i} className="w-4 h-4" style={{ fill: customization.primaryColor, color: customization.primaryColor }} />
+                      ))}
+                      {Array.from({ length: maxStars - filledStars }, (_, i) => (
+                        <Star key={i + filledStars} className="w-4 h-4 text-gray-300" />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -222,9 +231,12 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
       {/* CONTENU PRINCIPAL DROITE - 2/3 */}
       <div className="w-2/3 p-12 bg-white">
         {/* EN-TÊTE */}
-        <div className="mb-8">
+        <div className="mb-8" style={{ marginBottom: `${spacingScale * 2}rem` }}>
           <h1 className="uppercase text-xl text-gray-800 mb-2">{fullName}</h1>
-          <h2 className="uppercase text-5xl font-bold text-cyan-500 mb-4">
+          <h2 
+            className="uppercase text-5xl font-bold mb-4"
+            style={{ color: customization.primaryColor }}
+          >
             {posteRecherche || "POSTE RECHERCHÉ"}
           </h2>
           {objectif && (
@@ -240,9 +252,12 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
             <h2 className="uppercase font-bold text-sm mb-4 text-gray-800">Expériences</h2>
             <div className="space-y-6">
               {experiences.map((exp, index) => (
-                <div key={index} className="relative pl-8 border-l-2 border-cyan-500">
+                <div key={index} className="relative pl-8" style={{ borderLeft: `2px solid ${customization.primaryColor}` }}>
                   {/* Numéro dans cercle */}
-                  <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-cyan-500 text-white flex items-center justify-center font-bold text-sm">
+                  <div 
+                    className="absolute -left-4 top-0 w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-sm"
+                    style={{ backgroundColor: customization.primaryColor }}
+                  >
                     {index + 1}
                   </div>
                   
@@ -255,7 +270,10 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
                     </div>
                     
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="px-3 py-1 bg-cyan-500 text-white text-xs rounded-full">
+                      <span 
+                        className="px-3 py-1 text-white text-xs rounded-full"
+                        style={{ backgroundColor: customization.primaryColor }}
+                      >
                         {exp.entreprise}
                       </span>
                       <span className="text-xs italic text-gray-500">
@@ -279,9 +297,12 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
         {formation && (
           <div className="mb-8">
             <h2 className="uppercase font-bold text-sm mb-4 text-gray-800">Formations</h2>
-            <div className="relative pl-8 border-l-2 border-cyan-500">
+            <div className="relative pl-8" style={{ borderLeft: `2px solid ${customization.primaryColor}` }}>
               {/* Numéro dans cercle */}
-              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-cyan-500 text-white flex items-center justify-center font-bold text-sm">
+              <div 
+                className="absolute -left-4 top-0 w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-sm"
+                style={{ backgroundColor: customization.primaryColor }}
+              >
                 1
               </div>
               
@@ -294,7 +315,10 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
                 </div>
                 
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="px-3 py-1 bg-cyan-500 text-white text-xs rounded-full">
+                  <span 
+                    className="px-3 py-1 text-white text-xs rounded-full"
+                    style={{ backgroundColor: customization.primaryColor }}
+                  >
                     {ecole}
                   </span>
                   {anneeFormation && (
