@@ -107,7 +107,7 @@ export default function PreviewCVPage() {
         profileImageUrl: profileImage || undefined,
       };
 
-      const response = await fetch("/api/generate-cv", {
+      const response = await fetch("/api/generate-cv-puppeteer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

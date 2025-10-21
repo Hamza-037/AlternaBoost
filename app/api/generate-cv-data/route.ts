@@ -35,27 +35,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Vérifier les limites d'usage
-    const usageResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/user/usage`, {
-      headers: {
-        'Cookie': request.headers.get('cookie') || '',
-      },
-    });
+    // 4. Vérifier les limites d'usage (avec fallback si DB non disponible)
+    let shouldCheckLimits = true;
+    let usageLimits = {
+      cvs: { unlimited: false, limit: 3, current: 0, remaining: 3 },
+      letters: { unlimited: false, limit: 1, current: 0, remaining: 1 }
+    };
 
-    if (!usageResponse.ok) {
-      logger.error("Erreur lors de la récupération de l'usage", { userId });
+    try {
+      const usageResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/user/usage`, {
+        headers: {
+          'Cookie': request.headers.get('cookie') || '',
+        },
+      });
+
+      if (usageResponse.ok) {
+        const usage = await usageResponse.json();
+        if (usage && usage.usage) {
+          usageLimits = usage.usage;
+        } else {
+          logger.warn("Format de réponse d'usage invalide, utilisation des limites par défaut", { userId });
+          shouldCheckLimits = false; // Ne pas bloquer si format invalide
+        }
+      } else {
+        logger.error("Erreur lors de la récupération de l'usage", { userId, status: usageResponse.status });
+        shouldCheckLimits = false; // Ne pas bloquer si erreur API
+      }
+    } catch (error) {
+      logger.error("Exception lors de la vérification de l'usage", { userId, error });
+      shouldCheckLimits = false; // Ne pas bloquer si exception
     }
 
-    const usage = await usageResponse.json();
-
-    // Vérifier si l'utilisateur a atteint sa limite
-    if (!usage.usage.cvs.unlimited && usage.usage.cvs.remaining <= 0) {
+    // Vérifier si l'utilisateur a atteint sa limite (seulement si on a pu récupérer les données)
+    if (shouldCheckLimits && !usageLimits.cvs.unlimited && usageLimits.cvs.remaining <= 0) {
       return NextResponse.json({
         error: 'Limite atteinte',
-        message: `Vous avez atteint votre limite de ${usage.usage.cvs.limit} CV par mois. Passez au plan supérieur pour créer plus de CVs.`,
+        message: `Vous avez atteint votre limite de ${usageLimits.cvs.limit} CV par mois. Passez au plan supérieur pour créer plus de CVs.`,
         upgradeUrl: '/pricing',
-        current: usage.usage.cvs.current,
-        limit: usage.usage.cvs.limit,
+        current: usageLimits.cvs.current,
+        limit: usageLimits.cvs.limit,
       }, { status: 403 });
     }
 
