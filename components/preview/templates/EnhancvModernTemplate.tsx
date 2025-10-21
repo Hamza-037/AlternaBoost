@@ -405,7 +405,14 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
                       </div>
                       <p className="text-xs font-semibold" style={{ color: primaryColor }}>{form.ecole}</p>
                       {form.mention && (
-                        <p className="text-xs text-gray-600 mt-1 italic">{form.mention}</p>
+                        <ul className="space-y-1 mt-2">
+                          {form.mention.split('\n').filter((line: string) => line.trim()).map((line: string, idx: number) => (
+                            <li key={idx} className="text-xs text-gray-700 leading-relaxed flex items-start gap-2">
+                              <span className="mt-0.5" style={{ color: primaryColor }}>•</span>
+                              <span className="flex-1">{line.trim()}</span>
+                            </li>
+                          ))}
+                        </ul>
                       )}
                     </div>
                   ))}

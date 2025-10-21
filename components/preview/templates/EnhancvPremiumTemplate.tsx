@@ -292,9 +292,14 @@ export const EnhancvPremiumTemplate: React.FC<EnhancvPremiumTemplateProps> = ({
                   </div>
                   <p className="text-xs font-semibold text-indigo-700 mb-2">{ecole}</p>
                   {descriptionFormation && (
-                    <p className="text-xs text-gray-700 leading-relaxed mt-2 pt-2 border-t border-indigo-200">
-                      {descriptionFormation}
-                    </p>
+                    <ul className="space-y-1 mt-2 pt-2 border-t border-indigo-200">
+                      {descriptionFormation.split('\n').filter(line => line.trim()).map((line, idx) => (
+                        <li key={idx} className="text-xs text-gray-700 leading-relaxed flex items-start gap-2">
+                          <span className="text-indigo-600 mt-0.5">•</span>
+                          <span className="flex-1">{line.trim()}</span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
               </div>

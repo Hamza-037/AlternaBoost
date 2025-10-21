@@ -199,9 +199,14 @@ export const EnhancvMinimalTemplate: React.FC<EnhancvMinimalTemplateProps> = ({
                 {formation}
               </p>
               {descriptionFormation && (
-                <p className="text-xs text-gray-800 leading-relaxed">
-                  {descriptionFormation}
-                </p>
+                <ul className="space-y-1 mt-2">
+                  {descriptionFormation.split('\n').filter(line => line.trim()).map((line, idx) => (
+                    <li key={idx} className="text-xs text-gray-800 leading-relaxed flex items-start gap-2">
+                      <span className="text-gray-900 mt-0.5">•</span>
+                      <span className="flex-1">{line.trim()}</span>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>

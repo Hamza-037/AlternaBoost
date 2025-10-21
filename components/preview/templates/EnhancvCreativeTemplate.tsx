@@ -325,9 +325,14 @@ export const EnhancvCreativeTemplate: React.FC<EnhancvCreativeTemplateProps> = (
                     </p>
                     <p className="text-xs text-gray-500 mt-1 mb-2">{anneeFormation}</p>
                     {descriptionFormation && (
-                      <p className="text-sm text-gray-700 leading-relaxed mt-2">
-                        {descriptionFormation}
-                      </p>
+                      <ul className="space-y-1 mt-2">
+                        {descriptionFormation.split('\n').filter(line => line.trim()).map((line, idx) => (
+                          <li key={idx} className="text-sm text-gray-700 leading-relaxed flex items-start gap-2">
+                            <span className="mt-0.5" style={{ color: primaryColor }}>•</span>
+                            <span className="flex-1">{line.trim()}</span>
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
                 </div>

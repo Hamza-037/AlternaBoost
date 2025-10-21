@@ -717,10 +717,10 @@ export default function CreateCVFusionPage() {
                   className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <Textarea 
-                  placeholder="Description (optionnelle) - Mention, spécialisation, détails importants..." 
+                  placeholder="Description (optionnelle) - Une ligne = un point&#10;Ex:&#10;Mention Très Bien&#10;Spécialisation Data Science&#10;Major de promotion" 
                   value={descriptionFormation}
                   onChange={(e) => setDescriptionFormation(e.target.value)}
-                  rows={3}
+                  rows={4}
                   className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>

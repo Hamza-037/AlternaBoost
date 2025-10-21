@@ -335,9 +335,14 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
                 </div>
                 
                 {descriptionFormation && (
-                  <p className="text-sm text-gray-700 leading-relaxed mt-2">
-                    {descriptionFormation}
-                  </p>
+                  <ul className="space-y-1 mt-2">
+                    {descriptionFormation.split('\n').filter(line => line.trim()).map((line, idx) => (
+                      <li key={idx} className="text-sm text-gray-700 leading-relaxed flex items-start gap-2">
+                        <span className="mt-0.5" style={{ color: customization.primaryColor }}>•</span>
+                        <span className="flex-1">{line.trim()}</span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
             </div>
