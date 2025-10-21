@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { DateRangeInput } from "@/components/ui/date-range-input";
 import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { ModernCVTemplate } from "@/components/preview/templates/ModernCVTemplate";
 import { PremiumCVTemplate } from "@/components/preview/templates/PremiumCVTemplate";
@@ -238,7 +239,7 @@ export default function PreviewCVPage() {
                     </>
                   )}
                 </Button>
-                
+
               <Button
                 onClick={handleDownloadPDF}
                 disabled={isDownloading}
@@ -397,11 +398,10 @@ export default function PreviewCVPage() {
                                 />
                               </div>
                               <div>
-                                <Label className="text-xs">Période</Label>
-                                <Input
+                                <Label className="text-xs mb-2 block">Période</Label>
+                                <DateRangeInput
                                   value={exp.periode}
-                                  onChange={(e) => handleUpdateExperience(index, "periode", e.target.value)}
-                                  className="mt-1 text-sm"
+                                  onChange={(value) => handleUpdateExperience(index, "periode", value)}
                                 />
                               </div>
                               <div>
