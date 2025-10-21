@@ -19,6 +19,13 @@ interface EnhancvCreativeTemplateProps {
   competences: string[];
   languages: { language: string; proficiency: string }[];
   hobbies: string[];
+  customization?: {
+    primaryColor?: string;
+    fontFamily?: string;
+    fontSize?: number;
+    photoSize?: number;
+    spacing?: number;
+  };
 }
 
 export const EnhancvCreativeTemplate: React.FC<EnhancvCreativeTemplateProps> = ({
@@ -37,11 +44,26 @@ export const EnhancvCreativeTemplate: React.FC<EnhancvCreativeTemplateProps> = (
   competences,
   languages,
   hobbies,
+  customization = {},
 }) => {
   const fullName = `${prenom} ${nom}`.trim();
+  
+  // Apply customization with defaults
+  const primaryColor = customization.primaryColor || "#EC4899";
+  const fontFamily = customization.fontFamily || "'Montserrat', sans-serif";
+  const fontSize = (customization.fontSize || 100) / 100;
+  const photoSize = (customization.photoSize || 100) / 100;
+  const spacing = (customization.spacing || 100) / 100;
 
   return (
-    <div className="w-[21cm] h-[29.7cm] bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 shadow-2xl mx-auto relative overflow-hidden" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+    <div 
+      className="w-[21cm] h-[29.7cm] shadow-2xl mx-auto relative overflow-hidden" 
+      style={{ 
+        fontFamily,
+        fontSize: `${fontSize}rem`,
+        background: `linear-gradient(135deg, ${primaryColor}33, ${primaryColor}11, ${primaryColor}22)`
+      }}
+    >
       {/* Formes géométriques décoratives */}
       <div className="absolute top-20 right-20 w-40 h-40 bg-pink-500/20 rounded-full blur-2xl"></div>
       <div className="absolute bottom-40 left-20 w-60 h-60 bg-cyan-500/20 rounded-full blur-3xl"></div>

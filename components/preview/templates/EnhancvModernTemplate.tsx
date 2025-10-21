@@ -19,6 +19,13 @@ interface EnhancvModernTemplateProps {
   competences: string[];
   languages: { language: string; proficiency: string }[];
   hobbies: string[];
+  customization?: {
+    primaryColor?: string;
+    fontFamily?: string;
+    fontSize?: number;
+    photoSize?: number;
+    spacing?: number;
+  };
 }
 
 export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
@@ -37,13 +44,34 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
   competences,
   languages,
   hobbies,
+  customization = {},
 }) => {
   const fullName = `${prenom} ${nom}`.trim();
+  
+  // Apply customization with defaults
+  const primaryColor = customization.primaryColor || "#3B82F6";
+  const fontFamily = customization.fontFamily || "'Inter', sans-serif";
+  const fontSize = (customization.fontSize || 100) / 100;
+  const photoSize = (customization.photoSize || 100) / 100;
+  const spacing = (customization.spacing || 100) / 100;
 
   return (
-    <div className="w-[21cm] h-[29.7cm] bg-white shadow-2xl mx-auto p-0 overflow-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div 
+      className="w-[21cm] h-[29.7cm] bg-white shadow-2xl mx-auto p-0 overflow-hidden" 
+      style={{ 
+        fontFamily,
+        fontSize: `${fontSize}rem`
+      }}
+    >
       {/* HEADER - Bande colorée avec nom */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-12 py-10 text-white relative overflow-hidden">
+      <div 
+        className="bg-gradient-to-r px-12 text-white relative overflow-hidden"
+        style={{ 
+          background: `linear-gradient(to right, ${primaryColor}, ${primaryColor}dd, ${primaryColor}bb)`,
+          paddingTop: `${2.5 * spacing}rem`,
+          paddingBottom: `${2.5 * spacing}rem`
+        }}
+      >
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
         
@@ -77,10 +105,26 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
       {/* CONTENT - 2 colonnes */}
       <div className="flex">
         {/* COLONNE GAUCHE - 40% */}
-        <div className="w-[40%] bg-gray-50 px-8 py-10 space-y-8">
+        <div 
+          className="w-[40%] bg-gray-50 px-8"
+          style={{ 
+            paddingTop: `${2.5 * spacing}rem`,
+            paddingBottom: `${2.5 * spacing}rem`
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: `${2 * spacing}rem` }}>
           {/* Photo */}
           {profileImage && (
-            <div className="w-40 h-40 mx-auto rounded-full overflow-hidden border-4 border-white shadow-lg">
+            <div 
+              className="mx-auto rounded-full overflow-hidden shadow-lg"
+              style={{ 
+                width: `${10 * photoSize}rem`,
+                height: `${10 * photoSize}rem`,
+                borderWidth: '4px',
+                borderColor: primaryColor,
+                borderStyle: 'solid'
+              }}
+            >
               <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
             </div>
           )}
@@ -89,12 +133,16 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
           {competences.length > 0 && (
             <div>
               <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Award className="w-5 h-5 text-blue-600" />
+                <Award className="w-5 h-5" style={{ color: primaryColor }} />
                 COMPÉTENCES
               </h2>
-              <div className="space-y-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: `${0.5 * spacing}rem` }}>
                 {competences.map((skill, i) => (
-                  <div key={i} className="bg-white px-4 py-2 rounded-lg shadow-sm border-l-4 border-blue-600">
+                  <div 
+                    key={i} 
+                    className="bg-white px-4 py-2 rounded-lg shadow-sm"
+                    style={{ borderLeft: `4px solid ${primaryColor}` }}
+                  >
                     <span className="text-sm font-medium text-gray-700">{skill}</span>
                   </div>
                 ))}
@@ -106,10 +154,10 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
           {languages.length > 0 && (
             <div>
               <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-blue-600" />
+                <Globe className="w-5 h-5" style={{ color: primaryColor }} />
                 LANGUES
               </h2>
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: `${0.75 * spacing}rem` }}>
                 {languages.map((lang, i) => (
                   <div key={i}>
                     <div className="flex justify-between mb-1">
@@ -118,8 +166,9 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
                     </div>
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
+                        className="h-full rounded-full"
                         style={{ 
+                          background: `linear-gradient(to right, ${primaryColor}, ${primaryColor}aa)`,
                           width: lang.proficiency === "Avancé" ? "100%" : 
                                  lang.proficiency === "Intermédiaire" ? "66%" : "33%" 
                         }}
@@ -135,26 +184,44 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
           {hobbies.length > 0 && (
             <div>
               <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Heart className="w-5 h-5 text-blue-600" />
+                <Heart className="w-5 h-5" style={{ color: primaryColor }} />
                 LOISIRS
               </h2>
               <div className="flex flex-wrap gap-2">
                 {hobbies.map((hobby, i) => (
-                  <span key={i} className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                  <span 
+                    key={i} 
+                    className="px-3 py-1 text-xs font-medium rounded-full"
+                    style={{ 
+                      backgroundColor: `${primaryColor}22`,
+                      color: primaryColor
+                    }}
+                  >
                     {hobby}
                   </span>
                 ))}
               </div>
             </div>
           )}
+          </div>
         </div>
 
         {/* COLONNE DROITE - 60% */}
-        <div className="w-[60%] px-10 py-10 space-y-8">
+        <div 
+          className="w-[60%] px-10"
+          style={{ 
+            paddingTop: `${2.5 * spacing}rem`,
+            paddingBottom: `${2.5 * spacing}rem`
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: `${2 * spacing}rem` }}>
           {/* À propos */}
           {objectif && (
             <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-blue-600 pb-2">
+              <h2 
+                className="text-xl font-bold text-gray-800 mb-4 pb-2"
+                style={{ borderBottom: `2px solid ${primaryColor}` }}
+              >
                 À PROPOS
               </h2>
               <p className="text-sm text-gray-600 leading-relaxed">{objectif}</p>
@@ -164,16 +231,29 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
           {/* Expériences */}
           {experiences.length > 0 && (
             <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-6 border-b-2 border-blue-600 pb-2 flex items-center gap-2">
-                <Briefcase className="w-5 h-5 text-blue-600" />
+              <h2 
+                className="text-xl font-bold text-gray-800 mb-6 pb-2 flex items-center gap-2"
+                style={{ borderBottom: `2px solid ${primaryColor}` }}
+              >
+                <Briefcase className="w-5 h-5" style={{ color: primaryColor }} />
                 EXPÉRIENCES PROFESSIONNELLES
               </h2>
-              <div className="space-y-6">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: `${1.5 * spacing}rem` }}>
                 {experiences.map((exp, i) => (
-                  <div key={i} className="relative pl-6 border-l-2 border-gray-200">
-                    <div className="absolute -left-[9px] top-0 w-4 h-4 bg-blue-600 rounded-full border-4 border-white"></div>
+                  <div 
+                    key={i} 
+                    className="relative pl-6"
+                    style={{ borderLeft: `2px solid ${primaryColor}33` }}
+                  >
+                    <div 
+                      className="absolute top-0 w-4 h-4 rounded-full border-4 border-white"
+                      style={{ 
+                        left: '-9px',
+                        backgroundColor: primaryColor
+                      }}
+                    ></div>
                     <h3 className="text-base font-bold text-gray-800">{exp.poste}</h3>
-                    <p className="text-sm font-medium text-blue-600 mb-1">{exp.entreprise}</p>
+                    <p className="text-sm font-medium mb-1" style={{ color: primaryColor }}>{exp.entreprise}</p>
                     <p className="text-xs text-gray-500 mb-2">{exp.periode}</p>
                     <p className="text-sm text-gray-600 leading-relaxed">{exp.description}</p>
                   </div>
@@ -185,18 +265,31 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
           {/* Formation */}
           {formation && (
             <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-6 border-b-2 border-blue-600 pb-2 flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-blue-600" />
+              <h2 
+                className="text-xl font-bold text-gray-800 mb-6 pb-2 flex items-center gap-2"
+                style={{ borderBottom: `2px solid ${primaryColor}` }}
+              >
+                <GraduationCap className="w-5 h-5" style={{ color: primaryColor }} />
                 FORMATION
               </h2>
-              <div className="relative pl-6 border-l-2 border-gray-200">
-                <div className="absolute -left-[9px] top-0 w-4 h-4 bg-blue-600 rounded-full border-4 border-white"></div>
+              <div 
+                className="relative pl-6"
+                style={{ borderLeft: `2px solid ${primaryColor}33` }}
+              >
+                <div 
+                  className="absolute top-0 w-4 h-4 rounded-full border-4 border-white"
+                  style={{ 
+                    left: '-9px',
+                    backgroundColor: primaryColor
+                  }}
+                ></div>
                 <h3 className="text-base font-bold text-gray-800">{formation}</h3>
-                <p className="text-sm font-medium text-blue-600 mb-1">{ecole}</p>
+                <p className="text-sm font-medium mb-1" style={{ color: primaryColor }}>{ecole}</p>
                 <p className="text-xs text-gray-500">{anneeFormation}</p>
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

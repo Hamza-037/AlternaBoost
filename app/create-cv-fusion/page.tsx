@@ -429,6 +429,7 @@ export default function CreateCVFusionPage() {
       competences,
       languages,
       hobbies,
+      customization, // ✅ AJOUT: Passer la customisation à tous les templates
     };
 
     // CVBuilderTemplate a des props supplémentaires
@@ -437,7 +438,6 @@ export default function CreateCVFusionPage() {
         <CVBuilderTemplate
           {...commonProps}
           customSections={customSections}
-          customization={customization}
         />
       );
     }
