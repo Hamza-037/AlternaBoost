@@ -70,6 +70,44 @@ const THEMES = [
   { name: "business", label: "Business", color: "#1e40af" },
 ];
 
+// Composant SectionCard extrait pour éviter les re-renders
+const SectionCard = ({ id, title, icon: Icon, children, expandedSection, setExpandedSection }: any) => {
+  const isExpanded = expandedSection === id;
+  
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-300">
+      <button
+        onClick={() => setExpandedSection(isExpanded ? "" : id)}
+        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+            <Icon className="w-5 h-5 text-blue-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+        </div>
+        <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+      </button>
+      
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="px-6 pb-6 space-y-4">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 export default function CreateCVFusionPage() {
   const router = useRouter();
   const { user } = useUser();
@@ -263,43 +301,6 @@ export default function CreateCVFusionPage() {
     }
   };
 
-  const SectionCard = ({ id, title, icon: Icon, children }: any) => {
-    const isExpanded = expandedSection === id;
-    
-    return (
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-300">
-        <button
-          onClick={() => setExpandedSection(isExpanded ? "" : id)}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-              <Icon className="w-5 h-5 text-blue-600" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-          </div>
-          <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-        </button>
-        
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden"
-            >
-              <div className="px-6 pb-6 space-y-4">
-                {children}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50" data-theme={theme}>
       {/* Header */}
@@ -344,7 +345,7 @@ export default function CreateCVFusionPage() {
         <div className="w-[420px] h-[calc(100vh-80px)] border-r border-gray-200 overflow-y-auto bg-white/60 backdrop-blur-sm scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
           <div className="p-6 space-y-4">
             {/* Section: Qui êtes-vous ? */}
-            <SectionCard id="personal" title="Qui êtes-vous ?" icon={User}>
+            <SectionCard id="personal" title="Qui êtes-vous ?" icon={User} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Prénom" 
@@ -416,7 +417,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Expériences */}
-            <SectionCard id="experiences" title="Expériences" icon={Briefcase}>
+            <SectionCard id="experiences" title="Expériences" icon={Briefcase} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Poste" 
@@ -483,7 +484,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Formation */}
-            <SectionCard id="formation" title="Formation" icon={GraduationCap}>
+            <SectionCard id="formation" title="Formation" icon={GraduationCap} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Diplôme (ex: Master Informatique)" 
@@ -507,7 +508,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Compétences */}
-            <SectionCard id="competences" title="Compétences" icon={Award}>
+            <SectionCard id="competences" title="Compétences" icon={Award} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input 
@@ -550,7 +551,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Langues */}
-            <SectionCard id="langues" title="Langues" icon={Globe}>
+            <SectionCard id="langues" title="Langues" icon={Globe} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Ex: Anglais" 
@@ -605,7 +606,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Loisirs */}
-            <SectionCard id="loisirs" title="Loisirs" icon={Heart}>
+            <SectionCard id="loisirs" title="Loisirs" icon={Heart} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input 
