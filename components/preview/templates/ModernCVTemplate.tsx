@@ -1,104 +1,71 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import type { GeneratedCV } from "@/types/cv";
-import { Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Target } from "lucide-react";
+import { Mail, Phone, Briefcase, GraduationCap, Award, Target } from "lucide-react";
 
 interface ModernCVTemplateProps {
-  data: GeneratedCV;
-  isEditing: boolean;
-  onUpdate: (field: string, value: unknown) => void;
+  cvData: GeneratedCV;
   profileImage?: string;
+  customColors?: {
+    primary?: string;
+    secondary?: string;
+  };
 }
 
 export function ModernCVTemplate({
-  data,
-  isEditing,
-  onUpdate,
+  cvData,
   profileImage,
+  customColors,
 }: ModernCVTemplateProps) {
-  const primaryColor = "#2563EB"; // Bleu moderne
-  const accentColor = "#3B82F6";
+  const data = cvData;
+  const primaryColor = customColors?.primary || "#2563EB";
+  const accentColor = customColors?.secondary || "#3B82F6";
 
   return (
-    <Card className="w-full max-w-[210mm] mx-auto bg-white shadow-2xl overflow-hidden">
+    <div className="w-full bg-white">
       {/* Header avec gradient */}
       <div 
         className="relative p-8 pb-6 text-white"
         style={{
-          background: `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`,
+          background: `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 50%, ${accentColor}dd 100%)`,
         }}
       >
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1">
             <h1 className="text-4xl font-bold mb-2 tracking-tight">
-              {isEditing ? (
-                <Input
-                  value={`${data.prenom} ${data.nom}`}
-                  onChange={(e) => {
-                    const [prenom, ...nomParts] = e.target.value.split(" ");
-                    onUpdate("prenom", prenom || "");
-                    onUpdate("nom", nomParts.join(" ") || "");
-                  }}
-                  className="text-4xl font-bold bg-white/20 border-white/30 text-white placeholder:text-white/70"
-                />
-              ) : (
-                `${data.prenom} ${data.nom}`.toUpperCase()
-              )}
+              {`${data.prenom} ${data.nom}`.toUpperCase()}
             </h1>
             
             <div className="text-lg font-medium text-blue-100 mb-4">
-              {isEditing ? (
-                <Input
-                  value={data.formation || ""}
-                  onChange={(e) => onUpdate("formation", e.target.value)}
-                  className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
-                  placeholder="Votre formation"
-                />
-              ) : (
-                data.formation
-              )}
+              {data.formation || ""}
             </div>
-
+            
+            {/* Coordonnées */}
             <div className="flex flex-wrap gap-4 text-sm text-blue-50">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                {isEditing ? (
-                  <Input
-                    value={data.email}
-                    onChange={(e) => onUpdate("email", e.target.value)}
-                    className="bg-white/20 border-white/30 text-white placeholder:text-white/70 text-sm"
-                  />
-                ) : (
-                  data.email
-                )}
+                <span>{data.email}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
-                {isEditing ? (
-                  <Input
-                    value={data.telephone}
-                    onChange={(e) => onUpdate("telephone", e.target.value)}
-                    className="bg-white/20 border-white/30 text-white placeholder:text-white/70 text-sm"
-                  />
-                ) : (
-                  data.telephone
-                )}
+                <span>{data.telephone}</span>
               </div>
             </div>
           </div>
 
-          {/* Photo de profil (optionnelle) */}
+          {/* Photo de profil */}
           {profileImage && (
-            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-xl flex-shrink-0">
-              <img 
-                src={profileImage} 
-                alt="Photo de profil" 
-                className="w-full h-full object-cover"
-              />
+            <div className="flex-shrink-0">
+              <div 
+                className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl"
+              >
+                <img 
+                  src={profileImage} 
+                  alt="Photo de profil" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -106,127 +73,107 @@ export function ModernCVTemplate({
 
       {/* Corps du CV */}
       <div className="p-8 space-y-6">
-        {/* Objectif / Pitch */}
+        {/* Objectif */}
         {(data.pitchPersonnalise || data.objectifAmeliore || data.objectif) && (
           <section>
             <div className="flex items-center gap-3 mb-3">
               <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: `${primaryColor}15` }}
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
+                style={{ backgroundColor: primaryColor }}
               >
-                <Target className="w-5 h-5" style={{ color: primaryColor }} />
+                <Target className="w-5 h-5" />
               </div>
-              <h2 
-                className="text-xl font-bold tracking-tight"
-                style={{ color: primaryColor }}
-              >
+              <h2 className="text-xl font-bold text-gray-900">
                 OBJECTIF PROFESSIONNEL
               </h2>
             </div>
             <div className="pl-13">
-              {isEditing ? (
-                <Textarea
-                  value={data.pitchPersonnalise || data.objectifAmeliore || data.objectif}
-                  onChange={(e) => onUpdate("pitchPersonnalise", e.target.value)}
-                  className="min-h-[80px] border-gray-300 focus:border-blue-500"
-                  placeholder="Votre objectif professionnel..."
-                />
-              ) : (
-                <p className="text-gray-700 leading-relaxed">
-                  {data.pitchPersonnalise || data.objectifAmeliore || data.objectif}
-                </p>
-              )}
+              <p className="text-gray-700 leading-relaxed">
+                {data.pitchPersonnalise || data.objectifAmeliore || data.objectif}
+              </p>
             </div>
           </section>
         )}
 
-        {/* Expériences Professionnelles */}
+        {/* Formation */}
+        <section>
+          <div className="flex items-center gap-3 mb-3">
+            <div 
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
+              style={{ backgroundColor: primaryColor }}
+            >
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">
+              FORMATION
+            </h2>
+          </div>
+          <div className="pl-13">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">{data.formation}</h3>
+                <p className="text-sm font-medium" style={{ color: accentColor }}>
+                  {data.ecole}
+                </p>
+              </div>
+              <div 
+                className="text-sm font-semibold px-3 py-1 rounded-full"
+                style={{ 
+                  backgroundColor: `${primaryColor}15`,
+                  color: primaryColor 
+                }}
+              >
+                {data.anneeFormation}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Expériences */}
         {data.experiencesAmeliorees && data.experiencesAmeliorees.length > 0 && (
           <section>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-3">
               <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: `${primaryColor}15` }}
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
+                style={{ backgroundColor: primaryColor }}
               >
-                <Briefcase className="w-5 h-5" style={{ color: primaryColor }} />
+                <Briefcase className="w-5 h-5" />
               </div>
-              <h2 
-                className="text-xl font-bold tracking-tight"
-                style={{ color: primaryColor }}
-              >
+              <h2 className="text-xl font-bold text-gray-900">
                 EXPÉRIENCES PROFESSIONNELLES
               </h2>
             </div>
-            
-            <div className="space-y-5 pl-13">
+            <div className="pl-13 space-y-4">
               {data.experiencesAmeliorees.map((exp, index) => (
                 <div key={index} className="relative">
                   {/* Timeline dot */}
                   <div 
-                    className="absolute -left-[3.25rem] top-2 w-3 h-3 rounded-full border-2"
-                    style={{ 
-                      backgroundColor: "white",
-                      borderColor: primaryColor 
-                    }}
+                    className="absolute -left-[52px] top-2 w-3 h-3 rounded-full border-2 border-white shadow-md"
+                    style={{ backgroundColor: primaryColor }}
                   />
                   
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-4">
                       <h3 className="text-lg font-bold text-gray-900">
-                        {isEditing ? (
-                          <Input
-                            value={exp.poste}
-                            onChange={(e) => {
-                              const newExps = [...data.experiencesAmeliorees!];
-                              newExps[index] = { ...newExps[index], poste: e.target.value };
-                              onUpdate("experiencesAmeliorees", newExps);
-                            }}
-                            className="font-bold"
-                          />
-                        ) : (
-                          exp.poste
-                        )}
+                        {exp.poste}
                       </h3>
-                      {data.experiences?.[index]?.periode && (
-                        <Badge 
-                          variant="secondary"
-                          className="text-xs font-medium shrink-0"
-                          style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
-                        >
-                          {data.experiences[index].periode}
-                        </Badge>
-                      )}
+                      <div 
+                        className="text-sm font-semibold px-3 py-1 rounded-full whitespace-nowrap"
+                        style={{ 
+                          backgroundColor: `${primaryColor}15`,
+                          color: primaryColor 
+                        }}
+                      >
+                        {exp.periode}
+                      </div>
                     </div>
                     
                     <p className="text-sm font-medium" style={{ color: accentColor }}>
-                      {isEditing ? (
-                        <Input
-                          value={exp.entreprise}
-                          onChange={(e) => {
-                            const newExps = [...data.experiencesAmeliorees!];
-                            newExps[index] = { ...newExps[index], entreprise: e.target.value };
-                            onUpdate("experiencesAmeliorees", newExps);
-                          }}
-                        />
-                      ) : (
-                        exp.entreprise
-                      )}
+                      {exp.entreprise}
                     </p>
                     
                     <div className="text-gray-700 leading-relaxed">
-                      {isEditing ? (
-                        <Textarea
-                          value={exp.description}
-                          onChange={(e) => {
-                            const newExps = [...data.experiencesAmeliorees!];
-                            newExps[index] = { ...newExps[index], description: e.target.value };
-                            onUpdate("experiencesAmeliorees", newExps);
-                          }}
-                          className="min-h-[80px]"
-                        />
-                      ) : (
-                        <p>{exp.description}</p>
-                      )}
+                      <p>{exp.description}</p>
                     </div>
                   </div>
                 </div>
@@ -235,93 +182,43 @@ export function ModernCVTemplate({
           </section>
         )}
 
-        {/* Formation */}
-        {data.formation && (
-          <section>
-            <div className="flex items-center gap-3 mb-3">
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: `${primaryColor}15` }}
-              >
-                <GraduationCap className="w-5 h-5" style={{ color: primaryColor }} />
-              </div>
-              <h2 
-                className="text-xl font-bold tracking-tight"
-                style={{ color: primaryColor }}
-              >
-                FORMATION
-              </h2>
-            </div>
-            <div className="pl-13">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900">
-                    {data.formation}
-                  </h3>
-                  {data.ecole && (
-                    <p className="text-sm font-medium" style={{ color: accentColor }}>
-                      {data.ecole}
-                    </p>
-                  )}
-                </div>
-                {data.anneeFormation && (
-                  <Badge 
-                    variant="secondary"
-                    className="text-xs font-medium"
-                    style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
-                  >
-                    {data.anneeFormation}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* Compétences */}
-        {data.competencesAmeliorees && data.competencesAmeliorees.length > 0 && (
+        {(data.competencesAmeliorees || data.competences) && (
           <section>
             <div className="flex items-center gap-3 mb-3">
               <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: `${primaryColor}15` }}
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
+                style={{ backgroundColor: primaryColor }}
               >
-                <Award className="w-5 h-5" style={{ color: primaryColor }} />
+                <Award className="w-5 h-5" />
               </div>
-              <h2 
-                className="text-xl font-bold tracking-tight"
-                style={{ color: primaryColor }}
-              >
+              <h2 className="text-xl font-bold text-gray-900">
                 COMPÉTENCES
               </h2>
             </div>
             <div className="pl-13">
               <div className="flex flex-wrap gap-2">
-                {data.competencesAmeliorees.map((comp, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="px-3 py-1.5 text-sm font-medium"
-                    style={{ 
-                      backgroundColor: `${primaryColor}10`,
-                      color: primaryColor,
-                      border: `1px solid ${primaryColor}30`
-                    }}
-                  >
-                    {comp}
-                  </Badge>
-                ))}
+                {(Array.isArray(data.competencesAmeliorees) 
+                  ? data.competencesAmeliorees 
+                  : (data.competencesAmeliorees || data.competences || "").split(/[,;]/))
+                  .map((comp: string, index: number) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium"
+                      style={{
+                        backgroundColor: `${primaryColor}10`,
+                        color: primaryColor,
+                        border: `1px solid ${primaryColor}30`,
+                      }}
+                    >
+                      {typeof comp === 'string' ? comp.trim() : comp}
+                    </span>
+                  ))}
               </div>
             </div>
           </section>
         )}
       </div>
-
-      {/* Footer subtil */}
-      <div className="px-8 pb-6 text-center text-xs text-gray-400">
-        CV généré avec AlternaBoost
-      </div>
-    </Card>
+    </div>
   );
 }
-

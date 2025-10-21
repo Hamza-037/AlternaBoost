@@ -1,202 +1,138 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import type { GeneratedCV } from "@/types/cv";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 interface MinimalCVTemplateProps {
-  data: GeneratedCV;
-  isEditing: boolean;
-  onUpdate: (field: string, value: unknown) => void;
+  cvData: GeneratedCV;
+  customColors?: {
+    primary?: string;
+    secondary?: string;
+  };
 }
 
 export function MinimalCVTemplate({
-  data,
-  isEditing,
-  onUpdate,
+  cvData,
+  customColors,
 }: MinimalCVTemplateProps) {
-  return (
-    <Card className="w-full max-w-[210mm] mx-auto bg-white shadow-lg p-12 min-h-[297mm]">
-      {/* Header épuré */}
-      <div className="border-b border-gray-900 pb-4 mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-1 tracking-tight">
-          {isEditing ? (
-            <Input
-              value={`${data.prenom} ${data.nom}`}
-              onChange={(e) => {
-                const [prenom, ...nomParts] = e.target.value.split(" ");
-                onUpdate("prenom", prenom || "");
-                onUpdate("nom", nomParts.join(" ") || "");
-              }}
-              className="text-4xl font-bold"
-            />
-          ) : (
-            `${data.prenom} ${data.nom}`.toUpperCase()
-          )}
-        </h1>
-        
-        <p className="text-lg text-gray-700 mb-3">
-          {isEditing ? (
-            <Input
-              value={data.formation || ""}
-              onChange={(e) => onUpdate("formation", e.target.value)}
-            />
-          ) : (
-            data.formation
-          )}
-        </p>
+  const data = cvData;
+  const primaryColor = customColors?.primary || "#475569";
+  const accentColor = customColors?.secondary || "#64748B";
 
-        <div className="text-sm text-gray-600 flex flex-wrap gap-3">
-          {isEditing ? (
-            <>
-              <Input
-                value={data.email}
-                onChange={(e) => onUpdate("email", e.target.value)}
-                className="text-sm max-w-xs"
-              />
-              <span>|</span>
-              <Input
-                value={data.telephone}
-                onChange={(e) => onUpdate("telephone", e.target.value)}
-                className="text-sm max-w-xs"
-              />
-            </>
-          ) : (
-            <>
-              <span>{data.email}</span>
-              <span>|</span>
-              <span>{data.telephone}</span>
-            </>
-          )}
+  return (
+    <div className="w-full bg-white p-12 space-y-8">
+      {/* Header minimaliste */}
+      <header className="border-b-2 pb-6" style={{ borderColor: primaryColor }}>
+        <h1 
+          className="text-5xl font-light mb-3 tracking-tight"
+          style={{ color: primaryColor }}
+        >
+          {data.prenom} <span className="font-bold">{data.nom.toUpperCase()}</span>
+        </h1>
+        <p className="text-xl text-gray-600 mb-4">{data.formation}</p>
+        
+        {/* Contact en ligne */}
+        <div className="flex flex-wrap gap-6 text-sm text-gray-600">
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            <span>{data.email}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Phone className="w-4 h-4" />
+            <span>{data.telephone}</span>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Objectif */}
       {(data.pitchPersonnalise || data.objectifAmeliore || data.objectif) && (
-        <section className="mb-8">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-3 border-b border-gray-300 pb-1">
-            Profil
+        <section>
+          <h2 
+            className="text-sm font-bold uppercase tracking-wider mb-3"
+            style={{ color: primaryColor }}
+          >
+            Profil professionnel
           </h2>
-          {isEditing ? (
-            <Textarea
-              value={data.pitchPersonnalise || data.objectifAmeliore || data.objectif}
-              onChange={(e) => onUpdate("pitchPersonnalise", e.target.value)}
-              className="min-h-[80px]"
-            />
-          ) : (
-            <p className="text-gray-800 leading-relaxed text-justify">
-              {data.pitchPersonnalise || data.objectifAmeliore || data.objectif}
-            </p>
-          )}
+          <p className="text-gray-700 leading-relaxed">
+            {data.pitchPersonnalise || data.objectifAmeliore || data.objectif}
+          </p>
         </section>
       )}
 
+      {/* Formation */}
+      <section>
+        <h2 
+          className="text-sm font-bold uppercase tracking-wider mb-4"
+          style={{ color: primaryColor }}
+        >
+          Formation
+        </h2>
+        <div className="space-y-2">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="font-semibold text-gray-900">{data.formation}</h3>
+              <p className="text-sm text-gray-600">{data.ecole}</p>
+            </div>
+            <span className="text-sm text-gray-500">{data.anneeFormation}</span>
+          </div>
+        </div>
+      </section>
+
       {/* Expériences */}
       {data.experiencesAmeliorees && data.experiencesAmeliorees.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4 border-b border-gray-300 pb-1">
-            Expérience Professionnelle
+        <section>
+          <h2 
+            className="text-sm font-bold uppercase tracking-wider mb-4"
+            style={{ color: primaryColor }}
+          >
+            Expérience professionnelle
           </h2>
-          
-          <div className="space-y-5">
+          <div className="space-y-6">
             {data.experiencesAmeliorees.map((exp, index) => (
               <div key={index}>
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="text-base font-bold text-gray-900">
-                    {isEditing ? (
-                      <Input
-                        value={exp.poste}
-                        onChange={(e) => {
-                          const newExps = [...data.experiencesAmeliorees!];
-                          newExps[index] = { ...newExps[index], poste: e.target.value };
-                          onUpdate("experiencesAmeliorees", newExps);
-                        }}
-                      />
-                    ) : (
-                      exp.poste
-                    )}
-                  </h3>
-                  {data.experiences?.[index]?.periode && (
-                    <span className="text-sm text-gray-600 font-medium">
-                      {data.experiences[index].periode}
-                    </span>
-                  )}
+                <div className="flex items-start justify-between mb-1">
+                  <h3 className="font-semibold text-gray-900">{exp.poste}</h3>
+                  <span className="text-sm text-gray-500 whitespace-nowrap ml-4">
+                    {exp.periode}
+                  </span>
                 </div>
-                
-                <p className="text-sm text-gray-700 font-medium mb-2 italic">
-                  {isEditing ? (
-                    <Input
-                      value={exp.entreprise}
-                      onChange={(e) => {
-                        const newExps = [...data.experiencesAmeliorees!];
-                        newExps[index] = { ...newExps[index], entreprise: e.target.value };
-                        onUpdate("experiencesAmeliorees", newExps);
-                      }}
-                    />
-                  ) : (
-                    exp.entreprise
-                  )}
+                <p className="text-sm mb-2" style={{ color: accentColor }}>
+                  {exp.entreprise}
                 </p>
-                
-                <div className="text-sm text-gray-800 leading-relaxed">
-                  {isEditing ? (
-                    <Textarea
-                      value={exp.description}
-                      onChange={(e) => {
-                        const newExps = [...data.experiencesAmeliorees!];
-                        newExps[index] = { ...newExps[index], description: e.target.value };
-                        onUpdate("experiencesAmeliorees", newExps);
-                      }}
-                      className="min-h-[60px]"
-                    />
-                  ) : (
-                    <p>{exp.description}</p>
-                  )}
-                </div>
+                <p className="text-gray-700 leading-relaxed text-sm">
+                  {exp.description}
+                </p>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Formation */}
-      {data.formation && (
-        <section className="mb-8">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-3 border-b border-gray-300 pb-1">
-            Formation
+      {/* Compétences */}
+      {(data.competencesAmeliorees || data.competences) && (
+        <section>
+          <h2 
+            className="text-sm font-bold uppercase tracking-wider mb-3"
+            style={{ color: primaryColor }}
+          >
+            Compétences
           </h2>
-          <div className="flex justify-between items-baseline">
-            <div>
-              <h3 className="text-base font-bold text-gray-900">{data.formation}</h3>
-              {data.ecole && (
-                <p className="text-sm text-gray-700 italic">{data.ecole}</p>
-              )}
-            </div>
-            {data.anneeFormation && (
-              <span className="text-sm text-gray-600 font-medium">{data.anneeFormation}</span>
-            )}
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-700">
+            {(Array.isArray(data.competencesAmeliorees) 
+              ? data.competencesAmeliorees 
+              : (data.competencesAmeliorees || data.competences || "").split(/[,;]/))
+              .map((comp: string, index: number) => (
+                <span key={index} className="flex items-center gap-2">
+                  <span 
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: primaryColor }}
+                  />
+                  {typeof comp === 'string' ? comp.trim() : comp}
+                </span>
+              ))}
           </div>
         </section>
       )}
-
-      {/* Compétences */}
-      {data.competencesAmeliorees && data.competencesAmeliorees.length > 0 && (
-        <section>
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-3 border-b border-gray-300 pb-1">
-            Compétences
-          </h2>
-          <p className="text-sm text-gray-800 leading-relaxed">
-            {data.competencesAmeliorees.join(" • ")}
-          </p>
-        </section>
-      )}
-
-      {/* Footer discret */}
-      <div className="mt-12 pt-4 border-t border-gray-200 text-center text-xs text-gray-400">
-        Document généré par AlternaBoost
-      </div>
-    </Card>
+    </div>
   );
 }
-
