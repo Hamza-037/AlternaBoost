@@ -126,7 +126,9 @@ export function ApplicationFormDialog({
       });
 
       if (!response.ok) {
-        throw new Error("Erreur lors de l'enregistrement");
+        const errorData = await response.json().catch(() => ({ error: "Erreur inconnue" }));
+        console.error("Erreur API:", errorData);
+        throw new Error(errorData.error || "Erreur lors de l'enregistrement");
       }
 
       toast.success(
