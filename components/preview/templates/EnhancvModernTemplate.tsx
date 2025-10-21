@@ -16,6 +16,7 @@ interface EnhancvModernTemplateProps {
   formation: string | Array<{ diplome: string; ecole: string; annee: string; mention?: string }>;
   ecole?: string;
   anneeFormation?: string;
+  descriptionFormation?: string;
   competences: ({ nom: string; niveau?: number; categorie?: string } | string)[];
   certifications?: { nom: string; organisme: string; annee: string }[];
   languages: { language: string; proficiency: string }[];
@@ -43,6 +44,7 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
   formation,
   ecole,
   anneeFormation,
+  descriptionFormation,
   competences,
   certifications = [],
   languages,
@@ -67,8 +69,9 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
       diplome: formation,
       ecole: ecole || '',
       annee: anneeFormation || '',
+      mention: descriptionFormation || undefined,
     }];
-  }, [formation, ecole, anneeFormation]);
+  }, [formation, ecole, anneeFormation, descriptionFormation]);
 
   // Group skills by category
   const groupedSkills = React.useMemo(() => {

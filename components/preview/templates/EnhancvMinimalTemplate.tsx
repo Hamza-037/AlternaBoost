@@ -21,6 +21,7 @@ interface EnhancvMinimalTemplateProps {
   formation: string;
   ecole: string;
   anneeFormation: string;
+  descriptionFormation?: string;
   competences: string[];
   certifications?: { 
     nom: string; 
@@ -58,6 +59,7 @@ export const EnhancvMinimalTemplate: React.FC<EnhancvMinimalTemplateProps> = ({
   formation,
   ecole,
   anneeFormation,
+  descriptionFormation,
   competences,
   certifications = [],
   languages,
@@ -193,9 +195,14 @@ export const EnhancvMinimalTemplate: React.FC<EnhancvMinimalTemplateProps> = ({
                   {anneeFormation}
                 </span>
               </div>
-              <p className="text-xs text-gray-700 italic">
+              <p className="text-xs text-gray-700 italic mb-2">
                 {formation}
               </p>
+              {descriptionFormation && (
+                <p className="text-xs text-gray-800 leading-relaxed">
+                  {descriptionFormation}
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -280,7 +287,6 @@ export const EnhancvMinimalTemplate: React.FC<EnhancvMinimalTemplateProps> = ({
           paddingBottom: `${0.5 * spacing}rem`
         }}
       >
-        www.enhancv.com • Propulsé par Enhancv
       </div>
     </div>
   );

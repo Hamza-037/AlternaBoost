@@ -42,6 +42,7 @@ interface CVBuilderTemplateProps {
   formation: string;
   ecole: string;
   anneeFormation: string;
+  descriptionFormation?: string;
   customSections?: CustomSection[];
   customization?: {
     primaryColor: string;
@@ -96,6 +97,7 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
   formation,
   ecole,
   anneeFormation,
+  descriptionFormation,
   customSections = [],
   customization = {
     primaryColor: "#06B6D4",
@@ -331,6 +333,12 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
                     </span>
                   )}
                 </div>
+                
+                {descriptionFormation && (
+                  <p className="text-sm text-gray-700 leading-relaxed mt-2">
+                    {descriptionFormation}
+                  </p>
+                )}
               </div>
             </div>
           </div>

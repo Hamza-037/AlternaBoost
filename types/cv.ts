@@ -13,6 +13,7 @@ export interface CVFormData {
   formation: string;
   ecole: string;
   anneeFormation: string;
+  descriptionFormation?: string; // Description ou détails de la formation
   experiences: Experience[];
   competences: string;
   objectif: string;

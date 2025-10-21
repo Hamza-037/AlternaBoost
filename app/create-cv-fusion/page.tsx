@@ -129,6 +129,7 @@ export default function CreateCVFusionPage() {
   const [formation, setFormation] = useState("");
   const [ecole, setEcole] = useState("");
   const [anneeFormation, setAnneeFormation] = useState("");
+  const [descriptionFormation, setDescriptionFormation] = useState("");
   const [posteRecherche, setPosteRecherche] = useState("");
   const [objectif, setObjectif] = useState("");
   const [objectifOptimise, setObjectifOptimise] = useState("");
@@ -345,6 +346,7 @@ export default function CreateCVFusionPage() {
     setFormation("");
     setEcole("");
     setAnneeFormation("");
+    setDescriptionFormation("");
   };
 
   const handleResetCompetences = () => {
@@ -462,6 +464,7 @@ export default function CreateCVFusionPage() {
       formation,
       ecole,
       anneeFormation,
+      descriptionFormation,
       competences,
       languages,
       hobbies,
@@ -711,6 +714,13 @@ export default function CreateCVFusionPage() {
                   placeholder="Année (ex: 2024-2025)" 
                   value={anneeFormation}
                   onChange={(e) => setAnneeFormation(e.target.value)}
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                />
+                <Textarea 
+                  placeholder="Description (optionnelle) - Mention, spécialisation, détails importants..." 
+                  value={descriptionFormation}
+                  onChange={(e) => setDescriptionFormation(e.target.value)}
+                  rows={3}
                   className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>

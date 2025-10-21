@@ -16,6 +16,7 @@ interface EnhancvCreativeTemplateProps {
   formation: string;
   ecole: string;
   anneeFormation: string;
+  descriptionFormation?: string;
   competences: string[];
   languages: { language: string; proficiency: string }[];
   hobbies: string[];
@@ -41,6 +42,7 @@ export const EnhancvCreativeTemplate: React.FC<EnhancvCreativeTemplateProps> = (
   formation,
   ecole,
   anneeFormation,
+  descriptionFormation,
   competences,
   languages,
   hobbies,
@@ -321,7 +323,12 @@ export const EnhancvCreativeTemplate: React.FC<EnhancvCreativeTemplateProps> = (
                     <p className="text-sm font-medium mt-1" style={{ color: primaryColor }}>
                       {ecole}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">{anneeFormation}</p>
+                    <p className="text-xs text-gray-500 mt-1 mb-2">{anneeFormation}</p>
+                    {descriptionFormation && (
+                      <p className="text-sm text-gray-700 leading-relaxed mt-2">
+                        {descriptionFormation}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

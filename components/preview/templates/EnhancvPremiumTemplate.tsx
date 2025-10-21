@@ -16,6 +16,7 @@ interface EnhancvPremiumTemplateProps {
   formation: string;
   ecole: string;
   anneeFormation: string;
+  descriptionFormation?: string;
   competences: ({ nom: string; niveau?: number } | string)[];
   certifications?: { nom: string; organisme: string; annee: string }[];
   languages: { language: string; proficiency: string }[];
@@ -36,6 +37,7 @@ export const EnhancvPremiumTemplate: React.FC<EnhancvPremiumTemplateProps> = ({
   formation,
   ecole,
   anneeFormation,
+  descriptionFormation,
   competences,
   certifications = [],
   languages,
@@ -288,7 +290,12 @@ export const EnhancvPremiumTemplate: React.FC<EnhancvPremiumTemplateProps> = ({
                       {anneeFormation}
                     </span>
                   </div>
-                  <p className="text-xs font-semibold text-indigo-700">{ecole}</p>
+                  <p className="text-xs font-semibold text-indigo-700 mb-2">{ecole}</p>
+                  {descriptionFormation && (
+                    <p className="text-xs text-gray-700 leading-relaxed mt-2 pt-2 border-t border-indigo-200">
+                      {descriptionFormation}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
