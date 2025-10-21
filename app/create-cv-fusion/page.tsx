@@ -123,6 +123,7 @@ export default function CreateCVFusionPage() {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string>("personal");
+  const [showCustomizationPanel, setShowCustomizationPanel] = useState(true);
   
   // Données du CV
   const [prenom, setPrenom] = useState("");
@@ -667,20 +668,58 @@ export default function CreateCVFusionPage() {
                 </div>
               </div>
             </SectionCard>
-
-            {/* Section: Style & Personnalisation */}
-            <SectionCard id="style" title="Style & Personnalisation" icon={Palette} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
-              <CVCustomizationPanel
-                customization={customization}
-                onUpdate={setCustomization}
-              />
-            </SectionCard>
           </div>
         </div>
 
         {/* PREVIEW DROITE */}
         <div className="flex-1 h-[calc(100vh-80px)] overflow-y-auto bg-gradient-to-br from-blue-50/50 to-purple-50/50 relative">
-          {/* Contrôles */}
+          {/* Bouton Toggle Personnalisation */}
+          {!showCustomizationPanel && (
+            <button
+              onClick={() => setShowCustomizationPanel(true)}
+              className="fixed top-24 left-6 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110"
+              title="Afficher la personnalisation"
+            >
+              <Palette className="w-5 h-5" />
+            </button>
+          )}
+
+          {/* Panneau de Personnalisation - GAUCHE */}
+          {showCustomizationPanel && (
+            <motion.div
+              initial={{ x: -100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -100, opacity: 0 }}
+              className="absolute top-6 left-6 z-40 w-80"
+            >
+              <Card className="bg-white/95 backdrop-blur-md border-gray-200 shadow-xl overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Palette className="w-5 h-5" />
+                      <h3 className="font-bold text-lg">Personnalisation</h3>
+                    </div>
+                    <button
+                      onClick={() => setShowCustomizationPanel(false)}
+                      className="hover:bg-white/20 rounded-full p-1 transition-colors"
+                      title="Masquer"
+                    >
+                      <ChevronDown className="w-5 h-5 rotate-90" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-blue-100 mt-1">Créez un CV 100% unique ✨</p>
+                </div>
+                <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
+                  <CVCustomizationPanel
+                    customization={customization}
+                    onUpdate={setCustomization}
+                  />
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Contrôles Zoom/Thème - DROITE */}
           <div className="absolute top-6 right-6 z-40 space-y-3">
             <Card className="bg-white/95 backdrop-blur-md border-gray-200 shadow-lg p-4 space-y-3">
               <div className="flex items-center gap-3">
