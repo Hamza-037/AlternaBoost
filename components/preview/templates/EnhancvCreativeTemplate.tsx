@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Globe, Heart, Zap } from "lucide-react";
+import { Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Globe, Heart, Target } from "lucide-react";
 
 interface EnhancvCreativeTemplateProps {
   prenom: string;
@@ -49,223 +49,293 @@ export const EnhancvCreativeTemplate: React.FC<EnhancvCreativeTemplateProps> = (
   const fullName = `${prenom} ${nom}`.trim();
   
   // Apply customization with defaults
-  const primaryColor = customization.primaryColor || "#EC4899";
-  const fontFamily = customization.fontFamily || "'Montserrat', sans-serif";
+  const primaryColor = customization.primaryColor || "#3B82F6";
+  const fontFamily = customization.fontFamily || "'Inter', sans-serif";
   const fontSize = (customization.fontSize || 100) / 100;
   const photoSize = (customization.photoSize || 100) / 100;
   const spacing = (customization.spacing || 100) / 100;
 
   return (
     <div 
-      className="w-[21cm] h-[29.7cm] shadow-2xl mx-auto relative overflow-hidden" 
+      className="w-[21cm] h-[29.7cm] bg-white shadow-2xl mx-auto relative overflow-hidden" 
       style={{ 
         fontFamily,
-        fontSize: `${fontSize}rem`,
-        background: `linear-gradient(135deg, ${primaryColor}33, ${primaryColor}11, ${primaryColor}22)`
+        fontSize: `${fontSize}rem`
       }}
     >
-      {/* Formes géométriques décoratives */}
-      <div className="absolute top-20 right-20 w-40 h-40 bg-pink-500/20 rounded-full blur-2xl"></div>
-      <div className="absolute bottom-40 left-20 w-60 h-60 bg-cyan-500/20 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/2 right-1/4 w-32 h-32 border-4 border-yellow-400/30 rotate-45"></div>
+      {/* Decorative background elements */}
+      <div 
+        className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-10"
+        style={{ background: `radial-gradient(circle, ${primaryColor}, transparent)` }}
+      ></div>
+      <div 
+        className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-10"
+        style={{ background: `radial-gradient(circle, ${primaryColor}, transparent)` }}
+      ></div>
 
-      <div className="relative z-10 flex h-full">
-        {/* SIDEBAR GAUCHE - Violet foncé */}
+      <div className="relative z-10 h-full flex flex-col">
+        {/* HEADER */}
         <div 
-          className="w-[35%] text-white relative"
+          className="px-12 text-white relative"
           style={{ 
-            background: `linear-gradient(to bottom, ${primaryColor}ee, ${primaryColor}cc)`,
-            padding: `${2.5 * spacing}rem`
+            background: `linear-gradient(135deg, ${primaryColor}ee, ${primaryColor}bb)`,
+            paddingTop: `${2 * spacing}rem`,
+            paddingBottom: `${2 * spacing}rem`
           }}
         >
-          {/* Photo héxagonale */}
-          {profileImage && (
-            <div 
-              className="relative mx-auto"
-              style={{ 
-                width: `${12 * photoSize}rem`,
-                height: `${12 * photoSize}rem`,
-                marginBottom: `${2 * spacing}rem`
-              }}
-            >
+          <div className="flex items-center gap-8">
+            {/* Photo */}
+            {profileImage && (
               <div 
-                className="absolute inset-0 rounded-3xl rotate-6"
-                style={{ background: `linear-gradient(to bottom right, ${primaryColor}, ${primaryColor}88)` }}
+                className="relative flex-shrink-0"
+                style={{ 
+                  width: `${8 * photoSize}rem`,
+                  height: `${8 * photoSize}rem`
+                }}
+              >
+                <div 
+                  className="absolute inset-0 rounded-2xl rotate-6"
+                  style={{ background: `linear-gradient(to bottom right, ${primaryColor}44, transparent)` }}
+                ></div>
+                <div className="absolute inset-2 rounded-2xl overflow-hidden border-4 border-white/30 shadow-xl">
+                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                </div>
+              </div>
+            )}
+
+            {/* Info */}
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold mb-2 tracking-tight">{fullName}</h1>
+              <div 
+                className="h-1 mb-4 rounded-full"
+                style={{ 
+                  width: '6rem',
+                  background: `linear-gradient(to right, white, transparent)` 
+                }}
               ></div>
-              <div className="absolute inset-2 rounded-3xl overflow-hidden border-4 border-white/20">
-                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-              </div>
-            </div>
-          )}
+              <p className="text-xl text-white/90 font-light mb-6">{posteRecherche || "Professionnel"}</p>
 
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-pink-400 to-cyan-400 bg-clip-text text-transparent">
-              {fullName}
-            </h1>
-            <div className="h-1 w-20 bg-gradient-to-r from-pink-500 to-cyan-500 mb-4"></div>
-            <p className="text-cyan-300 font-medium text-lg">{posteRecherche || "Professionnel"}</p>
-          </div>
-
-          {/* Contact */}
-          <div className="mb-8 space-y-3">
-            <h2 className="text-sm uppercase tracking-wider text-pink-400 font-bold mb-4 flex items-center gap-2">
-              <Zap className="w-4 h-4" />
-              Contact
-            </h2>
-            {email && (
-              <div className="flex items-start gap-3 text-sm">
-                <Mail className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-300">{email}</span>
-              </div>
-            )}
-            {telephone && (
-              <div className="flex items-start gap-3 text-sm">
-                <Phone className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-300">{telephone}</span>
-              </div>
-            )}
-            {adresse && (
-              <div className="flex items-start gap-3 text-sm">
-                <MapPin className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-300">{adresse}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Compétences */}
-          {competences.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-sm uppercase tracking-wider text-pink-400 font-bold mb-4 flex items-center gap-2">
-                <Award className="w-4 h-4" />
-                Compétences
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {competences.map((skill, i) => (
-                  <span 
-                    key={i}
-                    className="px-3 py-1 bg-gradient-to-r from-pink-500/30 to-cyan-500/30 border border-cyan-400/50 text-cyan-100 text-xs font-medium rounded-full"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Langues */}
-          {languages.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-sm uppercase tracking-wider text-pink-400 font-bold mb-4 flex items-center gap-2">
-                <Globe className="w-4 h-4" />
-                Langues
-              </h2>
-              <div className="space-y-3">
-                {languages.map((lang, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-white font-medium">{lang.language}</span>
-                      <span className="text-cyan-300 text-xs">{lang.proficiency}</span>
-                    </div>
-                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-pink-500 to-cyan-500 rounded-full"
-                        style={{ 
-                          width: lang.proficiency === "Avancé" ? "100%" : 
-                                 lang.proficiency === "Intermédiaire" ? "66%" : "33%" 
-                        }}
-                      />
-                    </div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-white/80">
+                {email && (
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    <span>{email}</span>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Loisirs */}
-          {hobbies.length > 0 && (
-            <div>
-              <h2 className="text-sm uppercase tracking-wider text-pink-400 font-bold mb-4 flex items-center gap-2">
-                <Heart className="w-4 h-4" />
-                Passions
-              </h2>
-              <div className="space-y-2">
-                {hobbies.map((hobby, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm text-gray-300">
-                    <div className="w-2 h-2 bg-gradient-to-r from-pink-500 to-cyan-500 rounded-full"></div>
-                    {hobby}
+                )}
+                {telephone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    <span>{telephone}</span>
                   </div>
-                ))}
+                )}
+                {adresse && (
+                  <div className="flex items-center gap-2 col-span-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{adresse}</span>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* CONTENU PRINCIPAL DROITE - Blanc */}
-        <div className="w-[65%] bg-white p-12 overflow-y-auto">
-          {/* À propos */}
-          {objectif && (
-            <div className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <div className="w-1 h-8 bg-gradient-to-b from-pink-500 to-cyan-500 rounded-full"></div>
-                Profil
-              </h2>
-              <p className="text-sm text-gray-600 leading-relaxed pl-4 border-l-2 border-gray-200">
-                {objectif}
-              </p>
-            </div>
-          )}
-
-          {/* Expériences */}
-          {experiences.length > 0 && (
-            <div className="mb-10">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <Briefcase className="w-6 h-6 text-pink-500" />
-                Expériences
-              </h2>
-              <div className="space-y-6">
-                {experiences.map((exp, i) => (
-                  <div key={i} className="relative pl-8 pb-6 border-l-2 border-gray-200">
-                    <div className="absolute -left-[5px] top-0 w-3 h-3 bg-gradient-to-br from-pink-500 to-cyan-500 rounded-full"></div>
-                    
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-bold text-gray-900">{exp.poste}</h3>
-                      <span className="text-xs bg-gradient-to-r from-pink-100 to-cyan-100 text-pink-700 px-3 py-1 rounded-full whitespace-nowrap ml-4">
-                        {exp.periode}
-                      </span>
-                    </div>
-                    <p className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-cyan-600 mb-2">
-                      {exp.entreprise}
-                    </p>
-                    <p className="text-sm text-gray-600 leading-relaxed">{exp.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Formation */}
-          {formation && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <GraduationCap className="w-6 h-6 text-cyan-500" />
-                Formation
-              </h2>
-              <div className="bg-gradient-to-r from-pink-50 to-cyan-50 p-6 rounded-2xl border-l-4 border-gradient-to-b from-pink-500 to-cyan-500">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-bold text-gray-900">{formation}</h3>
-                  <span className="text-xs bg-white text-pink-700 px-3 py-1 rounded-full whitespace-nowrap ml-4">
-                    {anneeFormation}
-                  </span>
+        {/* MAIN CONTENT - 2 colonnes */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* COLONNE GAUCHE - Sidebar */}
+          <div 
+            className="w-[35%] px-8 bg-gray-50"
+            style={{ 
+              paddingTop: `${2 * spacing}rem`,
+              paddingBottom: `${2 * spacing}rem`
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: `${1.5 * spacing}rem` }}>
+              {/* À propos */}
+              {objectif && (
+                <div>
+                  <h2 
+                    className="text-sm font-bold mb-3 uppercase tracking-wide flex items-center gap-2"
+                    style={{ color: primaryColor }}
+                  >
+                    <Target className="w-4 h-4" />
+                    À Propos
+                  </h2>
+                  <p className="text-sm text-gray-700 leading-relaxed">{objectif}</p>
                 </div>
-                <p className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-cyan-600">
-                  {ecole}
-                </p>
-              </div>
+              )}
+
+              {/* Compétences */}
+              {competences.length > 0 && (
+                <div>
+                  <h2 
+                    className="text-sm font-bold mb-3 uppercase tracking-wide flex items-center gap-2"
+                    style={{ color: primaryColor }}
+                  >
+                    <Award className="w-4 h-4" />
+                    Compétences
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {competences.map((skill, i) => (
+                      <span 
+                        key={i}
+                        className="px-3 py-1 text-xs font-medium rounded-full border"
+                        style={{ 
+                          backgroundColor: `${primaryColor}15`,
+                          borderColor: `${primaryColor}40`,
+                          color: primaryColor
+                        }}
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Langues */}
+              {languages.length > 0 && (
+                <div>
+                  <h2 
+                    className="text-sm font-bold mb-3 uppercase tracking-wide flex items-center gap-2"
+                    style={{ color: primaryColor }}
+                  >
+                    <Globe className="w-4 h-4" />
+                    Langues
+                  </h2>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: `${0.75 * spacing}rem` }}>
+                    {languages.map((lang, i) => {
+                      const levelMap: { [key: string]: number } = {
+                        "Natif": 100, "Courant": 90, "Avancé": 75, "Intermédiaire": 50, "Débutant": 25
+                      };
+                      const level = levelMap[lang.proficiency] || 50;
+                      
+                      return (
+                        <div key={i}>
+                          <div className="flex justify-between mb-1 text-sm">
+                            <span className="font-medium text-gray-800">{lang.language}</span>
+                            <span className="text-xs text-gray-500">{lang.proficiency}</span>
+                          </div>
+                          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full rounded-full transition-all"
+                              style={{ 
+                                background: `linear-gradient(to right, ${primaryColor}, ${primaryColor}aa)`,
+                                width: `${level}%` 
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Loisirs */}
+              {hobbies.length > 0 && (
+                <div>
+                  <h2 
+                    className="text-sm font-bold mb-3 uppercase tracking-wide flex items-center gap-2"
+                    style={{ color: primaryColor }}
+                  >
+                    <Heart className="w-4 h-4" />
+                    Loisirs
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {hobbies.map((hobby, i) => (
+                      <span 
+                        key={i}
+                        className="text-xs text-gray-700 flex items-center gap-1"
+                      >
+                        <span style={{ color: primaryColor }}>•</span>
+                        {hobby}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* COLONNE DROITE - Contenu principal */}
+          <div 
+            className="flex-1 px-10 overflow-y-auto"
+            style={{ 
+              paddingTop: `${2 * spacing}rem`,
+              paddingBottom: `${2 * spacing}rem`
+            }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: `${2 * spacing}rem` }}>
+              {/* Expériences */}
+              {experiences.length > 0 && (
+                <div>
+                  <h2 
+                    className="text-lg font-bold mb-4 uppercase tracking-wide flex items-center gap-2 pb-2"
+                    style={{ 
+                      color: primaryColor,
+                      borderBottom: `2px solid ${primaryColor}33`
+                    }}
+                  >
+                    <Briefcase className="w-5 h-5" />
+                    Expériences Professionnelles
+                  </h2>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: `${1.5 * spacing}rem` }}>
+                    {experiences.map((exp, i) => (
+                      <div key={i} className="relative pl-6">
+                        <div 
+                          className="absolute left-0 top-2 w-3 h-3 rounded-full border-2 border-white shadow-md"
+                          style={{ backgroundColor: primaryColor }}
+                        ></div>
+                        <div 
+                          className="absolute left-1.5 top-5 bottom-0 w-0.5"
+                          style={{ backgroundColor: i === experiences.length - 1 ? 'transparent' : `${primaryColor}22` }}
+                        ></div>
+
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-base">{exp.poste}</h3>
+                          <p className="text-sm font-medium mt-1" style={{ color: primaryColor }}>
+                            {exp.entreprise}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1 mb-2">{exp.periode}</p>
+                          <p className="text-sm text-gray-700 leading-relaxed">{exp.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Formation */}
+              {formation && (
+                <div>
+                  <h2 
+                    className="text-lg font-bold mb-4 uppercase tracking-wide flex items-center gap-2 pb-2"
+                    style={{ 
+                      color: primaryColor,
+                      borderBottom: `2px solid ${primaryColor}33`
+                    }}
+                  >
+                    <GraduationCap className="w-5 h-5" />
+                    Formation
+                  </h2>
+                  <div className="pl-6 relative">
+                    <div 
+                      className="absolute left-0 top-2 w-3 h-3 rounded-full border-2 border-white shadow-md"
+                      style={{ backgroundColor: primaryColor }}
+                    ></div>
+
+                    <h3 className="font-bold text-gray-900 text-base">{formation}</h3>
+                    <p className="text-sm font-medium mt-1" style={{ color: primaryColor }}>
+                      {ecole}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{anneeFormation}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
