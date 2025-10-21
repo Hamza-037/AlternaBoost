@@ -22,7 +22,11 @@ import {
   ChevronDown,
   Download,
   Palette,
-  FileText
+  FileText,
+  Folder,
+  BookOpen,
+  Users,
+  Trophy
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +42,9 @@ import { ExperienceTimeline } from "@/components/cv/ExperienceTimeline";
 import { LanguageStars } from "@/components/cv/LanguageStars";
 import { SkillBadges } from "@/components/cv/SkillBadges";
 import { CVCustomizationPanel } from "@/components/cv/CVCustomizationPanel";
+import { AddSectionModal } from "@/components/cv/AddSectionModal";
+import { DynamicSectionForm } from "@/components/cv/DynamicSectionForm";
+import { SectionType, SECTION_CONFIG } from "@/types/custom-sections";
 import { ModernCVTemplate } from "@/components/preview/templates/ModernCVTemplate";
 import { PremiumCVTemplate } from "@/components/preview/templates/PremiumCVTemplate";
 import { CreativeCVTemplate } from "@/components/preview/templates/CreativeCVTemplate";
@@ -153,6 +160,10 @@ export default function CreateCVFusionPage() {
     spacing: 100,
   });
   
+  // Sections personnalisées
+  const [customSections, setCustomSections] = useState<any[]>([]);
+  const [showAddSectionModal, setShowAddSectionModal] = useState(false);
+  
   // Formulaire nouvelle expérience
   const [newExp, setNewExp] = useState<Experience>({
     poste: "",
@@ -231,6 +242,28 @@ export default function CreateCVFusionPage() {
       setHobbies([...hobbies, newHobby.trim()]);
       setNewHobby("");
     }
+  };
+
+  // Gestion des sections personnalisées
+  const handleAddCustomSection = (type: SectionType) => {
+    const newSection = {
+      id: `section-${Date.now()}`,
+      type,
+      enabled: true,
+      order: customSections.length,
+      data: []
+    };
+    setCustomSections([...customSections, newSection]);
+  };
+
+  const handleUpdateSectionData = (sectionId: string, data: any[]) => {
+    setCustomSections(customSections.map(section => 
+      section.id === sectionId ? { ...section, data } : section
+    ));
+  };
+
+  const handleRemoveSection = (sectionId: string) => {
+    setCustomSections(customSections.filter(section => section.id !== sectionId));
   };
 
   // Optimiser l'objectif
@@ -322,6 +355,7 @@ export default function CreateCVFusionPage() {
           formation={formation}
           ecole={ecole}
           anneeFormation={anneeFormation}
+          customSections={customSections}
           customization={customization}
         />
       );
@@ -668,6 +702,31 @@ export default function CreateCVFusionPage() {
                 </div>
               </div>
             </SectionCard>
+
+            {/* SECTIONS DYNAMIQUES */}
+            {customSections.map((section) => {
+              const config = SECTION_CONFIG[section.type];
+              const IconComponent = {
+                Folder, Award, BookOpen, Users, Trophy, Heart
+              }[config.icon as keyof typeof config];
+              
+              return (
+                <SectionCard 
+                  key={section.id}
+                  id={section.id} 
+                  title={config.label} 
+                  icon={IconComponent || Award} 
+                  expandedSection={expandedSection} 
+                  setExpandedSection={setExpandedSection}
+                >
+                  <DynamicSectionForm
+                    type={section.type}
+                    data={section.data}
+                    onUpdate={(data) => handleUpdateSectionData(section.id, data)}
+                  />
+                </SectionCard>
+              );
+            })}
           </div>
         </div>
 
@@ -709,14 +768,46 @@ export default function CreateCVFusionPage() {
                   </div>
                   <p className="text-xs text-blue-100 mt-1">Créez un CV 100% unique ✨</p>
                 </div>
-                <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
-                  <CVCustomizationPanel
-                    customization={customization}
-                    onUpdate={setCustomization}
-                  />
-                </div>
-              </Card>
-            </motion.div>
+              <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
+                <CVCustomizationPanel
+                  customization={customization}
+                  onUpdate={setCustomization}
+                />
+                
+                <Separator className="my-6" />
+                
+                {/* Bouton Ajouter Section */}
+                <Button
+                  onClick={() => setShowAddSectionModal(true)}
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter une section
+                </Button>
+                
+                {customSections.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-xs font-semibold text-gray-600 uppercase">Sections ajoutées</p>
+                    {customSections.map((section) => (
+                      <div key={section.id} className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg">
+                        <span className="text-sm font-medium" style={{ color: SECTION_CONFIG[section.type].color }}>
+                          {SECTION_CONFIG[section.type].label}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleRemoveSection(section.id)}
+                          className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Card>
+          </motion.div>
           )}
 
           {/* Contrôles Zoom/Thème - DROITE */}
@@ -825,6 +916,14 @@ export default function CreateCVFusionPage() {
           </motion.div>
         </div>
       )}
+
+      {/* MODAL AJOUTER SECTION */}
+      <AddSectionModal
+        open={showAddSectionModal}
+        onClose={() => setShowAddSectionModal(false)}
+        onAddSection={handleAddCustomSection}
+        existingSections={customSections.map(s => s.type)}
+      />
     </div>
   );
 }

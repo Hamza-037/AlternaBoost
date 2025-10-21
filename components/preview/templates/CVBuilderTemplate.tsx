@@ -11,6 +11,8 @@ import {
   Star,
   User
 } from "lucide-react";
+import { DynamicSectionRenderer } from "@/components/cv/DynamicSectionRenderer";
+import type { CustomSection } from "@/types/custom-sections";
 
 type Experience = {
   poste: string;
@@ -40,6 +42,7 @@ interface CVBuilderTemplateProps {
   formation: string;
   ecole: string;
   anneeFormation: string;
+  customSections?: CustomSection[];
   customization?: {
     primaryColor: string;
     fontFamily: string;
@@ -93,6 +96,7 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
   formation,
   ecole,
   anneeFormation,
+  customSections = [],
   customization = {
     primaryColor: "#06B6D4",
     fontFamily: "Inter, sans-serif",
@@ -330,6 +334,14 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
               </div>
             </div>
           </div>
+        )}
+
+        {/* SECTIONS PERSONNALISÉES */}
+        {customSections && customSections.length > 0 && (
+          <DynamicSectionRenderer 
+            sections={customSections} 
+            primaryColor={customization.primaryColor}
+          />
         )}
       </div>
     </div>
