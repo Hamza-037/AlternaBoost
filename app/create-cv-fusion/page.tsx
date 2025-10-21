@@ -666,25 +666,76 @@ export default function CreateCVFusionPage() {
                     <Separator className="mb-4" />
                     <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-blue-600" />
-                      Aperçu Timeline
+                      Expériences ajoutées ({experiences.length})
                     </h3>
-                    <ExperienceTimeline experiences={experiences} />
                     
-                    <div className="mt-4 space-y-2">
+                    <div className="space-y-4">
                       {experiences.map((exp, index) => (
-                        <div key={index} className="flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-200">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 text-xs truncate">{exp.poste}</p>
-                            <p className="text-xs text-blue-600 truncate">{exp.entreprise}</p>
+                        <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                          <div className="flex items-start justify-between mb-3">
+                            <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                              <Briefcase className="w-4 h-4 text-blue-600" />
+                              Expérience #{index + 1}
+                            </h4>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => setExperiences(experiences.filter((_, i) => i !== index))}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
                           </div>
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={() => setExperiences(experiences.filter((_, i) => i !== index))}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-100 ml-2"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
+                          
+                          <div className="space-y-3">
+                            <Input 
+                              placeholder="Poste" 
+                              value={exp.poste}
+                              onChange={(e) => {
+                                const newExps = [...experiences];
+                                newExps[index].poste = e.target.value;
+                                setExperiences(newExps);
+                              }}
+                              className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            
+                            <Input 
+                              placeholder="Entreprise" 
+                              value={exp.entreprise}
+                              onChange={(e) => {
+                                const newExps = [...experiences];
+                                newExps[index].entreprise = e.target.value;
+                                setExperiences(newExps);
+                              }}
+                              className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            
+                            <DateRangeInput
+                              value={exp.periode}
+                              onChange={(value) => {
+                                const newExps = [...experiences];
+                                newExps[index].periode = value;
+                                setExperiences(newExps);
+                              }}
+                            />
+                            
+                            <Textarea 
+                              placeholder="Description - Une ligne = un point" 
+                              value={exp.description}
+                              onChange={(e) => {
+                                const newExps = [...experiences];
+                                newExps[index].description = e.target.value;
+                                setExperiences(newExps);
+                              }}
+                              rows={4}
+                              className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            
+                            <div className="flex items-center gap-2 text-xs text-gray-500 bg-blue-100 p-2 rounded">
+                              <Sparkles className="w-3 h-3 text-blue-600" />
+                              <span>Modifiez directement le texte optimisé par l'IA</span>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
