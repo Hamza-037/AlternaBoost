@@ -37,6 +37,7 @@ import { DateRangeInput } from "@/components/ui/date-range-input";
 import { ExperienceTimeline } from "@/components/cv/ExperienceTimeline";
 import { LanguageStars } from "@/components/cv/LanguageStars";
 import { SkillBadges } from "@/components/cv/SkillBadges";
+import { CVCustomizationPanel } from "@/components/cv/CVCustomizationPanel";
 import { ModernCVTemplate } from "@/components/preview/templates/ModernCVTemplate";
 import { PremiumCVTemplate } from "@/components/preview/templates/PremiumCVTemplate";
 import { CreativeCVTemplate } from "@/components/preview/templates/CreativeCVTemplate";
@@ -141,6 +142,15 @@ export default function CreateCVFusionPage() {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [newHobby, setNewHobby] = useState("");
+  
+  // Personnalisation du CV
+  const [customization, setCustomization] = useState({
+    primaryColor: "#06B6D4",
+    fontFamily: "Inter, sans-serif",
+    fontSize: 100,
+    photoSize: 100,
+    spacing: 100,
+  });
   
   // Formulaire nouvelle expérience
   const [newExp, setNewExp] = useState<Experience>({
@@ -311,6 +321,7 @@ export default function CreateCVFusionPage() {
           formation={formation}
           ecole={ecole}
           anneeFormation={anneeFormation}
+          customization={customization}
         />
       );
     }
@@ -655,6 +666,14 @@ export default function CreateCVFusionPage() {
                   ))}
                 </div>
               </div>
+            </SectionCard>
+
+            {/* Section: Style & Personnalisation */}
+            <SectionCard id="style" title="Style & Personnalisation" icon={Palette} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
+              <CVCustomizationPanel
+                customization={customization}
+                onUpdate={setCustomization}
+              />
             </SectionCard>
           </div>
         </div>

@@ -40,6 +40,13 @@ interface CVBuilderTemplateProps {
   formation: string;
   ecole: string;
   anneeFormation: string;
+  customization?: {
+    primaryColor: string;
+    fontFamily: string;
+    fontSize: number;
+    photoSize: number;
+    spacing: number;
+  };
 }
 
 const formatDate = (dateString: string): string => {
@@ -95,11 +102,30 @@ export const CVBuilderTemplate: React.FC<CVBuilderTemplateProps> = ({
   formation,
   ecole,
   anneeFormation,
+  customization = {
+    primaryColor: "#06B6D4",
+    fontFamily: "Inter, sans-serif",
+    fontSize: 100,
+    photoSize: 100,
+    spacing: 100,
+  },
 }) => {
   const fullName = `${prenom} ${nom}`.trim().toUpperCase();
+  
+  // Calculer les tailles basées sur la customization
+  const photoSizePx = (256 * customization.photoSize) / 100;
+  const borderWidth = (8 * customization.photoSize) / 100;
+  const fontScale = customization.fontSize / 100;
+  const spacingScale = customization.spacing / 100;
 
   return (
-    <div className="flex w-[950px] h-[1200px] bg-white shadow-2xl">
+    <div 
+      className="flex w-[950px] h-[1200px] bg-white shadow-2xl"
+      style={{ 
+        fontFamily: customization.fontFamily,
+        fontSize: `${fontScale}rem`,
+      }}
+    >
       {/* SIDEBAR GAUCHE - 1/3 */}
       <div className="flex flex-col w-1/3 p-8 bg-gray-50">
         {/* PHOTO RONDE AVEC BORDURE CYAN */}
