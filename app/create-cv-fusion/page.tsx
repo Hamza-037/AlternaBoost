@@ -264,14 +264,14 @@ export default function CreateCVFusionPage() {
     const isExpanded = expandedSection === id;
     
     return (
-      <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden backdrop-blur-sm hover:border-orange-500/30 transition-all duration-300">
+      <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden backdrop-blur-sm hover:border-blue-500/30 transition-all duration-300">
         <button
           onClick={() => setExpandedSection(isExpanded ? "" : id)}
           className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/30 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-              <Icon className="w-5 h-5 text-orange-500" />
+            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <Icon className="w-5 h-5 text-blue-500" />
             </div>
             <h2 className="text-lg font-semibold text-white">{title}</h2>
           </div>
@@ -303,10 +303,13 @@ export default function CreateCVFusionPage() {
       <div className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">
-              <span className="text-white">CV</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-600">Builder</span>
-            </h1>
+            <button 
+              onClick={() => router.push(user ? '/dashboard' : '/')}
+              className="text-2xl font-bold hover:opacity-80 transition-opacity"
+            >
+              <span className="text-white">Alterna</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">Boost</span>
+            </button>
             <Badge className="bg-purple-600/20 text-purple-400 border-purple-600/30">
               <Sparkles className="w-3 h-3 mr-1" />
               IA Intégrée
@@ -315,8 +318,15 @@ export default function CreateCVFusionPage() {
           
           <div className="flex items-center gap-3">
             <Button 
+              onClick={() => router.push(user ? '/dashboard' : '/')}
+              variant="outline"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 gap-2"
+            >
+              ← {user ? 'Dashboard' : 'Accueil'}
+            </Button>
+            <Button 
               onClick={() => setShowPreviewModal(true)}
-              className="bg-orange-600 hover:bg-orange-700 text-white gap-2"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white gap-2"
             >
               <Eye className="w-4 h-4" />
               Prévisualiser
@@ -394,7 +404,7 @@ export default function CreateCVFusionPage() {
                 <Button 
                   onClick={handleOptimizeObjectif}
                   disabled={!objectif || isOptimizing}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   {isOptimizing ? "Optimisation..." : "Optimiser avec l'IA"}
@@ -430,7 +440,7 @@ export default function CreateCVFusionPage() {
                 />
                 <Button 
                   onClick={handleAddExperience}
-                  className="w-full bg-orange-600 hover:bg-orange-700"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   disabled={isOptimizing}
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -442,7 +452,7 @@ export default function CreateCVFusionPage() {
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
                         <p className="font-semibold text-white text-sm">{exp.poste}</p>
-                        <p className="text-xs text-orange-500">{exp.entreprise}</p>
+                        <p className="text-xs text-blue-400">{exp.entreprise}</p>
                         <p className="text-xs text-slate-500 mt-1">{exp.periode}</p>
                       </div>
                       <Button 
@@ -494,18 +504,18 @@ export default function CreateCVFusionPage() {
                     onKeyPress={(e) => e.key === 'Enter' && handleAddCompetence()}
                     className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
                   />
-                  <Button onClick={handleAddCompetence} className="bg-orange-600 hover:bg-orange-700">
+                  <Button onClick={handleAddCompetence} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
                 
                 <div className="flex flex-wrap gap-2">
                   {competences.map((comp, i) => (
-                    <Badge key={i} className="bg-cyan-600/20 text-cyan-400 border-cyan-600/30 gap-2 px-3 py-1">
+                    <Badge key={i} className="bg-blue-600/20 text-blue-400 border-blue-600/30 gap-2 px-3 py-1">
                       {comp}
                       <button 
                         onClick={() => setCompetences(competences.filter((_, idx) => idx !== i))}
-                        className="hover:text-cyan-200"
+                        className="hover:text-blue-200"
                       >
                         ×
                       </button>
@@ -533,7 +543,7 @@ export default function CreateCVFusionPage() {
                   <option value="Intermédiaire">Intermédiaire</option>
                   <option value="Avancé">Avancé</option>
                 </select>
-                <Button onClick={handleAddLanguage} className="w-full bg-orange-600 hover:bg-orange-700">
+                <Button onClick={handleAddLanguage} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                   <Plus className="w-4 h-4 mr-2" />
                   Ajouter
                 </Button>
@@ -558,7 +568,7 @@ export default function CreateCVFusionPage() {
                     onKeyPress={(e) => e.key === 'Enter' && handleAddHobby()}
                     className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
                   />
-                  <Button onClick={handleAddHobby} className="bg-orange-600 hover:bg-orange-700">
+                  <Button onClick={handleAddHobby} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
@@ -582,7 +592,7 @@ export default function CreateCVFusionPage() {
           <div className="absolute top-6 right-6 z-40 space-y-3">
             <Card className="bg-slate-800/90 backdrop-blur-md border-slate-700 p-4 space-y-3">
               <div className="flex items-center gap-3">
-                <Palette className="w-4 h-4 text-orange-500" />
+                <Palette className="w-4 h-4 text-blue-500" />
                 <input 
                   type="range" 
                   min="50" 
@@ -591,7 +601,7 @@ export default function CreateCVFusionPage() {
                   onChange={(e) => setZoom(Number(e.target.value))}
                   className="w-32"
                 />
-                <span className="text-sm font-bold text-orange-500 w-12">{zoom}%</span>
+                <span className="text-sm font-bold text-blue-500 w-12">{zoom}%</span>
               </div>
               
               <select 
@@ -631,11 +641,17 @@ export default function CreateCVFusionPage() {
       {/* Mobile */}
       <div className="lg:hidden min-h-screen flex items-center justify-center p-8 pt-24">
         <div className="text-center max-w-md bg-slate-800/50 p-8 rounded-2xl border border-slate-700">
-          <FileText className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+          <FileText className="w-16 h-16 text-blue-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-4">Désolé 😢</h2>
-          <p className="text-slate-400">
-            Le CV Builder est optimisé pour ordinateur afin de vous offrir la meilleure expérience possible.
+          <p className="text-slate-400 mb-6">
+            Le créateur de CV est optimisé pour ordinateur afin de vous offrir la meilleure expérience possible.
           </p>
+          <Button 
+            onClick={() => router.push(user ? '/dashboard' : '/')}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            ← Retour à {user ? 'dashboard' : 'l\'accueil'}
+          </Button>
         </div>
       </div>
 
@@ -652,7 +668,7 @@ export default function CreateCVFusionPage() {
               <div className="flex items-center gap-3">
                 <Button 
                   onClick={handleDownloadPDF} 
-                  className="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Télécharger PDF
