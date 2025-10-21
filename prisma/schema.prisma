@@ -46,6 +46,7 @@ model User {
   cvs                      CV[]
   letters                  Letter[]
   usageHistory             UsageHistory[]
+  applications             Application[]
 
   // Métadonnées
   createdAt                DateTime @default(now())
@@ -222,5 +223,34 @@ model DailyStats {
   @@index([date(sort: Desc)])
 }
 
+// ============================================
+// MODÈLE CANDIDATURES
+// ============================================
+model Application {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Informations de l'entreprise
+  companyName       String
+  position          String
+  
+  // Statut de la candidature
+  status            String    @default("en_attente") // en_attente, entretien, offre, refus, sans_reponse
+  
+  // Dates
+  appliedDate       DateTime
+  lastContactDate   DateTime?
+  
+  // Informations supplémentaires
+  contactPerson     String?
+  notes             String?   @db.Text
+  
+  // Métadonnées
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([userId, appliedDate(sort: Desc)])
+  @@index([status])
+}
 

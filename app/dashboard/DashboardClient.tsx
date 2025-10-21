@@ -26,6 +26,10 @@ import {
   RefreshCw,
   ArrowUpRight,
   Activity,
+  Briefcase,
+  Target,
+  Rocket,
+  Award,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -49,7 +53,7 @@ interface Usage {
   resetDate: string;
 }
 
-export default function DashboardClient() {
+export default function DashboardClientV2() {
   const { user, isLoaded } = useUser();
   const [subscription, setSubscription] = useState<any>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
@@ -110,420 +114,403 @@ export default function DashboardClient() {
     }
   };
 
-  const refreshUserData = async () => {
-    setIsRefreshing(true);
-    try {
-      await user?.reload();
-      if (user) {
-        const metadata = user.publicMetadata;
-        setSubscription({
-          plan: metadata.plan || "FREE",
-          status: metadata.subscriptionStatus || "active",
-          currentPeriodEnd: metadata.currentPeriodEnd,
-          cancelAtPeriodEnd: metadata.cancelAtPeriodEnd,
-        });
-      }
-      // Recharger aussi l'usage
-      await loadUsage();
-      toast.success('Données actualisées');
-    } catch (error) {
-      console.error('Erreur rechargement:', error);
-      toast.error('Erreur lors de l\'actualisation');
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   useEffect(() => {
-    if (user) {
-      const metadata = user.publicMetadata;
+    if (isLoaded && user) {
       setSubscription({
-        plan: metadata.plan || "FREE",
-        status: metadata.subscriptionStatus || "active",
-        currentPeriodEnd: metadata.currentPeriodEnd,
-        cancelAtPeriodEnd: metadata.cancelAtPeriodEnd,
+        plan: user?.publicMetadata?.plan || "FREE",
+        status: "active",
       });
-      
-      // Charger l'usage depuis la DB
       loadUsage();
     }
-  }, [user]);
+  }, [isLoaded, user]);
+
+  const refreshUserData = async () => {
+    setIsRefreshing(true);
+    await loadUsage();
+    toast.success("Données actualisées");
+    setIsRefreshing(false);
+  };
+
+  const planIcons: Record<string, any> = {
+    FREE: Sparkles,
+    STARTER: Zap,
+    PRO: Crown,
+    PREMIUM: Star,
+  };
+
+  const PlanIcon = planIcons[subscription?.plan || "FREE"];
 
   if (!isLoaded || isLoadingUsage) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-white to-blue-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement de votre dashboard...</p>
+        </div>
       </div>
     );
   }
 
-  const planColors: Record<string, string> = {
-    FREE: "from-gray-500 to-gray-700",
-    STARTER: "from-blue-500 to-cyan-600",
-    PRO: "from-purple-500 to-pink-600",
-    PREMIUM: "from-amber-500 to-orange-600",
-  };
-
-  const planIcons: Record<string, any> = {
-    FREE: Crown,
-    STARTER: Zap,
-    PRO: Star,
-    PREMIUM: Sparkles,
-  };
-
-  const planNames: Record<string, string> = {
-    FREE: "Gratuit",
-    STARTER: "Starter",
-    PRO: "Pro",
-    PREMIUM: "Premium",
-  };
-
-  const statusColors: Record<string, string> = {
-    active: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    trialing: "bg-blue-100 text-blue-800 border-blue-200",
-    past_due: "bg-orange-100 text-orange-800 border-orange-200",
-    canceled: "bg-red-100 text-red-800 border-red-200",
-  };
-
-  const statusLabels: Record<string, string> = {
-    active: "Actif",
-    trialing: "Essai gratuit",
-    past_due: "Paiement en retard",
-    canceled: "Annulé",
-  };
-
-  // Utiliser les vraies données de la DB
-  const cvUsed = usage?.usage.cvs.current || 0;
-  const cvLimit = usage?.usage.cvs.limit || 3;
-  const cvUnlimited = usage?.usage.cvs.unlimited || false;
-  
-  const lettersUsed = usage?.usage.letters.current || 0;
-  const lettersLimit = usage?.usage.letters.limit || 1;
-  const lettersUnlimited = usage?.usage.letters.unlimited || false;
-  
-  const cvUsagePercent = cvUnlimited ? 0 : (cvUsed / cvLimit) * 100;
-  const letterUsagePercent = lettersUnlimited ? 0 : (lettersUsed / lettersLimit) * 100;
-
-  const PlanIcon = planIcons[subscription?.plan || "FREE"];
+  const cvPercentage = usage?.usage.cvs.unlimited ? 0 : (usage?.usage.cvs.current / usage?.usage.cvs.limit) * 100 || 0;
+  const letterPercentage = usage?.usage.letters.unlimited ? 0 : (usage?.usage.letters.current / usage?.usage.letters.limit) * 100 || 0;
 
   return (
     <>
       <HeaderV2 />
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-blue-50 pt-20 pb-16">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50 pt-20 pb-16">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
-          {/* Header avec salutation */}
+          
+          {/* Hero Header avec stats */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-12"
           >
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent mb-2">
-                  Bonjour, {user?.firstName || "Utilisateur"} 👋
-                </h1>
-                <p className="text-gray-600 text-lg">
-                  Prêt à créer votre prochain chef-d'œuvre ?
-                </p>
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-8 md:p-12 shadow-2xl">
+              {/* Décoration de fond */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
               </div>
-              <Button
-                onClick={refreshUserData}
-                disabled={isRefreshing}
-                variant="outline"
-                size="sm"
-                className="gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                Actualiser
-              </Button>
-            </div>
-          </motion.div>
+              
+              {/* Grid pattern */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+              
+              <div className="relative z-10">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                  <div>
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <Badge className="mb-4 bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                        <PlanIcon className="w-3 h-3 mr-1" />
+                        Plan {subscription?.plan || "FREE"}
+                      </Badge>
+                      <h1 className="text-3xl md:text-5xl font-bold text-white mb-3">
+                        Bonjour, {user?.firstName || "Étudiant"} 👋
+                      </h1>
+                      <p className="text-blue-100 text-lg md:text-xl">
+                        Prêt à booster votre recherche d'alternance aujourd'hui ?
+                      </p>
+                    </motion.div>
+                  </div>
+                  
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <Button
+                      onClick={refreshUserData}
+                      disabled={isRefreshing}
+                      variant="outline"
+                      className="bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm"
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                      Actualiser
+                    </Button>
+                  </motion.div>
+                </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {/* Carte de plan - 2 colonnes sur desktop */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              className="lg:col-span-2"
-            >
-              <Card className="border-2 shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader className={`bg-gradient-to-r ${planColors[subscription?.plan || "FREE"]} text-white rounded-t-lg`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                        <PlanIcon className="w-8 h-8" />
+                {/* Stats rapides inline */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4"
+                >
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg">
+                        <FileText className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <CardTitle className="text-2xl font-bold">
-                          Plan {planNames[subscription?.plan || "FREE"]}
-                        </CardTitle>
-                        <p className="text-white/90 text-sm mt-1">
-                          {subscription?.status === "trialing" ? "En période d'essai" : "Votre abonnement actuel"}
+                        <p className="text-white/80 text-sm">CVs ce mois</p>
+                        <p className="text-white text-2xl font-bold">
+                          {usage?.usage.cvs.unlimited ? "∞" : `${usage?.usage.cvs.current}/${usage?.usage.cvs.limit}`}
                         </p>
                       </div>
                     </div>
-                    <Badge className={`${statusColors[subscription?.status || "active"]} border font-semibold`}>
-                      {statusLabels[subscription?.status || "active"]}
-                    </Badge>
                   </div>
-                </CardHeader>
 
-                <CardContent className="p-6 space-y-6">
-                  {/* Informations de facturation */}
-                  {subscription?.plan !== "FREE" && subscription?.currentPeriodEnd && (
-                    <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                      <div className="p-3 bg-blue-600 rounded-lg">
-                        <Calendar className="w-5 h-5 text-white" />
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg">
+                        <Mail className="w-5 h-5 text-white" />
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-600 font-medium">
-                          {subscription?.status === "trialing" ? "Fin de l'essai gratuit" : "Prochaine facturation"}
-                        </p>
-                        <p className="text-lg font-bold text-gray-900">
-                          {new Date(subscription.currentPeriodEnd).toLocaleDateString("fr-FR", { 
-                            day: 'numeric', 
-                            month: 'long', 
-                            year: 'numeric' 
-                          })}
+                      <div>
+                        <p className="text-white/80 text-sm">Lettres ce mois</p>
+                        <p className="text-white text-2xl font-bold">
+                          {usage?.usage.letters.unlimited ? "∞" : `${usage?.usage.letters.current}/${usage?.usage.letters.limit}`}
                         </p>
                       </div>
                     </div>
-                  )}
-
-                  {subscription?.cancelAtPeriodEnd && (
-                    <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-xl border border-orange-200">
-                      <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
-                      <p className="text-sm text-orange-800 font-medium">
-                        Votre abonnement sera annulé le {new Date(subscription.currentPeriodEnd).toLocaleDateString("fr-FR")}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Boutons d'action */}
-                  <div className="flex gap-3 pt-2">
-                    {subscription?.plan === "FREE" ? (
-                      <Link href="/pricing" className="flex-1">
-                        <Button className="w-full bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 shadow-md hover:shadow-lg transition-all">
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Passer à Premium
-                        </Button>
-                      </Link>
-                    ) : (
-                      <>
-                        <Button variant="outline" className="flex-1 gap-2">
-                          <CreditCard className="w-4 h-4" />
-                          Gérer mon abonnement
-                        </Button>
-                        {subscription?.plan !== "PREMIUM" && (
-                          <Link href="/pricing" className="flex-1">
-                            <Button variant="outline" className="w-full gap-2">
-                              <TrendingUp className="w-4 h-4" />
-                              Upgrade
-                            </Button>
-                          </Link>
-                        )}
-                      </>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
 
-            {/* Statistiques d'utilisation */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="border-2 shadow-lg hover:shadow-xl transition-shadow h-full">
-                <CardHeader className="bg-gradient-to-br from-gray-50 to-gray-100 border-b">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-violet-600" />
-                    <CardTitle className="text-lg">Utilisation ce mois</CardTitle>
-                  </div>
-                  <CardDescription>Suivez vos créations</CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  {/* CV créés */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <FileText className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <span className="font-semibold text-gray-900">CV créés</span>
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg">
+                        <TrendingUp className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-sm font-bold text-gray-900">
-                        {cvUsed} / {cvUnlimited ? "∞" : cvLimit}
-                      </span>
-                    </div>
-                    <Progress value={cvUsagePercent} className="h-2.5 bg-blue-100" />
-                    {cvUsed >= cvLimit && !cvUnlimited && (
-                      <p className="text-xs text-orange-600 font-medium">
-                        Limite atteinte ! Passez à un plan supérieur.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Lettres créées */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 bg-purple-100 rounded-lg">
-                          <Mail className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <span className="font-semibold text-gray-900">Lettres créées</span>
-                      </div>
-                      <span className="text-sm font-bold text-gray-900">
-                        {lettersUsed} / {lettersUnlimited ? "∞" : lettersLimit}
-                      </span>
-                    </div>
-                    <Progress value={letterUsagePercent} className="h-2.5 bg-purple-100" />
-                    {lettersUsed >= lettersLimit && !lettersUnlimited && (
-                      <p className="text-xs text-orange-600 font-medium">
-                        Limite atteinte ! Passez à un plan supérieur.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Upgrade CTA pour plan gratuit */}
-                  {subscription?.plan === "FREE" && (
-                    <div className="pt-4 border-t">
-                      <div className="p-3 bg-gradient-to-r from-violet-50 to-blue-50 rounded-lg border border-violet-200">
-                        <p className="text-xs text-violet-900 font-medium mb-2">
-                          💡 Besoin de plus de créations ?
+                      <div>
+                        <p className="text-white/80 text-sm">Prochain reset</p>
+                        <p className="text-white text-sm font-medium">
+                          {usage ? new Date(usage.resetDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "-"}
                         </p>
-                        <Link href="/pricing">
-                          <Button size="sm" className="w-full bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700">
-                            Voir les plans
-                          </Button>
-                        </Link>
                       </div>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-
-          {/* Actions rapides - Grid amélioré */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <Zap className="w-6 h-6 text-violet-600" />
-              Actions rapides
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Link href="/create-cv-v2">
-                <Card className="group hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer border-2 hover:border-blue-300 relative">
-                  <div className="absolute top-2 right-2 z-10">
-                    <Badge className="bg-green-500 text-white text-xs">NOUVEAU</Badge>
                   </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl group-hover:scale-110 transition-transform shadow-lg">
-                        <FileText className="w-6 h-6 text-white" />
-                      </div>
-                      <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-blue-600 transition-colors">
-                      Créer un CV
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Nouvelle interface avec preview en temps réel
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-
-              <Link href="/create-letter">
-                <Card className="group hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer border-2 hover:border-purple-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl group-hover:scale-110 transition-transform shadow-lg">
-                        <Mail className="w-6 h-6 text-white" />
-                      </div>
-                      <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-purple-600 transition-colors">
-                      Créer une lettre
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Rédigez une lettre de motivation personnalisée
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-
-              <Link href="/my-cvs">
-                <Card className="group hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer border-2 hover:border-cyan-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl group-hover:scale-110 transition-transform shadow-lg">
-                        <FileText className="w-6 h-6 text-white" />
-                      </div>
-                      <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-cyan-600 transition-colors" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-cyan-600 transition-colors">
-                      Mes CVs
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Consultez et modifiez vos CVs créés
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-
-              <Link href="/my-letters">
-                <Card className="group hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer border-2 hover:border-pink-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="p-3 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl group-hover:scale-110 transition-transform shadow-lg">
-                        <Mail className="w-6 h-6 text-white" />
-                      </div>
-                      <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-pink-600 transition-colors" />
-                    </div>
-                    <h3 className="font-bold text-lg mb-2 group-hover:text-pink-600 transition-colors">
-                      Mes Lettres
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Gérez vos lettres de motivation
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
+                </motion.div>
+              </div>
             </div>
           </motion.div>
 
-          {/* Section Astuces / Tips */}
+          {/* Actions rapides - Design amélioré */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mt-8"
+            className="mb-12"
           >
-            <Card className="border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-amber-500 rounded-xl">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg text-gray-900 mb-2">
-                      💡 Astuce du jour
-                    </h3>
-                    <p className="text-gray-700">
-                      Utilisez des verbes d'action forts dans votre CV pour capter l'attention des recruteurs : "Développé", "Optimisé", "Dirigé", "Augmenté"...
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2">
+                <Rocket className="w-7 h-7 text-blue-600" />
+                Actions rapides
+              </h2>
+              <Link href="/pricing">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Crown className="w-4 h-4" />
+                  Upgrade
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Créer un CV */}
+              <Link href="/create-cv-v2">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Card className="group h-full border-2 border-transparent hover:border-blue-300 hover:shadow-2xl transition-all duration-300 cursor-pointer relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <CardContent className="relative p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl group-hover:scale-110 group-hover:rotate-3 transition-all shadow-lg">
+                          <FileText className="w-7 h-7 text-white" />
+                        </div>
+                        <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">NOUVEAU</Badge>
+                      </div>
+                      <h3 className="font-bold text-xl mb-2 group-hover:text-blue-600 transition-colors">
+                        Créer un CV
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        Nouvelle interface avec preview en temps réel
+                      </p>
+                      <div className="flex items-center text-blue-600 font-medium text-sm">
+                        Commencer
+                        <ArrowUpRight className="w-4 h-4 ml-1 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Link>
+
+              {/* Créer une lettre */}
+              <Link href="/create-letter">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Card className="group h-full border-2 border-transparent hover:border-purple-300 hover:shadow-2xl transition-all duration-300 cursor-pointer relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <CardContent className="relative p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="p-4 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl group-hover:scale-110 group-hover:rotate-3 transition-all shadow-lg">
+                          <Mail className="w-7 h-7 text-white" />
+                        </div>
+                      </div>
+                      <h3 className="font-bold text-xl mb-2 group-hover:text-purple-600 transition-colors">
+                        Créer une lettre
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        Rédigez une lettre de motivation personnalisée
+                      </p>
+                      <div className="flex items-center text-purple-600 font-medium text-sm">
+                        Commencer
+                        <ArrowUpRight className="w-4 h-4 ml-1 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Link>
+
+              {/* Mes Candidatures */}
+              <Link href="/dashboard/applications">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Card className="group h-full border-2 border-transparent hover:border-green-300 hover:shadow-2xl transition-all duration-300 cursor-pointer relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <CardContent className="relative p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl group-hover:scale-110 group-hover:rotate-3 transition-all shadow-lg">
+                          <Briefcase className="w-7 h-7 text-white" />
+                        </div>
+                        <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">NOUVEAU</Badge>
+                      </div>
+                      <h3 className="font-bold text-xl mb-2 group-hover:text-green-600 transition-colors">
+                        Mes Candidatures
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4">
+                        Suivez toutes vos candidatures en un seul endroit
+                      </p>
+                      <div className="flex items-center text-green-600 font-medium text-sm">
+                        Gérer
+                        <ArrowUpRight className="w-4 h-4 ml-1 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Section Documents */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mb-12"
+          >
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <Award className="w-7 h-7 text-purple-600" />
+              Vos documents
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Mes CVs */}
+              <Link href="/my-cvs">
+                <motion.div whileHover={{ y: -4 }}>
+                  <Card className="group border-2 hover:border-cyan-300 hover:shadow-xl transition-all duration-300 cursor-pointer bg-gradient-to-br from-white to-cyan-50/30">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg">
+                          <FileText className="w-6 h-6 text-white" />
+                        </div>
+                        <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-cyan-600 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+                      </div>
+                      <h3 className="font-bold text-lg mb-1 group-hover:text-cyan-600 transition-colors">
+                        Mes CVs
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        Consultez et modifiez vos CVs créés
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Link>
+
+              {/* Mes Lettres */}
+              <Link href="/my-letters">
+                <motion.div whileHover={{ y: -4 }}>
+                  <Card className="group border-2 hover:border-pink-300 hover:shadow-xl transition-all duration-300 cursor-pointer bg-gradient-to-br from-white to-pink-50/30">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl shadow-lg">
+                          <Mail className="w-6 h-6 text-white" />
+                        </div>
+                        <ArrowUpRight className="w-5 h-5 text-gray-400 group-hover:text-pink-600 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+                      </div>
+                      <h3 className="font-bold text-lg mb-1 group-hover:text-pink-600 transition-colors">
+                        Mes Lettres
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        Gérez vos lettres de motivation
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Tips & Upgrade CTA */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Conseils */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-900">
+                    <Target className="w-5 h-5" />
+                    Conseils du jour
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-700 text-sm">
+                      <strong>Personnalisez</strong> chaque CV selon l'offre ciblée
                     </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-700 text-sm">
+                      <strong>Mettez en avant</strong> vos compétences les plus pertinentes
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-gray-700 text-sm">
+                      <strong>Relisez</strong> attentivement avant d'envoyer
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Upgrade CTA */}
+            {subscription?.plan === "FREE" && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Crown className="w-5 h-5" />
+                      Passez au niveau supérieur
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-4 text-blue-100">
+                      Débloquez toutes les fonctionnalités premium et boostez votre recherche d'alternance
+                    </p>
+                    <ul className="space-y-2 mb-6 text-sm">
+                      <li className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        CVs et lettres illimités
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        Tous les templates premium
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        Support prioritaire
+                      </li>
+                    </ul>
+                    <Link href="/pricing">
+                      <Button className="w-full bg-white text-purple-600 hover:bg-gray-50 font-semibold">
+                        Voir les offres
+                        <ArrowUpRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
       <Footer />
