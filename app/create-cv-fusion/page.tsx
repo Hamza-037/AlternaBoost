@@ -44,7 +44,25 @@ import { SkillBadges } from "@/components/cv/SkillBadges";
 import { CVCustomizationPanel } from "@/components/cv/CVCustomizationPanel";
 import { AddSectionModal } from "@/components/cv/AddSectionModal";
 import { DynamicSectionForm } from "@/components/cv/DynamicSectionForm";
+import { DraggableSectionCard } from "@/components/cv/DraggableSectionCard";
+import { DraggableChip } from "@/components/cv/DraggableChip";
 import { SectionType, SECTION_CONFIG } from "@/types/custom-sections";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { EnhancvModernTemplate } from "@/components/preview/templates/EnhancvModernTemplate";
 import { EnhancvPremiumTemplate } from "@/components/preview/templates/EnhancvPremiumTemplate";
 import { EnhancvCreativeTemplate } from "@/components/preview/templates/EnhancvCreativeTemplate";
@@ -201,6 +219,76 @@ export default function CreateCVFusionPage() {
   });
 
   const userPlan = (user?.publicMetadata?.plan as string) || "FREE";
+
+  // ✅ DRAG & DROP: Sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // ✅ DRAG & DROP: Section IDs Order
+  const [sectionOrder, setSectionOrder] = useState<string[]>([
+    "personal",
+    "experiences",
+    "formation",
+    "competences",
+    "langues",
+    "loisirs",
+  ]);
+
+  // ✅ DRAG & DROP: Handle section reorder
+  const handleDragEndSections = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setSectionOrder((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  // ✅ DRAG & DROP: Handle competences reorder
+  const handleDragEndCompetences = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setCompetences((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  // ✅ DRAG & DROP: Handle languages reorder
+  const handleDragEndLanguages = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setLanguages((items) => {
+        const oldIndex = items.findIndex(lang => lang.language === active.id);
+        const newIndex = items.findIndex(lang => lang.language === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  // ✅ DRAG & DROP: Handle hobbies reorder
+  const handleDragEndHobbies = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setHobbies((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   // Optimiser avec l'IA
   const optimizeWithAI = async (field: string, value: string) => {
