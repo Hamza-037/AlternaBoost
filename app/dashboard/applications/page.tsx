@@ -4,25 +4,20 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { Footer } from "@/components/landing/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
   Plus, 
   Briefcase, 
-  Calendar, 
-  Edit,
-  Trash2,
   Search,
   Filter,
-  Building2,
-  Clock
+  ArrowUpDown
 } from "lucide-react";
 import { toast } from "sonner";
 import { ApplicationFormDialog } from "@/components/applications/ApplicationFormDialog";
 import { DeleteConfirmDialog } from "@/components/applications/DeleteConfirmDialog";
+import { ApplicationStats } from "@/components/applications/ApplicationStats";
+import { ApplicationCard } from "@/components/applications/ApplicationCard";
 import type { Application } from "@/types/application";
-import { APPLICATION_STATUS_LABELS, APPLICATION_STATUS_COLORS } from "@/types/application";
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -32,6 +27,7 @@ export default function ApplicationsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"date" | "followup" | "status">("date");
 
   useEffect(() => {
     loadApplications();
@@ -84,30 +80,42 @@ export default function ApplicationsPage() {
     handleDialogClose();
   };
 
-  // Filtrer les candidatures
-  const filteredApplications = applications.filter((app) => {
-    const matchesStatus = filterStatus === "all" || app.status === filterStatus;
-    const matchesSearch =
-      searchQuery === "" ||
-      app.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.position.toLowerCase().includes(searchQuery.toLowerCase());
+  // Filtrer et trier les candidatures
+  const filteredAndSortedApplications = applications
+    .filter((app) => {
+      const matchesStatus = filterStatus === "all" || app.status === filterStatus;
+      const matchesSearch =
+        searchQuery === "" ||
+        app.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.location?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesStatus && matchesSearch;
-  });
-
-  // Stats rapides
-  const stats = {
-    total: applications.length,
-    en_attente: applications.filter((a) => a.status === "en_attente").length,
-    entretien: applications.filter((a) => a.status === "entretien").length,
-    offre: applications.filter((a) => a.status === "offre").length,
-    refus: applications.filter((a) => a.status === "refus").length,
-  };
+      return matchesStatus && matchesSearch;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "date":
+          return new Date(b.appliedDate).getTime() - new Date(a.appliedDate).getTime();
+        case "followup":
+          if (!a.nextFollowUp && !b.nextFollowUp) return 0;
+          if (!a.nextFollowUp) return 1;
+          if (!b.nextFollowUp) return -1;
+          return new Date(a.nextFollowUp).getTime() - new Date(b.nextFollowUp).getTime();
+        case "status":
+          const statusOrder = ["entretien", "offre", "en_attente", "sans_reponse", "refus"];
+          return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+        default:
+          return 0;
+      }
+    });
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Chargement de vos candidatures...</p>
+        </div>
       </div>
     );
   }
@@ -123,18 +131,19 @@ export default function ApplicationsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2 flex items-center gap-3">
+                  <Briefcase className="w-10 h-10 text-blue-600" />
                   Mes Candidatures
                 </h1>
-                <p className="text-gray-600">
-                  Suivez toutes vos candidatures en un seul endroit
+                <p className="text-gray-600 text-lg">
+                  Tableau de bord de suivi professionnel
                 </p>
               </div>
               <Button
                 onClick={() => setIsDialogOpen(true)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all"
                 size="lg"
               >
                 <Plus className="w-5 h-5 mr-2" />
@@ -142,34 +151,8 @@ export default function ApplicationsPage() {
               </Button>
             </div>
 
-            {/* Stats rapides */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {[
-                { label: "Total", value: stats.total, color: "from-gray-500 to-gray-600", icon: Briefcase },
-                { label: "En attente", value: stats.en_attente, color: "from-yellow-500 to-orange-500", icon: Clock },
-                { label: "Entretiens", value: stats.entretien, color: "from-blue-500 to-cyan-500", icon: Calendar },
-                { label: "Offres", value: stats.offre, color: "from-green-500 to-emerald-500", icon: Building2 },
-                { label: "Refus", value: stats.refus, color: "from-red-500 to-pink-500", icon: Trash2 },
-              ].map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <Card className="border-2 border-gray-100">
-                    <CardContent className="p-4">
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${stat.color} flex items-center justify-center mb-2`}>
-                        <stat.icon className="w-5 h-5 text-white" />
-                      </div>
-                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                      <p className="text-sm text-gray-600">{stat.label}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+            {/* Statistiques */}
+            <ApplicationStats applications={applications} />
           </motion.div>
 
           {/* Filtres et recherche */}
@@ -177,132 +160,109 @@ export default function ApplicationsPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="mb-6 flex flex-col md:flex-row gap-4"
+            className="mb-6 space-y-4"
           >
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Rechercher par entreprise ou poste..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
-              />
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Rechercher par entreprise, poste ou lieu..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors bg-white shadow-sm"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <div className="relative">
+                  <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="pl-10 pr-8 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors bg-white appearance-none cursor-pointer shadow-sm min-w-[180px]"
+                  >
+                    <option value="all">Tous les statuts</option>
+                    <option value="en_attente">En attente</option>
+                    <option value="entretien">Entretien</option>
+                    <option value="offre">Offre</option>
+                    <option value="refus">Refusé</option>
+                    <option value="sans_reponse">Sans réponse</option>
+                  </select>
+                </div>
+
+                <div className="relative">
+                  <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="pl-10 pr-8 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors bg-white appearance-none cursor-pointer shadow-sm min-w-[180px]"
+                  >
+                    <option value="date">Plus récentes</option>
+                    <option value="followup">À relancer</option>
+                    <option value="status">Par statut</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors bg-white"
-            >
-              <option value="all">Tous les statuts</option>
-              <option value="en_attente">En attente</option>
-              <option value="entretien">Entretien</option>
-              <option value="offre">Offre</option>
-              <option value="refus">Refusé</option>
-              <option value="sans_reponse">Sans réponse</option>
-            </select>
+
+            {/* Compteur de résultats */}
+            {(searchQuery || filterStatus !== "all") && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span className="font-semibold text-blue-600">
+                  {filteredAndSortedApplications.length}
+                </span>
+                résultat{filteredAndSortedApplications.length > 1 ? "s" : ""}
+                {searchQuery && (
+                  <span>
+                    pour "{searchQuery}"
+                  </span>
+                )}
+              </div>
+            )}
           </motion.div>
 
           {/* Liste des candidatures */}
-          {filteredApplications.length === 0 ? (
+          {filteredAndSortedApplications.length === 0 ? (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-16"
+              className="text-center py-20"
             >
-              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                <Briefcase className="w-12 h-12 text-blue-600" />
+              <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 rounded-full flex items-center justify-center">
+                <Briefcase className="w-16 h-16 text-blue-600" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-3xl font-bold text-gray-900 mb-3">
                 {searchQuery || filterStatus !== "all" 
                   ? "Aucune candidature trouvée"
-                  : "Commencez à suivre vos candidatures"}
+                  : "Commencez votre suivi"}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-8 text-lg max-w-md mx-auto">
                 {searchQuery || filterStatus !== "all"
-                  ? "Essayez de modifier vos filtres"
-                  : "Ajoutez votre première candidature pour commencer"}
+                  ? "Essayez de modifier vos filtres ou votre recherche"
+                  : "Ajoutez votre première candidature et gardez une trace de toutes vos démarches"}
               </p>
               {!searchQuery && filterStatus === "all" && (
                 <Button
                   onClick={() => setIsDialogOpen(true)}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
+                  size="lg"
                 >
                   <Plus className="w-5 h-5 mr-2" />
-                  Ajouter une candidature
+                  Ajouter ma première candidature
                 </Button>
               )}
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
-              <AnimatePresence>
-                {filteredApplications.map((application, index) => (
-                  <motion.div
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {filteredAndSortedApplications.map((application, index) => (
+                  <ApplicationCard
                     key={application.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Card className="border-2 border-gray-100 hover:border-blue-300 hover:shadow-lg transition-all">
-                      <CardContent className="p-6">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-start gap-4">
-                              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${APPLICATION_STATUS_COLORS[application.status as keyof typeof APPLICATION_STATUS_COLORS].bg} border-2 ${APPLICATION_STATUS_COLORS[application.status as keyof typeof APPLICATION_STATUS_COLORS].badge} flex items-center justify-center text-2xl`}>
-                                {APPLICATION_STATUS_COLORS[application.status as keyof typeof APPLICATION_STATUS_COLORS].icon}
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="text-xl font-bold text-gray-900 mb-1">
-                                  {application.companyName}
-                                </h3>
-                                <p className="text-gray-600 mb-2">{application.position}</p>
-                                <div className="flex flex-wrap gap-3 text-sm text-gray-500">
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="w-4 h-4" />
-                                    {new Date(application.appliedDate).toLocaleDateString("fr-FR")}
-                                  </span>
-                                  {application.contactPerson && (
-                                    <span className="flex items-center gap-1">
-                                      <Building2 className="w-4 h-4" />
-                                      {application.contactPerson}
-                                    </span>
-                                  )}
-                                </div>
-                                {application.notes && (
-                                  <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-                                    {application.notes}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <Badge className={APPLICATION_STATUS_COLORS[application.status as keyof typeof APPLICATION_STATUS_COLORS].badge}>
-                              {APPLICATION_STATUS_LABELS[application.status as keyof typeof APPLICATION_STATUS_LABELS]}
-                            </Badge>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleEdit(application)}
-                              className="hover:bg-blue-50 hover:border-blue-500"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setDeletingId(application.id)}
-                              className="hover:bg-red-50 hover:border-red-500 hover:text-red-600"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
+                    application={application}
+                    onEdit={handleEdit}
+                    onDelete={(id) => setDeletingId(id)}
+                  />
                 ))}
               </AnimatePresence>
             </div>
@@ -329,4 +289,3 @@ export default function ApplicationsPage() {
     </>
   );
 }
-
