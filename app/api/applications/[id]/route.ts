@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { applicationSchema } from "@/lib/validations/application-schema";
+import type { StatusHistory } from "@/types/application";
 
 // GET - Récupérer une candidature spécifique
 export async function GET(
@@ -88,6 +89,19 @@ export async function PUT(
       );
     }
 
+    // Gérer l'historique des statuts
+    let updatedHistory = (existingApplication.statusHistory as StatusHistory[] | null) || [];
+    
+    // Si le statut a changé, ajouter une entrée dans l'historique
+    if (existingApplication.status !== validatedData.status) {
+      const newHistoryEntry: StatusHistory = {
+        status: validatedData.status,
+        date: new Date().toISOString(),
+        note: `Changement de statut: ${existingApplication.status} → ${validatedData.status}`,
+      };
+      updatedHistory = [...updatedHistory, newHistoryEntry];
+    }
+
     // Mettre à jour la candidature
     const updatedApplication = await db.application.update({
       where: { id },
@@ -101,6 +115,14 @@ export async function PUT(
           : null,
         contactPerson: validatedData.contactPerson || null,
         notes: validatedData.notes || null,
+        jobUrl: validatedData.jobUrl || null,
+        nextFollowUp: validatedData.nextFollowUp 
+          ? new Date(validatedData.nextFollowUp) 
+          : null,
+        statusHistory: updatedHistory as any,
+        salary: validatedData.salary || null,
+        location: validatedData.location || null,
+        contractType: validatedData.contractType || null,
         updatedAt: new Date(),
       },
     });
@@ -175,4 +197,3 @@ export async function DELETE(
     );
   }
 }
-

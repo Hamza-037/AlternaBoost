@@ -9,8 +9,12 @@ export const applicationSchema = z.object({
   appliedDate: z.string().min(1, "La date de candidature est requise"),
   lastContactDate: z.string().optional().nullable(),
   contactPerson: z.string().max(100).optional().nullable(),
-  notes: z.string().max(1000).optional().nullable(),
+  notes: z.string().max(2000).optional().nullable(),
+  jobUrl: z.string().url("L'URL doit être valide").optional().or(z.literal("")),
+  nextFollowUp: z.string().optional().nullable(),
+  salary: z.string().max(50).optional().nullable(),
+  location: z.string().max(100).optional().nullable(),
+  contractType: z.string().max(50).optional().nullable(),
 });
 
 export type ApplicationFormValues = z.infer<typeof applicationSchema>;
-

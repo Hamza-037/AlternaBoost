@@ -53,6 +53,13 @@ export async function POST(req: NextRequest) {
     // Validation des données
     const validatedData = applicationSchema.parse(body);
 
+    // Initialiser l'historique avec le statut initial
+    const initialHistory = [{
+      status: validatedData.status,
+      date: new Date().toISOString(),
+      note: "Candidature créée",
+    }];
+
     // Créer la candidature
     const application = await db.application.create({
       data: {
@@ -67,6 +74,14 @@ export async function POST(req: NextRequest) {
           : null,
         contactPerson: validatedData.contactPerson || null,
         notes: validatedData.notes || null,
+        jobUrl: validatedData.jobUrl || null,
+        nextFollowUp: validatedData.nextFollowUp 
+          ? new Date(validatedData.nextFollowUp) 
+          : null,
+        statusHistory: initialHistory as any,
+        salary: validatedData.salary || null,
+        location: validatedData.location || null,
+        contractType: validatedData.contractType || null,
       },
     });
 
@@ -87,4 +102,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
