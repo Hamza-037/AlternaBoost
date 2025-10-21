@@ -3,6 +3,11 @@
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
+export const revalidate = 0
+
 export default function Error({
   error,
   reset,
