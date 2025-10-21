@@ -1,5 +1,7 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
+import { auth } from '@clerk/nextjs/server';
 import { openai } from "@/lib/openai";
+import { logger } from "@/lib/errors";
 import type { LetterFormData, GeneratedLetter } from "@/types/letter";
 
 /**
@@ -67,7 +69,43 @@ Répondez uniquement par le corps de la lettre (3 paragraphes).`,
       dateGeneration: new Date().toISOString(),
     };
 
-    return NextResponse.json(generatedLetter, { status: 200 });
+    // Sauvegarder automatiquement en DB si utilisateur authentifié
+    const { userId } = await auth();
+    let letterId: string | undefined;
+    
+    if (userId) {
+      try {
+        // Appeler l'API save-letter
+        const saveResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/save-letter`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cookie': request.headers.get('cookie') || '',
+          },
+          body: JSON.stringify({
+            data: formData,
+            generatedContent: contenuGenere,
+            title: `Lettre ${formData.entreprise}`,
+            targetCompany: formData.entreprise,
+            targetPosition: formData.posteVise,
+          }),
+        });
+
+        if (saveResponse.ok) {
+          const saveResult = await saveResponse.json();
+          letterId = saveResult.letter?.id;
+          logger.info("Lettre sauvegardée en DB", { letterId, userId });
+        }
+      } catch (saveError) {
+        // Ne pas bloquer si la sauvegarde échoue
+        logger.error("Erreur sauvegarde lettre", { error: saveError, userId });
+      }
+    }
+
+    return NextResponse.json({
+      ...generatedLetter,
+      id: letterId, // ID de la lettre sauvegardée
+    }, { status: 200 });
   } catch (error) {
     console.error("Erreur lors de la génération des données de la lettre:", error);
 

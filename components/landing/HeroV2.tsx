@@ -3,12 +3,13 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, Users, Zap, Shield, Star, TrendingUp } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Shield, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { CVMockup } from "./CVMockup";
 
 export function HeroV2() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[85vh] md:min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background avec gradient animé amélioré */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50" />
       
@@ -59,7 +60,10 @@ export function HeroV2() {
         />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 text-center">
+      <div className="relative z-10 container mx-auto px-4">
+        <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+          {/* Contenu texte à gauche */}
+          <div className="text-center lg:text-left">
         {/* Badge de nouveauté */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -72,7 +76,7 @@ export function HeroV2() {
             className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border-blue-200"
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            Nouveau : Personnalisation avancée disponible
+            Générateur de CV intelligent propulsé par l'IA
           </Badge>
         </motion.div>
 
@@ -101,59 +105,15 @@ export function HeroV2() {
           et vous le téléchargez en PDF. Simple, rapide, efficace.
         </motion.p>
 
-        {/* Stats impressionnantes avec design amélioré */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex flex-wrap justify-center gap-6 mb-12"
-        >
-          <motion.div 
-            whileHover={{ scale: 1.05, y: -5 }}
-            className="flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-gray-100"
-          >
-            <div className="p-2 bg-blue-100 rounded-full">
-              <Users className="w-5 h-5 text-blue-600" />
-            </div>
-            <div className="text-left">
-              <p className="text-2xl font-bold text-gray-900">+10,000</p>
-              <p className="text-xs text-gray-600">CVs créés</p>
-            </div>
-          </motion.div>
-          <motion.div 
-            whileHover={{ scale: 1.05, y: -5 }}
-            className="flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-gray-100"
-          >
-            <div className="p-2 bg-purple-100 rounded-full">
-              <Zap className="w-5 h-5 text-purple-600" />
-            </div>
-            <div className="text-left">
-              <p className="text-2xl font-bold text-gray-900">2 min</p>
-              <p className="text-xs text-gray-600">En moyenne</p>
-            </div>
-          </motion.div>
-          <motion.div 
-            whileHover={{ scale: 1.05, y: -5 }}
-            className="flex items-center gap-3 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-gray-100"
-          >
-            <div className="p-2 bg-yellow-100 rounded-full">
-              <Star className="w-5 h-5 text-yellow-600 fill-yellow-600" />
-            </div>
-            <div className="text-left">
-              <p className="text-2xl font-bold text-gray-900">4.9/5</p>
-              <p className="text-xs text-gray-600">Satisfaction</p>
-            </div>
-          </motion.div>
-        </motion.div>
 
         {/* CTA avec animations et design amélioré */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
         >
-          <Link href="/create-cv">
+          <Link href="/create-cv-v2">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 size="lg" 
@@ -185,7 +145,7 @@ export function HeroV2() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1 }}
+          transition={{ duration: 1, delay: 0.8 }}
           className="flex flex-wrap justify-center items-center gap-4 text-sm text-gray-600"
         >
           <div className="flex items-center gap-2">
@@ -204,11 +164,19 @@ export function HeroV2() {
           </div>
         </motion.div>
 
+          </div>
+
+          {/* Mockup CV à droite */}
+          <div className="hidden lg:block">
+            <CVMockup />
+          </div>
+        </div>
+
         {/* Indicateur de scroll */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.2 }}
+          transition={{ duration: 1, delay: 1 }}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
         >
           <motion.div

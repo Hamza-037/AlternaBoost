@@ -22,7 +22,7 @@ const features = [
     title: "IA Avancée GPT-4",
     description: "GPT-4o-mini optimise votre contenu pour maximiser vos chances",
     color: "from-blue-500 to-cyan-500",
-    badge: "Nouveau",
+    badge: "Populaire",
     gradient: "from-blue-50 to-cyan-50"
   },
   {
@@ -30,7 +30,7 @@ const features = [
     title: "4 Templates Premium",
     description: "Modern, Premium, Creative, Minimal - un style pour chaque profil",
     color: "from-purple-500 to-pink-500",
-    badge: "Populaire",
+    badge: "Premium",
     gradient: "from-purple-50 to-pink-50"
   },
   {
@@ -38,7 +38,7 @@ const features = [
     title: "Personnalisation Illimitée",
     description: "Couleurs, polices, sections, espacement - contrôle total",
     color: "from-green-500 to-emerald-500",
-    badge: "Exclusif",
+    badge: "Premium",
     gradient: "from-green-50 to-emerald-50"
   },
   {
@@ -46,7 +46,7 @@ const features = [
     title: "Preview Instantané",
     description: "Visualisez chaque modification en temps réel, sans attente",
     color: "from-orange-500 to-red-500",
-    badge: "Innovant",
+    badge: "Nouveau",
     gradient: "from-orange-50 to-red-50"
   },
   {
@@ -54,7 +54,7 @@ const features = [
     title: "Lettres Intelligentes",
     description: "L'IA génère des lettres de motivation percutantes",
     color: "from-indigo-500 to-purple-500",
-    badge: "Bonus",
+    badge: "Nouveau",
     gradient: "from-indigo-50 to-purple-50"
   },
   {
@@ -62,7 +62,7 @@ const features = [
     title: "Export Professionnel",
     description: "PDF haute qualité, compatible ATS, prêt pour l'envoi",
     color: "from-teal-500 to-blue-500",
-    badge: "Essentiel",
+    badge: "Populaire",
     gradient: "from-teal-50 to-blue-50"
   }
 ];
@@ -182,7 +182,7 @@ export function FeaturesV2() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
             {processSteps.map((step, index) => (
               <motion.div
                 key={step.step}
@@ -191,16 +191,16 @@ export function FeaturesV2() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05 }}
-                className="text-center relative"
+                className="text-center relative z-10"
               >
-                {/* Ligne de connexion animée */}
+                {/* Ligne de connexion animée - positionnée ENTRE les éléments */}
                 {index < processSteps.length - 1 && (
                   <motion.div 
                     initial={{ scaleX: 0 }}
                     whileInView={{ scaleX: 1 }}
                     transition={{ duration: 0.8, delay: index * 0.2 + 0.5 }}
                     viewport={{ once: true }}
-                    className="hidden lg:block absolute top-8 left-full w-full h-1 bg-gradient-to-r from-blue-400 to-purple-400 transform translate-x-4 origin-left"
+                    className="hidden lg:block absolute top-8 -right-4 w-8 h-1 bg-gradient-to-r from-blue-400 to-purple-400 origin-left z-0"
                   />
                 )}
                 
@@ -237,10 +237,10 @@ export function FeaturesV2() {
           className="mt-20 text-center"
         >
           <h3 className="text-3xl font-bold text-gray-900 mb-4">
-            Pourquoi choisir AlternaBoost ?
+            Nos avantages exclusifs
           </h3>
           <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Des avantages pensés pour vous simplifier la vie et maximiser vos chances
+            Tout ce dont vous avez besoin pour créer un CV professionnel rapidement
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">

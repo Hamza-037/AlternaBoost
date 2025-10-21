@@ -5,13 +5,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { LetterFormSteps } from "@/components/letter/LetterFormSteps";
-import { Header } from "@/components/landing/Header";
+import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { Footer } from "@/components/landing/Footer";
 
 export default function CreateLetterPage() {
   return (
     <>
-      <Header />
+      <HeaderV2 />
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 pt-20">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* En-tête */}

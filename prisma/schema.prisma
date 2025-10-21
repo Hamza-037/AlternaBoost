@@ -1,0 +1,226 @@
+// Schéma Prisma pour AlternaBoost
+// Base de données : Supabase PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================
+// MODÈLE UTILISATEUR
+// ============================================
+model User {
+  id          String   @id @default(cuid())
+  clerkUserId String   @unique // ID de Clerk pour l'auth
+  email       String   @unique
+  firstName   String?
+  lastName    String?
+
+  // Abonnement et plan
+  plan                     String   @default("FREE") // FREE, STARTER, PRO, PREMIUM
+  stripeCustomerId         String?  @unique
+  stripeSubscriptionId     String?  @unique
+  stripePriceId            String?
+  subscriptionStatus       String?  @default("active") // active, trialing, past_due, canceled
+  currentPeriodEnd         DateTime?
+  cancelAtPeriodEnd        Boolean  @default(false)
+  trialEndsAt              DateTime?
+
+  // Tracking d'usage mensuel
+  cvsCreatedThisMonth      Int      @default(0)
+  lettersCreatedThisMonth  Int      @default(0)
+  usageResetDate           DateTime @default(now())
+
+  // Préférences utilisateur
+  preferredTemplate        String?  @default("modern")
+  preferredLanguage        String   @default("fr")
+  notificationsEnabled     Boolean  @default(true)
+  marketingEmailsEnabled   Boolean  @default(true)
+
+  // Relations
+  cvs                      CV[]
+  letters                  Letter[]
+  usageHistory             UsageHistory[]
+
+  // Métadonnées
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  lastLoginAt              DateTime?
+
+  @@index([clerkUserId])
+  @@index([email])
+  @@index([plan, subscriptionStatus])
+  @@index([stripeCustomerId])
+}
+
+// ============================================
+// MODÈLE CV
+// ============================================
+model CV {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Données du CV (stockées en JSON)
+  data        Json     // Toutes les données du formulaire
+  
+  // Métadonnées
+  template    String   @default("modern") // modern, premium, creative, minimal
+  title       String?  // Titre personnalisé du CV
+  
+  // URLs des fichiers générés
+  pdfUrl      String?  // URL du PDF sur le stockage
+  pdfSize     Int?     // Taille en bytes
+  
+  // Status
+  status      String   @default("draft") // draft, completed, archived
+  isPublic    Boolean  @default(false)   // Pour partage public éventuel
+  
+  // Entreprise ciblée (pour organisation)
+  targetCompany String?
+  targetPosition String?
+
+  // Analytics
+  viewCount   Int      @default(0)
+  downloadCount Int    @default(0)
+  lastViewedAt DateTime?
+  
+  // Métadonnées
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([template])
+  @@index([status])
+}
+
+// ============================================
+// MODÈLE LETTRE DE MOTIVATION
+// ============================================
+model Letter {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Données de la lettre
+  data        Json     // Toutes les données du formulaire
+  
+  // Contenu généré par l'IA
+  generatedContent String @db.Text
+  
+  // Métadonnées
+  title       String?  // Titre personnalisé
+  
+  // URLs des fichiers
+  pdfUrl      String?
+  pdfSize     Int?
+  
+  // Status
+  status      String   @default("draft") // draft, completed, archived
+  
+  // Entreprise ciblée
+  targetCompany String?
+  targetPosition String?
+  
+  // Analytics
+  viewCount   Int      @default(0)
+  downloadCount Int    @default(0)
+  
+  // Métadonnées
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+}
+
+// ============================================
+// MODÈLE HISTORIQUE D'USAGE
+// ============================================
+model UsageHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Type d'action
+  action      String   // cv_created, letter_created, pdf_downloaded, etc.
+  resourceType String  // cv, letter, etc.
+  resourceId  String?  // ID de la ressource concernée
+  
+  // Détails additionnels
+  metadata    Json?    // Données supplémentaires (template utilisé, etc.)
+  
+  // IP et user agent pour analytics
+  ipAddress   String?
+  userAgent   String?
+  
+  // Métadonnées
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([action])
+  @@index([resourceType])
+}
+
+// ============================================
+// MODÈLE WEBHOOK EVENTS (pour debugging)
+// ============================================
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  
+  // Source du webhook
+  source      String   // stripe, clerk, etc.
+  eventType   String   // checkout.session.completed, etc.
+  
+  // Données brutes
+  payload     Json
+  
+  // Processing
+  processed   Boolean  @default(false)
+  processedAt DateTime?
+  error       String?  @db.Text
+  
+  // Métadonnées
+  createdAt   DateTime @default(now())
+
+  @@index([source, eventType])
+  @@index([processed])
+  @@index([createdAt(sort: Desc)])
+}
+
+// ============================================
+// MODÈLE ANALYTICS (pour le dashboard admin)
+// ============================================
+model DailyStats {
+  id              String   @id @default(cuid())
+  date            DateTime @unique @db.Date
+  
+  // Métriques utilisateurs
+  newUsers        Int      @default(0)
+  activeUsers     Int      @default(0)
+  
+  // Métriques créations
+  cvsCreated      Int      @default(0)
+  lettersCreated  Int      @default(0)
+  
+  // Métriques abonnements
+  newSubscriptions Int     @default(0)
+  canceledSubscriptions Int @default(0)
+  
+  // Revenus (en centimes)
+  revenue         Int      @default(0)
+  
+  // Métadonnées
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([date(sort: Desc)])
+}
+
+
+

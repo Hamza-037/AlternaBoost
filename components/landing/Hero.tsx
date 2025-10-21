@@ -75,7 +75,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
             >
-              <Link href="/create-cv">
+              <Link href="/create-cv-v2">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     size="lg"

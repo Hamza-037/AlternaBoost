@@ -85,7 +85,7 @@ export function Header() {
 
           {/* CTA Desktop */}
           <div className="hidden md:block">
-            <Link href="/create-cv">
+            <Link href="/create-cv-v2">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
                 Créer mon CV
               </Button>
@@ -165,7 +165,7 @@ export function Header() {
                 Lettre de motivation
               </Link>
                 <div className="px-4 pt-2">
-                  <Link href="/create-cv">
+                  <Link href="/create-cv-v2">
                     <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                       Créer mon CV
                     </Button>

@@ -34,7 +34,7 @@ export function HeaderV2() {
     { name: "Accueil", href: "/" },
     { 
       name: "Créer CV", 
-      href: "/create-cv",
+      href: "/create-cv-v2",
       badge: "Populaire"
     },
     { 
@@ -54,7 +54,7 @@ export function HeaderV2() {
     {
       title: "CV Professionnel",
       description: "Générez un CV optimisé par l'IA",
-      href: "/create-cv",
+      href: "/create-cv-v2",
       icon: FileText,
       color: "text-blue-600"
     },
@@ -146,7 +146,7 @@ export function HeaderV2() {
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
             
-            <Link href="/create-cv">
+            <Link href="/create-cv-v2">
               <Button 
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
@@ -232,7 +232,7 @@ export function HeaderV2() {
 
                 {/* CTA Mobile */}
                 <div className="border-t border-gray-200 pt-4">
-                  <Link href="/create-cv" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link href="/create-cv-v2" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button 
                       className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
                     >

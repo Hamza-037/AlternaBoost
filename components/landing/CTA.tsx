@@ -53,25 +53,25 @@ export function CTA() {
             viewport={{ once: true }}
             className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white mb-6 border border-white/30"
           >
-            <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-semibold">Rejoignez +10,000 utilisateurs satisfaits</span>
+            <CheckCircle className="w-4 h-4" />
+            <span className="text-sm font-semibold">Des milliers d'étudiants ont déjà trouvé leur alternance</span>
           </motion.div>
           
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            Prêt à créer votre CV
+            À votre tour de réussir !
             <br />
             <span className="bg-gradient-to-r from-yellow-200 to-orange-200 bg-clip-text text-transparent">
-              de rêve ?
+              Créez votre CV maintenant
             </span>
           </h2>
           <p className="text-xl md:text-2xl text-blue-100 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Lancez-vous maintenant et créez un CV professionnel qui vous démarquera.
+            Rejoignez les étudiants qui ont transformé leur recherche d'alternance avec AlternaBoost.
             <br />
-            <span className="font-semibold text-white">Gratuit, rapide, et optimisé par l'IA.</span>
+            <span className="font-semibold text-white">Commencez gratuitement en 2 minutes.</span>
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
-            <Link href="/create-cv">
+            <Link href="/create-cv-v2">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

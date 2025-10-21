@@ -7,6 +7,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/exemples',
   '/pricing',
+  '/cleanup', // Page de nettoyage de session
   '/checkout(.*)', // Pages de confirmation de paiement
   '/api/webhook(.*)', // Pour les webhooks Stripe
 ]);

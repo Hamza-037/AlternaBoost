@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Sparkles, Zap, Crown } from "lucide-react";
-import { Header } from "@/components/landing/Header";
+import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { Footer } from "@/components/landing/Footer";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -130,7 +130,7 @@ export default function PricingPage() {
 
   return (
     <>
-      <Header />
+      <HeaderV2 />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50 pt-20">
         <div className="container mx-auto px-4 py-16">
           {/* Header */}
@@ -214,9 +214,14 @@ export default function PricingPage() {
                           </span>
                         )}
                       </div>
+                      {plan.price > 0 && (
+                        <p className="text-sm text-white/80 mt-1">
+                          TTC
+                        </p>
+                      )}
                       {billingCycle === "yearly" && plan.yearlyPrice && (
                         <p className="text-sm text-white/80 mt-1">
-                          Soit {(plan.yearlyPrice / 12).toFixed(2)}€/mois
+                          Soit {(plan.yearlyPrice / 12).toFixed(2)}€/mois TTC
                         </p>
                       )}
                     </CardHeader>

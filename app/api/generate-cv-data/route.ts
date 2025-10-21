@@ -1,4 +1,5 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
+import { auth } from '@clerk/nextjs/server';
 import { ameliorerContenuCV } from "@/lib/openai";
 import { cvFormSchema } from "@/lib/validations/cv-schema";
 import type { GeneratedCV } from "@/types/cv";
@@ -62,11 +63,50 @@ export async function POST(request: NextRequest) {
       recommandationsIA: ameliorations.recommandationsIA,
     };
 
-    // 7. Logger le succès
+    // 7. Sauvegarder automatiquement en DB si utilisateur authentifié
+    const { userId } = await auth();
+    let cvId: string | undefined;
+    
+    if (userId) {
+      try {
+        // Appeler l'API save-cv (désactivé si DB non configurée)
+        // TODO: Réactiver quand Supabase est configuré
+        // const saveResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/save-cv`, {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //     'Cookie': request.headers.get('cookie') || '',
+        //   },
+        //   body: JSON.stringify({
+        //     data: cvData,
+        //     template: cvData.template || 'modern',
+        //     title: `CV ${validatedData.prenom} ${validatedData.nom}`,
+        //     targetCompany: validatedData.entrepriseCiblee,
+        //     targetPosition: validatedData.posteCible,
+        //   }),
+        // });
+
+        // if (saveResponse.ok) {
+        //   const saveResult = await saveResponse.json();
+        //   cvId = saveResult.cv?.id;
+        //   logger.info("CV sauvegardé en DB", { cvId, userId });
+        // }
+        
+        logger.info("Sauvegarde DB désactivée (DB non configurée)", { userId });
+      } catch (saveError) {
+        // Ne pas bloquer si la sauvegarde échoue
+        logger.error("Erreur sauvegarde CV", { error: saveError, userId });
+      }
+    }
+
+    // 8. Logger le succès
     logger.info("CV généré avec succès", { ip: clientIp });
 
-    // 8. Retourner les données JSON
-    return NextResponse.json(cvData, { status: 200 });
+    // 9. Retourner les données JSON avec l'ID si sauvegardé
+    return NextResponse.json({
+      ...cvData,
+      id: cvId, // ID du CV sauvegardé en DB
+    }, { status: 200 });
   } catch (error) {
     // Gestion centralisée des erreurs
     return handleApiError(error);

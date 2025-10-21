@@ -28,6 +28,11 @@ export default function CheckoutSuccessPage() {
         
         if (data.success) {
           setSessionData(data.subscription);
+          
+          // Attendre 3 secondes puis rediriger vers le dashboard
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 3000);
         }
       } catch (error) {
         console.error('Erreur synchro:', error);
@@ -37,7 +42,7 @@ export default function CheckoutSuccessPage() {
     };
 
     syncSubscription();
-  }, [sessionId]);
+  }, [sessionId, router]);
 
   if (isLoading) {
     return (

@@ -5,13 +5,13 @@ import { motion } from "framer-motion";
 import { CVFormSteps } from "@/components/cv/CVFormSteps";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Header } from "@/components/landing/Header";
+import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { Footer } from "@/components/landing/Footer";
 
 export default function CreateCVPage() {
   return (
     <>
-      <Header />
+      <HeaderV2 />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* En-tête */}

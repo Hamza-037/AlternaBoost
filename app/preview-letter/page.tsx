@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { LetterPreviewHTMLV2 } from "@/components/preview/LetterPreviewHTMLV2";
 import { LetterCustomizer } from "@/components/letter/LetterCustomizer";
-import { Header } from "@/components/landing/Header";
+import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { Footer } from "@/components/landing/Footer";
 import type { GeneratedLetter, LetterStyle, LetterSection } from "@/types/letter";
 import { toast } from "sonner";
@@ -146,7 +146,7 @@ export default function PreviewLetterPage() {
 
   return (
     <>
-    <Header />
+      <HeaderV2 />
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 pt-20">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}

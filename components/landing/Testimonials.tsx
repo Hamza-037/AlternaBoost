@@ -8,33 +8,41 @@ import { Button } from "@/components/ui/button";
 const testimonials = [
   {
     name: "Marie L.",
-    role: "Étudiante en Master Informatique",
+    role: "Master Informatique - EPITA",
+    company: "Développeuse chez Capgemini",
+    date: "Octobre 2024",
     content:
-      "J'ai trouvé mon alternance grâce à AlternaBoost. Le CV généré était vraiment professionnel et m'a permis de me démarquer.",
+      "J'ai créé mon CV en 15 minutes avec AlternaBoost et j'ai reçu 3 réponses positives en une semaine. Le template Modern était parfait pour le secteur tech. J'ai décroché mon alternance chez Capgemini !",
     rating: 5,
     avatar: "M",
   },
   {
     name: "Thomas D.",
-    role: "Étudiant en Commerce",
+    role: "Licence Commerce - ESSEC",
+    company: "Assistant commercial chez L'Oréal",
+    date: "Septembre 2024",
     content:
-      "Très pratique pour reformuler mes expériences. L'IA a vraiment amélioré la qualité de mon CV sans que j'aie à passer des heures dessus.",
+      "L'IA a transformé mes expériences basiques en descriptions vraiment professionnelles. Mon maître de stage m'a même dit que c'était le CV le plus clair qu'il avait vu cette année.",
     rating: 5,
     avatar: "T",
   },
   {
     name: "Sarah K.",
-    role: "Étudiante en Communication",
+    role: "Master Communication - Celsa",
+    company: "Chargée de com chez Publicis",
+    date: "Novembre 2024",
     content:
-      "Simple et efficace. En 10 minutes j'avais un CV propre et prêt à envoyer. Exactement ce qu'il me fallait.",
+      "Le gain de temps est incroyable ! En 10 minutes j'avais un CV propre, moderne et prêt à envoyer. Les templates sont vraiment adaptés aux jeunes diplômés.",
     rating: 5,
     avatar: "S",
   },
   {
     name: "Lucas M.",
-    role: "Étudiant en Design",
+    role: "BTS Design Graphique",
+    company: "Designer chez Ubisoft",
+    date: "Août 2024",
     content:
-      "Interface intuitive et résultat au top. Je recommande à tous mes camarades de promo.",
+      "Interface ultra intuitive, résultat professionnel. Le template Creative était parfait pour mon domaine. Tous mes amis de promo l'utilisent maintenant !",
     rating: 5,
     avatar: "L",
   },
@@ -48,22 +56,30 @@ const stats = [
 
 export function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [resetKey, setResetKey] = useState(0);
 
   // Auto-rotation du carousel
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-    }, 5000); // Change toutes les 5 secondes
+    }, 8000); // Change toutes les 8 secondes
 
     return () => clearInterval(interval);
-  }, []);
+  }, [resetKey]); // Dépend de resetKey pour réinitialiser le timer
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    setResetKey((prev) => prev + 1); // Réinitialise le timer
   };
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    setResetKey((prev) => prev + 1); // Réinitialise le timer
+  };
+
+  const handleDotClick = (index: number) => {
+    setCurrentIndex(index);
+    setResetKey((prev) => prev + 1); // Réinitialise le timer
   };
 
   return (
@@ -122,7 +138,7 @@ export function Testimonials() {
 
         {/* Carousel */}
         <div className="max-w-4xl mx-auto relative">
-          <div className="relative overflow-hidden px-12">
+          <div className="relative px-12">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -179,6 +195,12 @@ export function Testimonials() {
                         <div className="text-base text-gray-600 mt-1">
                           {testimonials[currentIndex].role}
                         </div>
+                        <div className="text-sm font-semibold text-blue-600 mt-2">
+                          {testimonials[currentIndex].company}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {testimonials[currentIndex].date}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -187,13 +209,12 @@ export function Testimonials() {
             </AnimatePresence>
 
             {/* Navigation Buttons améliorés */}
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handlePrevious}
-                className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full shadow-xl hover:shadow-2xl bg-white border-2 w-12 h-12 hover:border-blue-500 hover:bg-blue-50 transition-all"
-              >
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handlePrevious}
+              className="absolute -left-6 top-1/2 -translate-y-1/2 rounded-full shadow-xl hover:shadow-2xl bg-white border-2 w-12 h-12 hover:border-blue-500 hover:bg-blue-50 transition-all hover:scale-110 z-30 cursor-pointer"
+            >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -208,14 +229,13 @@ export function Testimonials() {
                   <path d="m15 18-6-6 6-6" />
                 </svg>
               </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleNext}
-                className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full shadow-xl hover:shadow-2xl bg-white border-2 w-12 h-12 hover:border-blue-500 hover:bg-blue-50 transition-all"
-              >
+            
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleNext}
+              className="absolute -right-6 top-1/2 -translate-y-1/2 rounded-full shadow-xl hover:shadow-2xl bg-white border-2 w-12 h-12 hover:border-blue-500 hover:bg-blue-50 transition-all hover:scale-110 z-30 cursor-pointer"
+            >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -230,7 +250,6 @@ export function Testimonials() {
                   <path d="m9 18 6-6-6-6" />
                 </svg>
               </Button>
-            </motion.div>
           </div>
 
           {/* Dots améliorés */}
@@ -238,7 +257,7 @@ export function Testimonials() {
             {testimonials.map((_, index) => (
               <motion.button
                 key={index}
-                onClick={() => setCurrentIndex(index)}
+                onClick={() => handleDotClick(index)}
                 whileHover={{ scale: 1.3 }}
                 whileTap={{ scale: 0.9 }}
                 className={`h-3 rounded-full transition-all duration-300 ${
