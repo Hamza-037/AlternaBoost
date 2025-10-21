@@ -264,18 +264,18 @@ export default function CreateCVFusionPage() {
     const isExpanded = expandedSection === id;
     
     return (
-      <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden backdrop-blur-sm hover:border-blue-500/30 transition-all duration-300">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-300">
         <button
           onClick={() => setExpandedSection(isExpanded ? "" : id)}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700/30 transition-colors"
+          className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Icon className="w-5 h-5 text-blue-500" />
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+              <Icon className="w-5 h-5 text-blue-600" />
             </div>
-            <h2 className="text-lg font-semibold text-white">{title}</h2>
+            <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
           </div>
-          <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </button>
         
         <AnimatePresence>
@@ -298,19 +298,19 @@ export default function CreateCVFusionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" data-theme={theme}>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50" data-theme={theme}>
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => router.push(user ? '/dashboard' : '/')}
               className="text-2xl font-bold hover:opacity-80 transition-opacity"
             >
-              <span className="text-white">Alterna</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">Boost</span>
+              <span className="text-gray-800">Alterna</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Boost</span>
             </button>
-            <Badge className="bg-purple-600/20 text-purple-400 border-purple-600/30">
+            <Badge className="bg-purple-100 text-purple-700 border-purple-200">
               <Sparkles className="w-3 h-3 mr-1" />
               IA Intégrée
             </Badge>
@@ -320,7 +320,7 @@ export default function CreateCVFusionPage() {
             <Button 
               onClick={() => router.push(user ? '/dashboard' : '/')}
               variant="outline"
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 gap-2"
+              className="border-gray-300 text-gray-700 hover:bg-gray-100 gap-2"
             >
               ← {user ? 'Dashboard' : 'Accueil'}
             </Button>
@@ -338,7 +338,7 @@ export default function CreateCVFusionPage() {
       {/* Desktop Layout */}
       <div className="hidden lg:flex pt-20">
         {/* SIDEBAR - Formulaires */}
-        <div className="w-[420px] h-[calc(100vh-80px)] border-r border-slate-800 overflow-y-auto bg-slate-900/50 backdrop-blur-sm scrollbar-thin scrollbar-track-slate-900 scrollbar-thumb-slate-700">
+        <div className="w-[420px] h-[calc(100vh-80px)] border-r border-gray-200 overflow-y-auto bg-white/60 backdrop-blur-sm scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
           <div className="p-6 space-y-4">
             {/* Section: Qui êtes-vous ? */}
             <SectionCard id="personal" title="Qui êtes-vous ?" icon={User}>
@@ -347,37 +347,37 @@ export default function CreateCVFusionPage() {
                   placeholder="Prénom" 
                   value={prenom}
                   onChange={(e) => setPrenom(e.target.value)}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <Input 
                   placeholder="Nom" 
                   value={nom}
                   onChange={(e) => setNom(e.target.value)}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <Input 
                   type="email"
                   placeholder="Email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <Input 
                   placeholder="Téléphone" 
                   value={telephone}
                   onChange={(e) => setTelephone(e.target.value)}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <Input 
                   placeholder="Adresse" 
                   value={adresse}
                   onChange={(e) => setAdresse(e.target.value)}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 
                 <div className="pt-2">
-                  <Label className="text-sm text-slate-400 mb-3 block">Photo de profil</Label>
-                  <div className="bg-slate-900/80 p-4 rounded-lg">
+                  <Label className="text-sm text-gray-600 mb-3 block">Photo de profil</Label>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <PhotoUpload
                       onUpload={(url) => setProfileImage(url)}
                       currentPhoto={profileImage}
@@ -390,7 +390,7 @@ export default function CreateCVFusionPage() {
                   placeholder="Poste recherché (ex: Développeur Web)" 
                   value={posteRecherche}
                   onChange={(e) => setPosteRecherche(e.target.value)}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 
                 <Textarea 
@@ -398,7 +398,7 @@ export default function CreateCVFusionPage() {
                   value={objectif}
                   onChange={(e) => setObjectif(e.target.value)}
                   rows={4}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 
                 <Button 
@@ -419,13 +419,13 @@ export default function CreateCVFusionPage() {
                   placeholder="Poste" 
                   value={newExp.poste}
                   onChange={(e) => setNewExp({...newExp, poste: e.target.value})}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <Input 
                   placeholder="Entreprise" 
                   value={newExp.entreprise}
                   onChange={(e) => setNewExp({...newExp, entreprise: e.target.value})}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <DateRangeInput
                   value={newExp.periode}
@@ -436,7 +436,7 @@ export default function CreateCVFusionPage() {
                   value={newExp.description}
                   onChange={(e) => setNewExp({...newExp, description: e.target.value})}
                   rows={3}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <Button 
                   onClick={handleAddExperience}
@@ -448,12 +448,12 @@ export default function CreateCVFusionPage() {
                 </Button>
                 
                 {experiences.map((exp, index) => (
-                  <div key={index} className="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
+                  <div key={index} className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
-                        <p className="font-semibold text-white text-sm">{exp.poste}</p>
-                        <p className="text-xs text-blue-400">{exp.entreprise}</p>
-                        <p className="text-xs text-slate-500 mt-1">{exp.periode}</p>
+                        <p className="font-semibold text-gray-900 text-sm">{exp.poste}</p>
+                        <p className="text-xs text-blue-600">{exp.entreprise}</p>
+                        <p className="text-xs text-gray-500 mt-1">{exp.periode}</p>
                       </div>
                       <Button 
                         size="sm" 
@@ -476,19 +476,19 @@ export default function CreateCVFusionPage() {
                   placeholder="Diplôme (ex: Master Informatique)" 
                   value={formation}
                   onChange={(e) => setFormation(e.target.value)}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <Input 
                   placeholder="École/Université" 
                   value={ecole}
                   onChange={(e) => setEcole(e.target.value)}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <Input 
                   placeholder="Année (ex: 2024-2025)" 
                   value={anneeFormation}
                   onChange={(e) => setAnneeFormation(e.target.value)}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </SectionCard>
@@ -502,7 +502,7 @@ export default function CreateCVFusionPage() {
                     value={newCompetence}
                     onChange={(e) => setNewCompetence(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleAddCompetence()}
-                    className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                   />
                   <Button onClick={handleAddCompetence} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                     <Plus className="w-4 h-4" />
@@ -532,10 +532,10 @@ export default function CreateCVFusionPage() {
                   placeholder="Ex: Anglais" 
                   value={newLang.language}
                   onChange={(e) => setNewLang({...newLang, language: e.target.value})}
-                  className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <select 
-                  className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-md text-white"
+                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                   value={newLang.proficiency}
                   onChange={(e) => setNewLang({...newLang, proficiency: e.target.value as any})}
                 >
@@ -549,9 +549,9 @@ export default function CreateCVFusionPage() {
                 </Button>
                 
                 {languages.map((lang, i) => (
-                  <div key={i} className="flex justify-between items-center bg-slate-900/80 p-3 rounded-lg">
-                    <span className="text-white text-sm">{lang.language}</span>
-                    <Badge className="bg-slate-700/50 text-slate-300">{lang.proficiency}</Badge>
+                  <div key={i} className="flex justify-between items-center bg-purple-50 p-3 rounded-lg border border-purple-200">
+                    <span className="text-gray-900 text-sm">{lang.language}</span>
+                    <Badge className="bg-purple-100 text-purple-700">{lang.proficiency}</Badge>
                   </div>
                 ))}
               </div>
@@ -566,7 +566,7 @@ export default function CreateCVFusionPage() {
                     value={newHobby}
                     onChange={(e) => setNewHobby(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleAddHobby()}
-                    className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500"
+                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                   />
                   <Button onClick={handleAddHobby} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                     <Plus className="w-4 h-4" />
@@ -575,7 +575,7 @@ export default function CreateCVFusionPage() {
                 
                 <div className="flex flex-wrap gap-2">
                   {hobbies.map((hobby, i) => (
-                    <Badge key={i} className="bg-slate-700/50 text-slate-300 gap-2">
+                    <Badge key={i} className="bg-pink-100 text-pink-700 border-pink-200 gap-2">
                       {hobby}
                       <button onClick={() => setHobbies(hobbies.filter((_, idx) => idx !== i))}>×</button>
                     </Badge>
@@ -587,12 +587,12 @@ export default function CreateCVFusionPage() {
         </div>
 
         {/* PREVIEW DROITE */}
-        <div className="flex-1 h-[calc(100vh-80px)] overflow-y-auto bg-slate-900/30 relative">
+        <div className="flex-1 h-[calc(100vh-80px)] overflow-y-auto bg-gradient-to-br from-blue-50/50 to-purple-50/50 relative">
           {/* Contrôles */}
           <div className="absolute top-6 right-6 z-40 space-y-3">
-            <Card className="bg-slate-800/90 backdrop-blur-md border-slate-700 p-4 space-y-3">
+            <Card className="bg-white/95 backdrop-blur-md border-gray-200 shadow-lg p-4 space-y-3">
               <div className="flex items-center gap-3">
-                <Palette className="w-4 h-4 text-blue-500" />
+                <Palette className="w-4 h-4 text-blue-600" />
                 <input 
                   type="range" 
                   min="50" 
@@ -601,13 +601,13 @@ export default function CreateCVFusionPage() {
                   onChange={(e) => setZoom(Number(e.target.value))}
                   className="w-32"
                 />
-                <span className="text-sm font-bold text-blue-500 w-12">{zoom}%</span>
+                <span className="text-sm font-bold text-blue-600 w-12">{zoom}%</span>
               </div>
               
               <select 
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white text-sm"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 text-sm focus:border-blue-500 focus:ring-blue-500"
               >
                 {THEMES.map((t) => (
                   <option key={t.name} value={t.name}>{t.label}</option>
@@ -617,7 +617,7 @@ export default function CreateCVFusionPage() {
               <select 
                 value={selectedTemplate}
                 onChange={(e) => setSelectedTemplate(e.target.value as any)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white text-sm"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 text-sm focus:border-blue-500 focus:ring-blue-500"
               >
                 <option value="modern">Modern</option>
                 <option value="premium">Premium</option>
@@ -640,10 +640,10 @@ export default function CreateCVFusionPage() {
 
       {/* Mobile */}
       <div className="lg:hidden min-h-screen flex items-center justify-center p-8 pt-24">
-        <div className="text-center max-w-md bg-slate-800/50 p-8 rounded-2xl border border-slate-700">
-          <FileText className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-4">Désolé 😢</h2>
-          <p className="text-slate-400 mb-6">
+        <div className="text-center max-w-md bg-white p-8 rounded-2xl border border-gray-200 shadow-xl">
+          <FileText className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Désolé 😢</h2>
+          <p className="text-gray-600 mb-6">
             Le créateur de CV est optimisé pour ordinateur afin de vous offrir la meilleure expérience possible.
           </p>
           <Button 
@@ -661,10 +661,10 @@ export default function CreateCVFusionPage() {
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-slate-900 rounded-2xl border border-slate-700 w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+            className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
           >
-            <div className="p-6 border-b border-slate-700 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Aperçu final</h3>
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-blue-50 to-purple-50">
+              <h3 className="text-xl font-bold text-gray-900">Aperçu final</h3>
               <div className="flex items-center gap-3">
                 <Button 
                   onClick={handleDownloadPDF} 
@@ -676,14 +676,14 @@ export default function CreateCVFusionPage() {
                 <Button 
                   variant="ghost" 
                   onClick={() => setShowPreviewModal(false)}
-                  className="text-slate-400 hover:text-white"
+                  className="text-gray-500 hover:text-gray-900 hover:bg-gray-100"
                 >
                   ✕
                 </Button>
               </div>
             </div>
             
-            <div className="flex-1 overflow-auto p-6 bg-slate-950/50">
+            <div className="flex-1 overflow-auto p-6 bg-gradient-to-br from-blue-50/30 to-purple-50/30">
               <div className="flex justify-center">
                 <div ref={cvPreviewRef} data-theme={theme}>
                   {renderTemplate()}
