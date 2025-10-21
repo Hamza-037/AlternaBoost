@@ -2,97 +2,112 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { CVAnalysis } from "@/components/preview/CVAnalysis";
+import { Separator } from "@/components/ui/separator";
 import { HeaderV2 } from "@/components/landing/HeaderV2";
-import { Footer } from "@/components/landing/Footer";
-import { TemplateSelector } from "@/components/cv/TemplateSelector";
 import { ModernCVTemplate } from "@/components/preview/templates/ModernCVTemplate";
 import { PremiumCVTemplate } from "@/components/preview/templates/PremiumCVTemplate";
 import { CreativeCVTemplate } from "@/components/preview/templates/CreativeCVTemplate";
 import { MinimalCVTemplate } from "@/components/preview/templates/MinimalCVTemplate";
 import { useUser } from "@clerk/nextjs";
-import type { GeneratedCV, CVStyle, CVSection } from "@/types/cv";
+import { 
+  Download, 
+  Palette, 
+  Type, 
+  Layout,
+  Sparkles,
+  Eye,
+  Edit3,
+  FileText,
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  Plus,
+  X
+} from "lucide-react";
+import { toast } from "sonner";
+import type { GeneratedCV } from "@/types/cv";
+
+type TemplateName = "modern" | "premium" | "creative" | "minimal";
+
+const COLOR_PRESETS = [
+  { name: "Bleu Professionnel", primary: "#2563EB", secondary: "#3B82F6" },
+  { name: "Vert Moderne", primary: "#059669", secondary: "#10B981" },
+  { name: "Violet Créatif", primary: "#7C3AED", secondary: "#8B5CF6" },
+  { name: "Orange Dynamique", primary: "#EA580C", secondary: "#F97316" },
+  { name: "Rose Élégant", primary: "#DB2777", secondary: "#EC4899" },
+  { name: "Gris Minimaliste", primary: "#475569", secondary: "#64748B" },
+];
 
 export default function PreviewCVPage() {
   const router = useRouter();
   const { user } = useUser();
   const [cvData, setCvData] = useState<GeneratedCV | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<"modern" | "premium" | "creative" | "minimal">("modern");
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateName>("modern");
   const [profileImage, setProfileImage] = useState<string>("");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState("content");
   
   // Récupérer le plan de l'utilisateur
   const userPlan = (user?.publicMetadata?.plan as string) || "FREE";
-  
-  // Style et sections personnalisées
-  const [cvStyle, setCvStyle] = useState<CVStyle>({
-    template: "modern",
-    colorScheme: {
-      primary: "#2563EB",
-      secondary: "#3B82F6",
-      accent: "#60A5FA",
-      text: "#111827",
-      background: "#FFFFFF",
-    },
-    typography: {
-      headingFont: "Inter",
-      bodyFont: "Inter",
-    },
-    layout: {
-      spacing: "normal",
-      sectionIcons: true,
-    },
-  });
-  const [customSections, setCustomSections] = useState<CVSection[]>([]);
+
+  // Style personnalisé
+  const [primaryColor, setPrimaryColor] = useState("#2563EB");
+  const [secondaryColor, setSecondaryColor] = useState("#3B82F6");
 
   useEffect(() => {
-    // Récupérer les données du CV depuis sessionStorage
     const storedData = sessionStorage.getItem("generated_cv");
     if (storedData) {
       const data = JSON.parse(storedData);
       setCvData(data);
-      // Charger les préférences de template et photo si elles existent
       setSelectedTemplate(data.template || "modern");
       setProfileImage(data.profileImageUrl || "");
-      
-      // Charger le style personnalisé
-      if (data.style) {
-        setCvStyle(data.style);
-      }
-      
-      // Charger les sections personnalisées
-      if (data.sectionsPersonnalisees) {
-        setCustomSections(data.sectionsPersonnalisees);
-      }
     } else {
-      // Si pas de données, rediriger vers le formulaire
       router.push("/create-cv");
     }
   }, [router]);
 
   const handleUpdate = (field: string, value: unknown) => {
     if (!cvData) return;
-
-    // Fonction spéciale pour les tableaux d'expériences
-    if (field === "experiencesAmeliorees" && Array.isArray(value)) {
-      setCvData({ ...cvData, experiencesAmeliorees: value });
-      return;
-    }
-
-    // Fonction spéciale pour les compétences
-    if (field === "competencesAmeliorees" && Array.isArray(value)) {
-      setCvData({ ...cvData, competencesAmeliorees: value });
-      return;
-    }
-
-    // Mise à jour simple pour les autres champs
     setCvData({ ...cvData, [field]: value });
+  };
+
+  const handleUpdateExperience = (index: number, field: string, value: string) => {
+    if (!cvData?.experiencesAmeliorees) return;
+    const updated = [...cvData.experiencesAmeliorees];
+    updated[index] = { ...updated[index], [field]: value };
+    setCvData({ ...cvData, experiencesAmeliorees: updated });
+  };
+
+  const handleDeleteExperience = (index: number) => {
+    if (!cvData?.experiencesAmeliorees) return;
+    const updated = cvData.experiencesAmeliorees.filter((_, i) => i !== index);
+    setCvData({ ...cvData, experiencesAmeliorees: updated });
+    toast.success("Expérience supprimée");
+  };
+
+  const handleAddExperience = () => {
+    if (!cvData) return;
+    const newExp = {
+      poste: "Nouveau poste",
+      entreprise: "Entreprise",
+      periode: "Date - Date",
+      description: "Description de votre expérience...",
+    };
+    setCvData({
+      ...cvData,
+      experiencesAmeliorees: [...(cvData.experiencesAmeliorees || []), newExp],
+    });
+    toast.success("Expérience ajoutée");
   };
 
   const handleDownloadPDF = async () => {
@@ -100,11 +115,14 @@ export default function PreviewCVPage() {
 
     setIsDownloading(true);
     try {
-      // Inclure toutes les options de personnalisation dans les données envoyées
       const dataToSend = {
         ...cvData,
         template: selectedTemplate,
         profileImageUrl: profileImage || undefined,
+        customColors: {
+          primary: primaryColor,
+          secondary: secondaryColor,
+        },
       };
 
       const response = await fetch("/api/generate-cv-puppeteer", {
@@ -116,29 +134,49 @@ export default function PreviewCVPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erreur lors de la génération du PDF");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erreur lors de la génération du PDF");
       }
 
-      // Télécharger le PDF
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `CV_${cvData.prenom}_${cvData.nom}.pdf`;
-      document.body.appendChild(a);
-      a.click();
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `CV_${cvData.prenom}_${cvData.nom}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+
+      toast.success("CV téléchargé avec succès !");
     } catch (error) {
-      console.error("Erreur:", error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Une erreur est survenue lors du téléchargement"
+      console.error(error);
+      toast.error(
+        error instanceof Error ? error.message : "Erreur lors du téléchargement"
       );
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const renderTemplate = () => {
+    if (!cvData) return null;
+
+    const commonProps = {
+      cvData,
+      profileImage,
+      customColors: { primary: primaryColor, secondary: secondaryColor },
+    };
+
+    switch (selectedTemplate) {
+      case "premium":
+        return <PremiumCVTemplate {...commonProps} />;
+      case "creative":
+        return <CreativeCVTemplate {...commonProps} />;
+      case "minimal":
+        return <MinimalCVTemplate {...commonProps} />;
+      default:
+        return <ModernCVTemplate {...commonProps} />;
     }
   };
 
@@ -156,318 +194,444 @@ export default function PreviewCVPage() {
   return (
     <>
       <HeaderV2 />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-20">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <Link href="/create-cv">
-                <Button variant="ghost" className="mb-4">
-                  ← Retour au formulaire
-                </Button>
-              </Link>
-              <h1 className="text-4xl font-bold text-gray-900">
-                Aperçu de votre CV
-              </h1>
-              <p className="text-lg text-gray-600 mt-2">
-                Modifiez directement les champs ou téléchargez votre CV
-              </p>
-            </div>
-            <Badge
-              variant={isEditing ? "default" : "secondary"}
-              className="h-8 px-4"
-            >
-              {isEditing ? "Mode Édition" : "Mode Aperçu"}
-            </Badge>
-          </div>
-
-          {/* Actions */}
-          <Card className="p-4 bg-white/80 backdrop-blur-sm shadow-lg">
-            <div className="flex flex-wrap gap-3 items-center justify-between">
-              <div className="flex gap-3">
+      
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-20">
+        {/* Header fixe */}
+        <div className="fixed top-20 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-200 z-40 shadow-sm">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <Button
-                  variant={isEditing ? "secondary" : "default"}
-                  onClick={() => setIsEditing(!isEditing)}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push("/create-cv")}
                   className="gap-2"
                 >
-                  {isEditing ? (
+                  <ChevronLeft className="w-4 h-4" />
+                  Retour
+                </Button>
+                <Separator orientation="vertical" className="h-6" />
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">
+                    {cvData.prenom} {cvData.nom}
+              </h1>
+                  <p className="text-sm text-gray-500">{cvData.formation}</p>
+            </div>
+          </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="gap-2"
+                >
+                  {sidebarOpen ? (
                     <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                      Aperçu
+                      <ChevronRight className="w-4 h-4" />
+                      Masquer
                     </>
                   ) : (
                     <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                        <path d="m15 5 4 4" />
-                      </svg>
-                      Modifier
+                      <ChevronLeft className="w-4 h-4" />
+                      Personnaliser
                     </>
                   )}
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const storedData = sessionStorage.getItem("generated_cv");
-                    if (storedData) {
-                      setCvData(JSON.parse(storedData));
-                      setIsEditing(false);
-                    }
-                  }}
-                  className="gap-2"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                    <path d="M21 3v5h-5" />
-                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                    <path d="M3 16v5h5" />
-                  </svg>
-                  Réinitialiser
-                </Button>
-              </div>
-
+                
               <Button
                 onClick={handleDownloadPDF}
                 disabled={isDownloading}
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 gap-2"
+                  className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               >
                 {isDownloading ? (
                   <>
-                    <svg
-                      className="animate-spin h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Téléchargement...
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Génération...
                   </>
                 ) : (
                   <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" x2="12" y1="15" y2="3" />
-                    </svg>
+                      <Download className="w-4 h-4" />
                     Télécharger en PDF
                   </>
                 )}
               </Button>
             </div>
-          </Card>
-        </motion.div>
+            </div>
+          </div>
+        </div>
 
-        {/* Grille 3 colonnes : Personnalisation + Aperçu + Analyse */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Colonne gauche : Sélection de template (1/4) */}
+        {/* Contenu principal */}
+        <div className="container mx-auto px-4 pt-32 pb-12">
+          <div className="flex gap-6 relative">
+            {/* Sidebar d'édition */}
+            <AnimatePresence>
+              {sidebarOpen && (
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-1 space-y-6"
-          >
-            <Card className="p-6 shadow-lg border-2 border-blue-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Choisissez votre template
-              </h3>
-              <TemplateSelector
-                selected={selectedTemplate}
-                onSelect={setSelectedTemplate}
-                userPlan={userPlan}
-              />
-            </Card>
-          </motion.div>
+                  initial={{ x: -300, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -300, opacity: 0 }}
+                  transition={{ type: "spring", damping: 20 }}
+                  className="w-96 flex-shrink-0"
+                >
+                  <Card className="sticky top-36 p-6 shadow-xl border-2">
+                    <Tabs value={activeTab} onValueChange={setActiveTab}>
+                      <TabsList className="grid w-full grid-cols-3 mb-6">
+                        <TabsTrigger value="content" className="gap-2">
+                          <Edit3 className="w-4 h-4" />
+                          Contenu
+                        </TabsTrigger>
+                        <TabsTrigger value="style" className="gap-2">
+                          <Palette className="w-4 h-4" />
+                          Style
+                        </TabsTrigger>
+                        <TabsTrigger value="template" className="gap-2">
+                          <Layout className="w-4 h-4" />
+                          Template
+                        </TabsTrigger>
+                      </TabsList>
 
-          {/* Colonne centrale : Aperçu du CV (2/4) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="lg:col-span-2"
-          >
-            {isEditing && (
-              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  💡 <strong>Mode édition activé</strong> : Cliquez sur les
-                  champs pour les modifier directement.
-                </p>
+                      {/* TAB CONTENU */}
+                      <TabsContent value="content" className="space-y-6 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
+                        {/* Informations personnelles */}
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-blue-600" />
+                            Informations personnelles
+                          </h3>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <Label className="text-xs">Prénom</Label>
+                              <Input
+                                value={cvData.prenom}
+                                onChange={(e) => handleUpdate("prenom", e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Nom</Label>
+                              <Input
+                                value={cvData.nom}
+                                onChange={(e) => handleUpdate("nom", e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Email</Label>
+                              <Input
+                                value={cvData.email}
+                                onChange={(e) => handleUpdate("email", e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Téléphone</Label>
+                              <Input
+                                value={cvData.telephone}
+                                onChange={(e) => handleUpdate("telephone", e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <Separator />
+
+                        {/* Objectif */}
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-purple-600" />
+                            Objectif professionnel
+                          </h3>
+                          <Textarea
+                            value={cvData.pitchPersonnalise || cvData.objectifAmeliore || cvData.objectif}
+                            onChange={(e) => handleUpdate("pitchPersonnalise", e.target.value)}
+                            rows={4}
+                            className="text-sm"
+                          />
+                        </div>
+
+                        <Separator />
+
+                        {/* Expériences */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-gray-900">Expériences</h3>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={handleAddExperience}
+                              className="gap-1 h-7 text-xs"
+                            >
+                              <Plus className="w-3 h-3" />
+                              Ajouter
+                            </Button>
+                          </div>
+
+                          {cvData.experiencesAmeliorees?.map((exp, index) => (
+                            <Card key={index} className="p-4 bg-gray-50 space-y-3 relative">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteExperience(index)}
+                                className="absolute top-2 right-2 h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+
+                              <div>
+                                <Label className="text-xs">Poste</Label>
+                                <Input
+                                  value={exp.poste}
+                                  onChange={(e) => handleUpdateExperience(index, "poste", e.target.value)}
+                                  className="mt-1 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Entreprise</Label>
+                                <Input
+                                  value={exp.entreprise}
+                                  onChange={(e) => handleUpdateExperience(index, "entreprise", e.target.value)}
+                                  className="mt-1 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Période</Label>
+                                <Input
+                                  value={exp.periode}
+                                  onChange={(e) => handleUpdateExperience(index, "periode", e.target.value)}
+                                  className="mt-1 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs">Description</Label>
+                                <Textarea
+                                  value={exp.description}
+                                  onChange={(e) => handleUpdateExperience(index, "description", e.target.value)}
+                                  rows={3}
+                                  className="mt-1 text-sm"
+                                />
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+
+                        <Separator />
+
+                        {/* Compétences */}
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900">Compétences</h3>
+                          <Textarea
+                            value={Array.isArray(cvData.competencesAmeliorees) 
+                              ? cvData.competencesAmeliorees.join(", ")
+                              : cvData.competencesAmeliorees || cvData.competences}
+                            onChange={(e) => handleUpdate("competencesAmeliorees", e.target.value)}
+                            rows={3}
+                            placeholder="Ex: JavaScript, React, Node.js..."
+                            className="text-sm"
+                          />
+                        </div>
+                      </TabsContent>
+
+                      {/* TAB STYLE */}
+                      <TabsContent value="style" className="space-y-6">
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                            <Palette className="w-4 h-4 text-blue-600" />
+                            Couleurs
+                          </h3>
+                          
+                          <div className="grid grid-cols-3 gap-2">
+                            {COLOR_PRESETS.map((preset) => (
+                              <button
+                                key={preset.name}
+                                onClick={() => {
+                                  setPrimaryColor(preset.primary);
+                                  setSecondaryColor(preset.secondary);
+                                  toast.success(`Thème "${preset.name}" appliqué !`);
+                                }}
+                                className="group relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-gray-400 transition-all hover:scale-105"
+                                title={preset.name}
+                              >
+                                <div
+                                  className="absolute inset-0"
+                                  style={{
+                                    background: `linear-gradient(135deg, ${preset.primary} 0%, ${preset.secondary} 100%)`,
+                                  }}
+                                />
+                                {primaryColor === preset.primary && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                    <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                                    </div>
               </div>
             )}
+                              </button>
+                            ))}
+                          </div>
 
-            {/* Rendu du template sélectionné */}
-            {selectedTemplate === "modern" && (
-              <ModernCVTemplate
-                data={cvData}
-                isEditing={isEditing}
-                onUpdate={handleUpdate}
-                profileImage={profileImage}
-              />
-            )}
-            {selectedTemplate === "premium" && (
-              <PremiumCVTemplate
-                data={cvData}
-                isEditing={isEditing}
-                onUpdate={handleUpdate}
-                profileImage={profileImage}
-              />
-            )}
-            {selectedTemplate === "creative" && (
-              <CreativeCVTemplate
-                data={cvData}
-                isEditing={isEditing}
-                onUpdate={handleUpdate}
-                profileImage={profileImage}
-              />
-            )}
-            {selectedTemplate === "minimal" && (
-              <MinimalCVTemplate
-                data={cvData}
-                isEditing={isEditing}
-                onUpdate={handleUpdate}
-              />
-            )}
-          </motion.div>
+                          <div className="flex gap-3">
+                            <div className="flex-1">
+                              <Label className="text-xs">Couleur principale</Label>
+                              <div className="flex gap-2 mt-1">
+                                <Input
+                                  type="color"
+                                  value={primaryColor}
+                                  onChange={(e) => setPrimaryColor(e.target.value)}
+                                  className="w-12 h-10 p-1 cursor-pointer"
+                                />
+                                <Input
+                                  type="text"
+                                  value={primaryColor}
+                                  onChange={(e) => setPrimaryColor(e.target.value)}
+                                  className="flex-1 font-mono text-xs"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <Label className="text-xs">Couleur secondaire</Label>
+                              <div className="flex gap-2 mt-1">
+                                <Input
+                                  type="color"
+                                  value={secondaryColor}
+                                  onChange={(e) => setSecondaryColor(e.target.value)}
+                                  className="w-12 h-10 p-1 cursor-pointer"
+                                />
+                                <Input
+                                  type="text"
+                                  value={secondaryColor}
+                                  onChange={(e) => setSecondaryColor(e.target.value)}
+                                  className="flex-1 font-mono text-xs"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
 
-          {/* Colonne droite : Photo + Analyse IA (1/4) */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="space-y-6"
-          >
-            {/* Upload de photo (pour tous les templates sauf Minimal) */}
-            {selectedTemplate !== "minimal" && (
-              <Card className="p-6 shadow-lg border-2 border-blue-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-blue-600"
-                  >
-                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                  </svg>
+                        <Separator />
+
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4 text-purple-600" />
                   Photo de profil
                 </h3>
+                          
+                          {profileImage ? (
                 <div className="space-y-3">
-                  <input
-                    type="url"
-                    placeholder="https://exemple.com/photo.jpg"
-                    value={profileImage}
-                    onChange={(e) => setProfileImage(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  />
-                  <p className="text-xs text-gray-500">
-                    Collez l&apos;URL d&apos;une image (JPG, PNG)
-                  </p>
-                  {profileImage && (
-                    <div className="flex justify-center mt-2">
+                              <div className="relative w-32 h-32 mx-auto">
                       <img
                         src={profileImage}
-                        alt="Aperçu"
-                        className="w-24 h-24 rounded-full object-cover border-4 border-blue-100 shadow-md"
-                        onError={() => {
+                                  alt="Photo de profil"
+                                  className="w-full h-full object-cover rounded-full border-4 border-gray-200"
+                                />
+                                <button
+                                  onClick={() => {
                           setProfileImage("");
-                          alert("URL d'image invalide");
-                        }}
-                      />
+                                    toast.success("Photo supprimée");
+                                  }}
+                                  className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-lg"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <p className="text-xs text-center text-gray-500">
+                                La photo apparaîtra sur votre CV
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="text-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                              <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                              <p className="text-sm text-gray-600">
+                                Aucune photo uploadée
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                Retournez au formulaire pour ajouter une photo
+                              </p>
                     </div>
                   )}
                 </div>
-              </Card>
-            )}
+                      </TabsContent>
 
-            {/* Analyse IA */}
-            <CVAnalysis cvData={cvData} />
-
-            {/* Info supplémentaire */}
-            <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                ✨ Prochaines étapes
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li>• Analysez votre CV avec l&apos;IA</li>
-                <li>• Modifiez les champs si nécessaire</li>
-                <li>• Téléchargez votre CV en PDF</li>
-              </ul>
+                      {/* TAB TEMPLATE */}
+                      <TabsContent value="template" className="space-y-6">
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900">Choisissez votre template</h3>
+                          
+                          <div className="grid grid-cols-2 gap-3">
+                            {[
+                              { name: "modern", label: "Moderne", free: true },
+                              { name: "premium", label: "Premium", free: false },
+                              { name: "creative", label: "Créatif", free: false },
+                              { name: "minimal", label: "Minimal", free: false },
+                            ].map((template) => (
+                              <button
+                                key={template.name}
+                                onClick={() => {
+                                  if (!template.free && userPlan === "FREE") {
+                                    toast.error("Template premium - Passez à un plan payant");
+                                    return;
+                                  }
+                                  setSelectedTemplate(template.name as TemplateName);
+                                  toast.success(`Template "${template.label}" sélectionné !`);
+                                }}
+                                className={`
+                                  relative p-4 rounded-lg border-2 transition-all text-left
+                                  ${selectedTemplate === template.name 
+                                    ? "border-blue-600 bg-blue-50" 
+                                    : "border-gray-200 hover:border-gray-400"}
+                                  ${!template.free && userPlan === "FREE" ? "opacity-50" : ""}
+                                `}
+                              >
+                                <div className="font-semibold text-sm">{template.label}</div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {template.free ? "Gratuit" : "Premium"}
+                                </div>
+                                {!template.free && userPlan === "FREE" && (
+                                  <div className="absolute top-2 right-2">
+                                    <Badge variant="secondary" className="text-xs">🔒</Badge>
+                                  </div>
+                                )}
+                                {selectedTemplate === template.name && (
+                                  <div className="absolute top-2 right-2">
+                                    <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center">
+                                      <div className="w-2 h-2 rounded-full bg-white" />
+                                    </div>
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </TabsContent>
+                    </Tabs>
             </Card>
           </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Zone de preview du CV */}
+            <div className="flex-1 flex justify-center">
+              <motion.div
+                layout
+                className="w-full max-w-3xl"
+              >
+                <Card className="shadow-2xl overflow-hidden bg-white">
+                  <div className="aspect-[1/1.414] overflow-auto">
+                    {renderTemplate()}
+                  </div>
+                </Card>
+                
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-gray-500">
+                    ✨ Modifiez le contenu dans la sidebar et voyez les changements en temps réel
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <Footer />
     </>
   );
 }
-
