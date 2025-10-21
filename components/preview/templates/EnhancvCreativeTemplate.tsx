@@ -74,63 +74,56 @@ export const EnhancvCreativeTemplate: React.FC<EnhancvCreativeTemplateProps> = (
       ></div>
 
       <div className="relative z-10 h-full flex flex-col">
-        {/* HEADER */}
+        {/* HEADER - Compact */}
         <div 
-          className="px-12 text-white relative"
+          className="px-10 text-white relative"
           style={{ 
             background: `linear-gradient(135deg, ${primaryColor}ee, ${primaryColor}bb)`,
-            paddingTop: `${2 * spacing}rem`,
-            paddingBottom: `${2 * spacing}rem`
+            paddingTop: `${1.25 * spacing}rem`,
+            paddingBottom: `${1.25 * spacing}rem`
           }}
         >
-          <div className="flex items-center gap-8">
-            {/* Photo */}
+          <div className="flex items-center gap-6">
+            {/* Photo - Réduite */}
             {profileImage && (
               <div 
                 className="relative flex-shrink-0"
                 style={{ 
-                  width: `${8 * photoSize}rem`,
-                  height: `${8 * photoSize}rem`
+                  width: `${5.5 * photoSize}rem`,
+                  height: `${5.5 * photoSize}rem`
                 }}
               >
                 <div 
-                  className="absolute inset-0 rounded-2xl rotate-6"
+                  className="absolute inset-0 rounded-xl rotate-3"
                   style={{ background: `linear-gradient(to bottom right, ${primaryColor}44, transparent)` }}
                 ></div>
-                <div className="absolute inset-2 rounded-2xl overflow-hidden border-4 border-white/30 shadow-xl">
+                <div className="absolute inset-1.5 rounded-xl overflow-hidden border-3 border-white/30 shadow-lg">
                   <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
                 </div>
               </div>
             )}
 
-            {/* Info */}
+            {/* Info - Compacte */}
             <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-2 tracking-tight">{fullName}</h1>
-              <div 
-                className="h-1 mb-4 rounded-full"
-                style={{ 
-                  width: '6rem',
-                  background: `linear-gradient(to right, white, transparent)` 
-                }}
-              ></div>
-              <p className="text-xl text-white/90 font-light mb-6">{posteRecherche || "Professionnel"}</p>
+              <h1 className="text-2xl font-bold mb-1 tracking-tight">{fullName}</h1>
+              <p className="text-base text-white/90 font-medium mb-3">{posteRecherche || "Professionnel"}</p>
 
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-white/80">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/80">
                 {email && (
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
+                  <div className="flex items-center gap-1.5">
+                    <Mail className="w-3 h-3" />
                     <span>{email}</span>
                   </div>
                 )}
                 {telephone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
+                  <div className="flex items-center gap-1.5">
+                    <Phone className="w-3 h-3" />
                     <span>{telephone}</span>
                   </div>
                 )}
                 {adresse && (
-                  <div className="flex items-center gap-2 col-span-2">
-                    <MapPin className="w-4 h-4" />
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-3 h-3" />
                     <span>{adresse}</span>
                   </div>
                 )}
