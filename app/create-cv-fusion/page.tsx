@@ -105,58 +105,6 @@ const THEMES = [
   { name: "business", label: "Business", color: "#1e40af" },
 ];
 
-// Composant SectionCard extrait pour éviter les re-renders
-const SectionCard = ({ id, title, icon: Icon, children, expandedSection, setExpandedSection, onReset }: any) => {
-  const isExpanded = expandedSection === id;
-  
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-300">
-      <div className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-        <button
-          onClick={() => setExpandedSection(isExpanded ? "" : id)}
-          className="flex-1 flex items-center gap-3 text-left"
-        >
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-            <Icon className="w-5 h-5 text-blue-600" />
-          </div>
-          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-        </button>
-        
-        <div className="flex items-center gap-2">
-          {onReset && (
-            <button
-              onClick={onReset}
-              className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
-              title="Réinitialiser cette section"
-            >
-              <RotateCw className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" />
-            </button>
-          )}
-          <button onClick={() => setExpandedSection(isExpanded ? "" : id)}>
-            <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
-      </div>
-      
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <div className="px-6 pb-6 space-y-4">
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
 export default function CreateCVFusionPage() {
   const router = useRouter();
   const { user } = useUser();
@@ -595,9 +543,11 @@ export default function CreateCVFusionPage() {
       <div className="hidden lg:flex pt-20">
         {/* SIDEBAR - Formulaires */}
         <div className="w-[420px] h-[calc(100vh-80px)] border-r border-gray-200 overflow-y-auto bg-white/60 backdrop-blur-sm scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
-          <div className="p-6 space-y-4">
-            {/* Section: Qui êtes-vous ? */}
-            <SectionCard id="personal" title="Qui êtes-vous ?" icon={User} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetPersonalInfo}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndSections}>
+            <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+              <div className="p-6 space-y-4">
+                {/* Section: Qui êtes-vous ? */}
+                <DraggableSectionCard id="personal" title="Qui êtes-vous ?" icon={User} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetPersonalInfo}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Prénom" 
@@ -666,10 +616,10 @@ export default function CreateCVFusionPage() {
                   {isOptimizing ? "Optimisation..." : "Optimiser avec l'IA"}
                 </Button>
               </div>
-            </SectionCard>
+            </DraggableSectionCard>
 
             {/* Section: Expériences */}
-            <SectionCard id="experiences" title="Expériences" icon={Briefcase} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetExperiences}>
+            <DraggableSectionCard id="experiences" title="Expériences" icon={Briefcase} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetExperiences}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Poste" 
@@ -733,10 +683,10 @@ export default function CreateCVFusionPage() {
                   </div>
                 )}
               </div>
-            </SectionCard>
+            </DraggableSectionCard>
 
             {/* Section: Formation */}
-            <SectionCard id="formation" title="Formation" icon={GraduationCap} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetFormation}>
+            <DraggableSectionCard id="formation" title="Formation" icon={GraduationCap} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetFormation}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Diplôme (ex: Master Informatique)" 
@@ -757,10 +707,10 @@ export default function CreateCVFusionPage() {
                   className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
-            </SectionCard>
+            </DraggableSectionCard>
 
             {/* Section: Compétences */}
-            <SectionCard id="competences" title="Compétences" icon={Award} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetCompetences}>
+            <DraggableSectionCard id="competences" title="Compétences" icon={Award} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetCompetences}>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input 
@@ -784,26 +734,31 @@ export default function CreateCVFusionPage() {
                     </h3>
                     <SkillBadges competences={competences} />
                     
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {competences.map((comp, i) => (
-                        <div key={i} className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm">
-                          <span className="text-gray-700">{comp}</span>
-                          <button 
-                            onClick={() => setCompetences(competences.filter((_, idx) => idx !== i))}
-                            className="text-gray-500 hover:text-red-600 font-bold"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
+                    <div className="mt-4">
+                      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndCompetences}>
+                        <SortableContext items={competences} strategy={horizontalListSortingStrategy}>
+                          <div className="flex flex-wrap gap-2">
+                            {competences.map((comp) => (
+                              <DraggableChip
+                                key={comp}
+                                id={comp}
+                                onRemove={() => setCompetences(competences.filter((c) => c !== comp))}
+                                className="bg-gray-100"
+                              >
+                                {comp}
+                              </DraggableChip>
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
                     </div>
                   </div>
                 )}
               </div>
-            </SectionCard>
+            </DraggableSectionCard>
 
             {/* Section: Langues */}
-            <SectionCard id="langues" title="Langues" icon={Globe} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetLanguages}>
+            <DraggableSectionCard id="langues" title="Langues" icon={Globe} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetLanguages}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Ex: Anglais" 
@@ -855,10 +810,10 @@ export default function CreateCVFusionPage() {
                   </div>
                 )}
               </div>
-            </SectionCard>
+            </DraggableSectionCard>
 
             {/* Section: Loisirs */}
-            <SectionCard id="loisirs" title="Loisirs" icon={Heart} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetHobbies}>
+            <DraggableSectionCard id="loisirs" title="Loisirs" icon={Heart} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetHobbies}>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input 
@@ -873,16 +828,24 @@ export default function CreateCVFusionPage() {
                   </Button>
                 </div>
                 
-                <div className="flex flex-wrap gap-2">
-                  {hobbies.map((hobby, i) => (
-                    <Badge key={i} className="bg-pink-100 text-pink-700 border-pink-200 gap-2">
-                      {hobby}
-                      <button onClick={() => setHobbies(hobbies.filter((_, idx) => idx !== i))}>×</button>
-                    </Badge>
-                  ))}
-                </div>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndHobbies}>
+                  <SortableContext items={hobbies} strategy={horizontalListSortingStrategy}>
+                    <div className="flex flex-wrap gap-2">
+                      {hobbies.map((hobby) => (
+                        <DraggableChip
+                          key={hobby}
+                          id={hobby}
+                          onRemove={() => setHobbies(hobbies.filter((h) => h !== hobby))}
+                          className="bg-pink-100 text-pink-700 border-pink-200"
+                        >
+                          {hobby}
+                        </DraggableChip>
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               </div>
-            </SectionCard>
+            </DraggableSectionCard>
 
             {/* SECTIONS DYNAMIQUES */}
             {customSections.map((section) => {
@@ -892,7 +855,7 @@ export default function CreateCVFusionPage() {
               }[config.icon as keyof typeof config];
               
               return (
-                <SectionCard 
+                <DraggableSectionCard 
                   key={section.id}
                   id={section.id} 
                   title={config.label} 
@@ -905,10 +868,12 @@ export default function CreateCVFusionPage() {
                     data={section.data}
                     onUpdate={(data) => handleUpdateSectionData(section.id, data)}
                   />
-                </SectionCard>
+                </DraggableSectionCard>
               );
             })}
-          </div>
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
 
         {/* PREVIEW DROITE */}

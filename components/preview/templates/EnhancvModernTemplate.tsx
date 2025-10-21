@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Globe, Heart } from "lucide-react";
+import { Mail, Phone, MapPin, Briefcase, GraduationCap, Award, Globe, Heart, CheckCircle2, Linkedin, Github, ExternalLink } from "lucide-react";
 
 interface EnhancvModernTemplateProps {
   prenom: string;
@@ -12,13 +12,15 @@ interface EnhancvModernTemplateProps {
   posteRecherche: string;
   objectif: string;
   profileImage?: string;
-  experiences: { poste: string; entreprise: string; periode: string; description: string }[];
-  formation: string;
-  ecole: string;
-  anneeFormation: string;
-  competences: string[];
+  experiences: { poste: string; entreprise: string; periode: string; description: string; achievements?: string[] }[];
+  formation: string | Array<{ diplome: string; ecole: string; annee: string; mention?: string }>;
+  ecole?: string;
+  anneeFormation?: string;
+  competences: ({ nom: string; niveau?: number; categorie?: string } | string)[];
+  certifications?: { nom: string; organisme: string; annee: string }[];
   languages: { language: string; proficiency: string }[];
   hobbies: string[];
+  liens?: { linkedin?: string; github?: string; portfolio?: string };
   customization?: {
     primaryColor?: string;
     fontFamily?: string;
@@ -42,257 +44,374 @@ export const EnhancvModernTemplate: React.FC<EnhancvModernTemplateProps> = ({
   ecole,
   anneeFormation,
   competences,
+  certifications = [],
   languages,
   hobbies,
+  liens = {},
   customization = {},
 }) => {
   const fullName = `${prenom} ${nom}`.trim();
   
   // Apply customization with defaults
-  const primaryColor = customization.primaryColor || "#3B82F6";
+  const primaryColor = customization.primaryColor || "#06B6D4";
   const fontFamily = customization.fontFamily || "'Inter', sans-serif";
   const fontSize = (customization.fontSize || 100) / 100;
   const photoSize = (customization.photoSize || 100) / 100;
   const spacing = (customization.spacing || 100) / 100;
 
+  // Convert formation to array if needed
+  const formationArray = React.useMemo(() => {
+    if (!formation) return [];
+    if (Array.isArray(formation)) return formation;
+    return [{
+      diplome: formation,
+      ecole: ecole || '',
+      annee: anneeFormation || '',
+    }];
+  }, [formation, ecole, anneeFormation]);
+
+  // Group skills by category
+  const groupedSkills = React.useMemo(() => {
+    const groups: { [key: string]: string[] } = {};
+    competences.forEach(skill => {
+      const skillName = typeof skill === 'string' ? skill : skill.nom;
+      const category = typeof skill === 'object' && skill.categorie ? skill.categorie : 'Techniques';
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(skillName);
+    });
+    return groups;
+  }, [competences]);
+
   return (
     <div 
-      className="w-[21cm] h-[29.7cm] bg-white shadow-2xl mx-auto p-0 overflow-hidden" 
+      className="w-[21cm] h-[29.7cm] bg-white shadow-2xl mx-auto overflow-hidden print:shadow-none" 
       style={{ 
         fontFamily,
-        fontSize: `${fontSize}rem`
+        fontSize: `${0.9 * fontSize}rem`
       }}
     >
-      {/* HEADER - Bande colorée avec nom */}
+      {/* HEADER - Bande colorée optimisée */}
       <div 
-        className="bg-gradient-to-r px-12 text-white relative overflow-hidden"
+        className="px-10 text-white relative overflow-hidden"
         style={{ 
-          background: `linear-gradient(to right, ${primaryColor}, ${primaryColor}dd, ${primaryColor}bb)`,
-          paddingTop: `${2.5 * spacing}rem`,
-          paddingBottom: `${2.5 * spacing}rem`
+          background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 50%, ${primaryColor}bb 100%)`,
+          paddingTop: `${2 * spacing}rem`,
+          paddingBottom: `${2 * spacing}rem`
         }}
       >
+        {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
+        <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-white/5 rounded-full -mb-24"></div>
+        <div className="absolute top-1/2 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16"></div>
         
         <div className="relative z-10">
-          <h1 className="text-5xl font-bold mb-2 tracking-tight">{fullName}</h1>
-          <p className="text-2xl text-blue-100 font-light mb-6">{posteRecherche || "Professionnel"}</p>
+          <h1 className="text-4xl font-bold mb-1 tracking-tight">{fullName}</h1>
+          <p className="text-lg text-white/90 font-medium mb-4">{posteRecherche || "Professionnel"}</p>
           
-          <div className="flex gap-6 text-sm text-blue-50">
+          <div className="flex flex-wrap gap-4 text-xs text-white/80">
             {email && (
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
+              <div className="flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5" />
                 <span>{email}</span>
               </div>
             )}
             {telephone && (
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
+              <div className="flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5" />
                 <span>{telephone}</span>
               </div>
             )}
             {adresse && (
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
+              <div className="flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5" />
                 <span>{adresse}</span>
               </div>
             )}
           </div>
+
+          {/* Social Links */}
+          {(liens.linkedin || liens.github || liens.portfolio) && (
+            <div className="flex gap-2 mt-3">
+              {liens.linkedin && (
+                <a href={liens.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium hover:bg-white/30 transition-colors">
+                  <Linkedin className="w-3 h-3" />
+                  LinkedIn
+                </a>
+              )}
+              {liens.github && (
+                <a href={liens.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium hover:bg-white/30 transition-colors">
+                  <Github className="w-3 h-3" />
+                  GitHub
+                </a>
+              )}
+              {liens.portfolio && (
+                <a href={liens.portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-medium hover:bg-white/30 transition-colors">
+                  <ExternalLink className="w-3 h-3" />
+                  Portfolio
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* CONTENT - 2 colonnes */}
       <div className="flex">
-        {/* COLONNE GAUCHE - 40% */}
+        {/* COLONNE GAUCHE - 35% */}
         <div 
-          className="w-[40%] bg-gray-50 px-8"
+          className="w-[35%] bg-gray-50 px-6"
           style={{ 
-            paddingTop: `${2.5 * spacing}rem`,
-            paddingBottom: `${2.5 * spacing}rem`
+            paddingTop: `${1.75 * spacing}rem`,
+            paddingBottom: `${1.75 * spacing}rem`
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: `${2 * spacing}rem` }}>
-          {/* Photo */}
-          {profileImage && (
-            <div 
-              className="mx-auto rounded-full overflow-hidden shadow-lg"
-              style={{ 
-                width: `${10 * photoSize}rem`,
-                height: `${10 * photoSize}rem`,
-                borderWidth: '4px',
-                borderColor: primaryColor,
-                borderStyle: 'solid'
-              }}
-            >
-              <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-            </div>
-          )}
-
-          {/* Compétences */}
-          {competences.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Award className="w-5 h-5" style={{ color: primaryColor }} />
-                COMPÉTENCES
-              </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: `${0.5 * spacing}rem` }}>
-                {competences.map((skill, i) => (
-                  <div 
-                    key={i} 
-                    className="bg-white px-4 py-2 rounded-lg shadow-sm"
-                    style={{ borderLeft: `4px solid ${primaryColor}` }}
-                  >
-                    <span className="text-sm font-medium text-gray-700">{skill}</span>
-                  </div>
-                ))}
+          <div className="space-y-5">
+            {/* Photo */}
+            {profileImage && (
+              <div 
+                className="mx-auto rounded-2xl overflow-hidden shadow-xl"
+                style={{ 
+                  width: `${8 * photoSize}rem`,
+                  height: `${8 * photoSize}rem`,
+                  borderWidth: '3px',
+                  borderColor: primaryColor,
+                  borderStyle: 'solid'
+                }}
+              >
+                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Langues */}
-          {languages.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5" style={{ color: primaryColor }} />
-                LANGUES
-              </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: `${0.75 * spacing}rem` }}>
-                {languages.map((lang, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-700">{lang.language}</span>
-                      <span className="text-xs text-gray-500">{lang.proficiency}</span>
+            {/* Compétences - En badges/blocs */}
+            {Object.keys(groupedSkills).length > 0 && (
+              <div>
+                <h2 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wide">
+                  <Award className="w-4 h-4" style={{ color: primaryColor }} />
+                  Compétences
+                </h2>
+                <div className="space-y-4">
+                  {Object.entries(groupedSkills).map(([category, skills]) => (
+                    <div key={category}>
+                      {Object.keys(groupedSkills).length > 1 && (
+                        <p className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wider">{category}</p>
+                      )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {skills.map((skill, i) => (
+                          <span 
+                            key={i} 
+                            className="px-2.5 py-1 text-xs font-medium rounded-md shadow-sm hover:shadow transition-shadow"
+                            style={{ 
+                              backgroundColor: `${primaryColor}15`,
+                              color: primaryColor,
+                              border: `1px solid ${primaryColor}30`
+                            }}
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full"
-                        style={{ 
-                          background: `linear-gradient(to right, ${primaryColor}, ${primaryColor}aa)`,
-                          width: lang.proficiency === "Avancé" ? "100%" : 
-                                 lang.proficiency === "Intermédiaire" ? "66%" : "33%" 
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Loisirs */}
-          {hobbies.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Heart className="w-5 h-5" style={{ color: primaryColor }} />
-                LOISIRS
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {hobbies.map((hobby, i) => (
-                  <span 
-                    key={i} 
-                    className="px-3 py-1 text-xs font-medium rounded-full"
-                    style={{ 
-                      backgroundColor: `${primaryColor}22`,
-                      color: primaryColor
-                    }}
-                  >
-                    {hobby}
-                  </span>
-                ))}
+            {/* Certifications */}
+            {certifications.length > 0 && (
+              <div>
+                <h2 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wide">
+                  <Award className="w-4 h-4" style={{ color: primaryColor }} />
+                  Certifications
+                </h2>
+                <div className="space-y-2">
+                  {certifications.map((cert, i) => (
+                    <div key={i} className="bg-white p-2.5 rounded-lg shadow-sm border-l-3" style={{ borderLeftColor: primaryColor }}>
+                      <p className="text-xs font-semibold text-gray-800 leading-tight">{cert.nom}</p>
+                      <p className="text-xs text-gray-600 mt-0.5">{cert.organisme}</p>
+                      <p className="text-xs font-medium mt-0.5" style={{ color: primaryColor }}>{cert.annee}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* Langues */}
+            {languages.length > 0 && (
+              <div>
+                <h2 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wide">
+                  <Globe className="w-4 h-4" style={{ color: primaryColor }} />
+                  Langues
+                </h2>
+                <div className="space-y-2.5">
+                  {languages.map((lang, i) => {
+                    const levelMap: { [key: string]: number } = {
+                      "Natif": 100, "Courant": 85, "Avancé": 70, "Intermédiaire": 50, "Débutant": 30
+                    };
+                    const width = levelMap[lang.proficiency] || 50;
+                    
+                    return (
+                      <div key={i}>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs font-semibold text-gray-700">{lang.language}</span>
+                          <span className="text-xs text-gray-500">{lang.proficiency}</span>
+                        </div>
+                        <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{ 
+                              background: `linear-gradient(to right, ${primaryColor}, ${primaryColor}cc)`,
+                              width: `${width}%`
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Loisirs */}
+            {hobbies.length > 0 && (
+              <div>
+                <h2 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2 uppercase tracking-wide">
+                  <Heart className="w-4 h-4" style={{ color: primaryColor }} />
+                  Centres d'Intérêt
+                </h2>
+                <div className="flex flex-wrap gap-1.5">
+                  {hobbies.map((hobby, i) => (
+                    <span 
+                      key={i} 
+                      className="px-2.5 py-1 text-xs font-medium rounded-full"
+                      style={{ 
+                        backgroundColor: `${primaryColor}15`,
+                        color: primaryColor
+                      }}
+                    >
+                      {hobby}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* COLONNE DROITE - 60% */}
+        {/* COLONNE DROITE - 65% */}
         <div 
-          className="w-[60%] px-10"
+          className="w-[65%] px-8"
           style={{ 
-            paddingTop: `${2.5 * spacing}rem`,
-            paddingBottom: `${2.5 * spacing}rem`
+            paddingTop: `${1.75 * spacing}rem`,
+            paddingBottom: `${1.75 * spacing}rem`
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: `${2 * spacing}rem` }}>
-          {/* À propos */}
-          {objectif && (
-            <div>
-              <h2 
-                className="text-xl font-bold text-gray-800 mb-4 pb-2"
-                style={{ borderBottom: `2px solid ${primaryColor}` }}
-              >
-                À PROPOS
-              </h2>
-              <p className="text-sm text-gray-600 leading-relaxed">{objectif}</p>
-            </div>
-          )}
+          <div className="space-y-6">
+            {/* À propos */}
+            {objectif && (
+              <div>
+                <h2 
+                  className="text-base font-bold text-gray-800 mb-3 pb-2 uppercase tracking-wide"
+                  style={{ borderBottom: `2px solid ${primaryColor}` }}
+                >
+                  À Propos
+                </h2>
+                <p className="text-xs text-gray-700 leading-relaxed text-justify">{objectif}</p>
+              </div>
+            )}
 
-          {/* Expériences */}
-          {experiences.length > 0 && (
-            <div>
-              <h2 
-                className="text-xl font-bold text-gray-800 mb-6 pb-2 flex items-center gap-2"
-                style={{ borderBottom: `2px solid ${primaryColor}` }}
-              >
-                <Briefcase className="w-5 h-5" style={{ color: primaryColor }} />
-                EXPÉRIENCES PROFESSIONNELLES
-              </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: `${1.5 * spacing}rem` }}>
-                {experiences.map((exp, i) => (
-                  <div 
-                    key={i} 
-                    className="relative pl-6"
-                    style={{ borderLeft: `2px solid ${primaryColor}33` }}
-                  >
+            {/* Expériences */}
+            {experiences.length > 0 && (
+              <div>
+                <h2 
+                  className="text-base font-bold text-gray-800 mb-4 pb-2 flex items-center gap-2 uppercase tracking-wide"
+                  style={{ borderBottom: `2px solid ${primaryColor}` }}
+                >
+                  <Briefcase className="w-4 h-4" style={{ color: primaryColor }} />
+                  Expériences Professionnelles
+                </h2>
+                <div className="space-y-4">
+                  {experiences.map((exp, i) => (
                     <div 
-                      className="absolute top-0 w-4 h-4 rounded-full border-4 border-white"
-                      style={{ 
-                        left: '-9px',
-                        backgroundColor: primaryColor
-                      }}
-                    ></div>
-                    <h3 className="text-base font-bold text-gray-800">{exp.poste}</h3>
-                    <p className="text-sm font-medium mb-1" style={{ color: primaryColor }}>{exp.entreprise}</p>
-                    <p className="text-xs text-gray-500 mb-2">{exp.periode}</p>
-                    <p className="text-sm text-gray-600 leading-relaxed">{exp.description}</p>
-                  </div>
-                ))}
+                      key={i} 
+                      className="relative pl-5 pb-4"
+                      style={{ borderLeft: `2px solid ${primaryColor}30` }}
+                    >
+                      <div 
+                        className="absolute top-0.5 w-3 h-3 rounded-full border-3 border-white shadow-md"
+                        style={{ 
+                          left: '-7px',
+                          backgroundColor: primaryColor
+                        }}
+                      ></div>
+                      
+                      <div className="flex justify-between items-start mb-1.5 gap-2">
+                        <h3 className="text-sm font-bold text-gray-900">{exp.poste}</h3>
+                        <span className="text-xs text-gray-500 whitespace-nowrap bg-gray-100 px-2 py-0.5 rounded">
+                          {exp.periode}
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold mb-2" style={{ color: primaryColor }}>{exp.entreprise}</p>
+                      <p className="text-xs text-gray-700 leading-relaxed text-justify mb-2">{exp.description}</p>
+                      
+                      {/* Achievements */}
+                      {exp.achievements && exp.achievements.length > 0 && (
+                        <div className="space-y-1 mt-2 pt-2 border-t border-gray-200">
+                          {exp.achievements.map((achievement, idx) => (
+                            <div key={idx} className="flex items-start gap-1.5">
+                              <CheckCircle2 className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: primaryColor }} />
+                              <span className="text-xs text-gray-700 leading-relaxed">{achievement}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Formation */}
-          {formation && (
-            <div>
-              <h2 
-                className="text-xl font-bold text-gray-800 mb-6 pb-2 flex items-center gap-2"
-                style={{ borderBottom: `2px solid ${primaryColor}` }}
-              >
-                <GraduationCap className="w-5 h-5" style={{ color: primaryColor }} />
-                FORMATION
-              </h2>
-              <div 
-                className="relative pl-6"
-                style={{ borderLeft: `2px solid ${primaryColor}33` }}
-              >
-                <div 
-                  className="absolute top-0 w-4 h-4 rounded-full border-4 border-white"
-                  style={{ 
-                    left: '-9px',
-                    backgroundColor: primaryColor
-                  }}
-                ></div>
-                <h3 className="text-base font-bold text-gray-800">{formation}</h3>
-                <p className="text-sm font-medium mb-1" style={{ color: primaryColor }}>{ecole}</p>
-                <p className="text-xs text-gray-500">{anneeFormation}</p>
+            {/* Formation */}
+            {formationArray.length > 0 && (
+              <div>
+                <h2 
+                  className="text-base font-bold text-gray-800 mb-4 pb-2 flex items-center gap-2 uppercase tracking-wide"
+                  style={{ borderBottom: `2px solid ${primaryColor}` }}
+                >
+                  <GraduationCap className="w-4 h-4" style={{ color: primaryColor }} />
+                  Formation
+                </h2>
+                <div className="space-y-3">
+                  {formationArray.map((form, i) => (
+                    <div 
+                      key={i}
+                      className="relative pl-5"
+                      style={{ borderLeft: `2px solid ${primaryColor}30` }}
+                    >
+                      <div 
+                        className="absolute top-0.5 w-3 h-3 rounded-full border-3 border-white shadow-md"
+                        style={{ 
+                          left: '-7px',
+                          backgroundColor: primaryColor
+                        }}
+                      ></div>
+                      <div className="flex justify-between items-start mb-1 gap-2">
+                        <h3 className="text-sm font-bold text-gray-900">{form.diplome}</h3>
+                        <span className="text-xs text-gray-500 whitespace-nowrap bg-gray-100 px-2 py-0.5 rounded">
+                          {form.annee}
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold" style={{ color: primaryColor }}>{form.ecole}</p>
+                      {form.mention && (
+                        <p className="text-xs text-gray-600 mt-1 italic">{form.mention}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
-
