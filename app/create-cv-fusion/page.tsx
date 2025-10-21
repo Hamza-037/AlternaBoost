@@ -546,8 +546,11 @@ export default function CreateCVFusionPage() {
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndSections}>
             <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
               <div className="p-6 space-y-4">
-                {/* Section: Qui êtes-vous ? */}
-                <DraggableSectionCard id="personal" title="Qui êtes-vous ?" icon={User} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetPersonalInfo}>
+                {/* Map des sections pour permettre la réorganisation */}
+                {sectionOrder.map((sectionId) => {
+                  // Section: Qui êtes-vous ?
+                  if (sectionId === "personal") return (
+                    <DraggableSectionCard key="personal" id="personal" title="Qui êtes-vous ?" icon={User} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetPersonalInfo}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Prénom" 
@@ -617,9 +620,11 @@ export default function CreateCVFusionPage() {
                 </Button>
               </div>
             </DraggableSectionCard>
+                  );
 
-            {/* Section: Expériences */}
-            <DraggableSectionCard id="experiences" title="Expériences" icon={Briefcase} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetExperiences}>
+                  // Section: Expériences
+                  if (sectionId === "experiences") return (
+                    <DraggableSectionCard key="experiences" id="experiences" title="Expériences" icon={Briefcase} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetExperiences}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Poste" 
@@ -684,9 +689,11 @@ export default function CreateCVFusionPage() {
                 )}
               </div>
             </DraggableSectionCard>
+                    );
 
-            {/* Section: Formation */}
-            <DraggableSectionCard id="formation" title="Formation" icon={GraduationCap} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetFormation}>
+                  // Section: Formation
+                  if (sectionId === "formation") return (
+                    <DraggableSectionCard key="formation" id="formation" title="Formation" icon={GraduationCap} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetFormation}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Diplôme (ex: Master Informatique)" 
@@ -708,9 +715,11 @@ export default function CreateCVFusionPage() {
                 />
               </div>
             </DraggableSectionCard>
+                    );
 
-            {/* Section: Compétences */}
-            <DraggableSectionCard id="competences" title="Compétences" icon={Award} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetCompetences}>
+                  // Section: Compétences
+                  if (sectionId === "competences") return (
+                    <DraggableSectionCard key="competences" id="competences" title="Compétences" icon={Award} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetCompetences}>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input 
@@ -756,9 +765,11 @@ export default function CreateCVFusionPage() {
                 )}
               </div>
             </DraggableSectionCard>
+                    );
 
-            {/* Section: Langues */}
-            <DraggableSectionCard id="langues" title="Langues" icon={Globe} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetLanguages}>
+                  // Section: Langues
+                  if (sectionId === "langues") return (
+                    <DraggableSectionCard key="langues" id="langues" title="Langues" icon={Globe} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetLanguages}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Ex: Anglais" 
@@ -811,9 +822,11 @@ export default function CreateCVFusionPage() {
                 )}
               </div>
             </DraggableSectionCard>
+                    );
 
-            {/* Section: Loisirs */}
-            <DraggableSectionCard id="loisirs" title="Loisirs" icon={Heart} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetHobbies}>
+                  // Section: Loisirs
+                  if (sectionId === "loisirs") return (
+                    <DraggableSectionCard key="loisirs" id="loisirs" title="Loisirs" icon={Heart} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetHobbies}>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input 
@@ -846,31 +859,36 @@ export default function CreateCVFusionPage() {
                 </DndContext>
               </div>
             </DraggableSectionCard>
+                    );
 
-            {/* SECTIONS DYNAMIQUES */}
-            {customSections.map((section) => {
-              const config = SECTION_CONFIG[section.type];
-              const IconComponent = {
-                Folder, Award, BookOpen, Users, Trophy, Heart
-              }[config.icon as keyof typeof config];
-              
-              return (
-                <DraggableSectionCard 
-                  key={section.id}
-                  id={section.id} 
-                  title={config.label} 
-                  icon={IconComponent || Award} 
-                  expandedSection={expandedSection} 
-                  setExpandedSection={setExpandedSection}
-                >
-                  <DynamicSectionForm
-                    type={section.type}
-                    data={section.data}
-                    onUpdate={(data) => handleUpdateSectionData(section.id, data)}
-                  />
-                </DraggableSectionCard>
-              );
-            })}
+                  // Retourner null pour éviter les erreurs
+                  return null;
+                })}
+
+                {/* SECTIONS DYNAMIQUES */}
+                {customSections.map((section) => {
+                  const config = SECTION_CONFIG[section.type];
+                  const IconComponent = {
+                    Folder, Award, BookOpen, Users, Trophy, Heart
+                  }[config.icon as keyof typeof config];
+                  
+                  return (
+                    <DraggableSectionCard 
+                      key={section.id}
+                      id={section.id} 
+                      title={config.label} 
+                      icon={IconComponent || Award} 
+                      expandedSection={expandedSection} 
+                      setExpandedSection={setExpandedSection}
+                    >
+                      <DynamicSectionForm
+                        type={section.type}
+                        data={section.data}
+                        onUpdate={(data) => handleUpdateSectionData(section.id, data)}
+                      />
+                    </DraggableSectionCard>
+                  );
+                })}
               </div>
             </SortableContext>
           </DndContext>
