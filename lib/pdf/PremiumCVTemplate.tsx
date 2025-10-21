@@ -8,11 +8,6 @@ import {
 } from "@react-pdf/renderer";
 import type { GeneratedCV } from "@/types/cv";
 
-// Enregistrement des polices (optionnel - utilise les polices par défaut si non disponible)
-// Pour utiliser Inter, il faudrait l'héberger et la charger ici
-// import { Font } from "@react-pdf/renderer";
-// Font.register({ family: 'Inter', src: '/fonts/Inter-Regular.ttf' });
-
 // ========================================
 // STYLES DU TEMPLATE PREMIUM
 // ========================================
@@ -21,7 +16,7 @@ const styles = StyleSheet.create({
   page: {
     backgroundColor: "#F9FAFB",
     padding: 40,
-    fontFamily: "Helvetica", // Remplacer par "Inter" si police ajoutée
+    fontFamily: "Helvetica",
     fontSize: 10,
     color: "#111827",
     lineHeight: 1.5,
@@ -36,15 +31,15 @@ const styles = StyleSheet.create({
   },
   headerName: {
     fontSize: 28,
-    fontWeight: "bold",
     color: "#111827",
     marginBottom: 4,
     fontFamily: "Helvetica-Bold",
+    letterSpacing: 0.5,
   },
   headerTitle: {
     fontSize: 14,
     color: "#2563EB",
-    fontWeight: "semibold",
+    fontFamily: "Helvetica-Bold",
   },
 
   // === Layout deux colonnes ===
@@ -72,7 +67,6 @@ const styles = StyleSheet.create({
 
   sectionTitle: {
     fontSize: 12,
-    fontWeight: "bold",
     color: "#2563EB",
     marginBottom: 8,
     textTransform: "uppercase",
@@ -92,7 +86,6 @@ const styles = StyleSheet.create({
   },
 
   contactLabel: {
-    fontWeight: "bold",
     color: "#111827",
     fontFamily: "Helvetica-Bold",
   },
@@ -104,7 +97,6 @@ const styles = StyleSheet.create({
 
   skillName: {
     fontSize: 10,
-    fontWeight: "bold",
     color: "#111827",
     marginBottom: 3,
     fontFamily: "Helvetica-Bold",
@@ -115,12 +107,12 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: "#E5E7EB",
     borderRadius: 2,
-    overflow: "hidden",
   },
 
   skillBarFill: {
     height: "100%",
     backgroundColor: "#2563EB",
+    borderRadius: 2,
   },
 
   skillLevel: {
@@ -140,6 +132,13 @@ const styles = StyleSheet.create({
   skillBullet: {
     fontSize: 6,
     marginRight: 4,
+    color: "#2563EB",
+  },
+
+  skillSimpleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
   },
 
   // === Objectif professionnel ===
@@ -158,27 +157,30 @@ const styles = StyleSheet.create({
   experienceHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 4,
+    gap: 10,
   },
 
   experienceTitle: {
     fontSize: 11,
-    fontWeight: "bold",
     color: "#111827",
     fontFamily: "Helvetica-Bold",
+    flex: 1,
   },
 
   experienceDate: {
     fontSize: 9,
     color: "#6B7280",
     fontStyle: "italic",
+    flexShrink: 0,
   },
 
   experienceCompany: {
     fontSize: 10,
     color: "#2563EB",
     marginBottom: 6,
-    fontWeight: "semibold",
+    fontFamily: "Helvetica-Bold",
   },
 
   experienceDescription: {
@@ -188,11 +190,46 @@ const styles = StyleSheet.create({
     textAlign: "justify",
   },
 
-  // === Formation ===
-  formationText: {
-    fontSize: 10,
+  // Bullet points pour expériences
+  bulletPoint: {
+    flexDirection: "row",
+    marginBottom: 4,
+    paddingLeft: 5,
+  },
+
+  bullet: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#2563EB",
+    marginRight: 6,
+    marginTop: 4,
+    flexShrink: 0,
+  },
+
+  bulletText: {
+    flex: 1,
+    fontSize: 9,
     color: "#374151",
-    lineHeight: 1.6,
+    lineHeight: 1.4,
+  },
+
+  // === Formation ===
+  formationItem: {
+    marginBottom: 12,
+  },
+
+  formationTitle: {
+    fontSize: 11,
+    color: "#111827",
+    fontFamily: "Helvetica-Bold",
+    marginBottom: 3,
+  },
+
+  formationDetails: {
+    fontSize: 9,
+    color: "#6B7280",
+    lineHeight: 1.4,
   },
 
   // === Pied de page ===
@@ -217,47 +254,61 @@ const styles = StyleSheet.create({
   footerLogo: {
     fontSize: 9,
     color: "#2563EB",
-    fontWeight: "bold",
     fontFamily: "Helvetica-Bold",
   },
-
-  // === Séparateur visuel ===
-  divider: {
-    height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 8,
-  },
 });
+
+// ========================================
+// UTILS : Extraction des bullet points
+// ========================================
+const extractBulletPoints = (description: string): string[] => {
+  if (!description) return [];
+  
+  const points = description
+    .split(/[.•\-\n]/)
+    .map(s => s.trim())
+    .filter(s => s.length > 10);
+  
+  return points.slice(0, 5);
+};
+
+// ========================================
+// UTILS : Calculer le niveau de compétence
+// ========================================
+const getSkillLevelLabel = (level: number): string => {
+  if (level >= 80) return "Expert";
+  if (level >= 60) return "Avancé";
+  if (level >= 40) return "Intermédiaire";
+  return "Débutant";
+};
 
 // ========================================
 // COMPOSANT : Barre de compétence visuelle
 // ========================================
 interface SkillBarProps {
   name: string;
-  level?: number; // 0-100 ou undefined
+  level?: number;
 }
 
 const SkillBar: React.FC<SkillBarProps> = ({ name, level }) => {
-  // Si un niveau est fourni (0-100), afficher une barre
-  // Sinon, afficher juste le nom de la compétence
-  
-  if (level !== undefined) {
+  if (level !== undefined && level > 0) {
+    const validLevel = Math.min(100, Math.max(0, level));
+    
     return (
       <View style={styles.skillItem}>
         <Text style={styles.skillName}>{name}</Text>
         <View style={styles.skillBar}>
-          <View style={[styles.skillBarFill, { width: `${level}%` }]} />
+          <View style={[styles.skillBarFill, { width: `${validLevel}%` }]} />
         </View>
         <Text style={styles.skillLevel}>
-          {level >= 80 ? "Expert" : level >= 60 ? "Avancé" : level >= 40 ? "Intermédiaire" : "Débutant"}
+          {getSkillLevelLabel(validLevel)}
         </Text>
       </View>
     );
   }
 
-  // Affichage simple (bullet point)
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View style={styles.skillSimpleContainer}>
       <Text style={styles.skillBullet}>•</Text>
       <Text style={styles.skillTag}>{name}</Text>
     </View>
@@ -272,6 +323,10 @@ interface ContactSectionProps {
 }
 
 const ContactSection: React.FC<ContactSectionProps> = ({ data }) => {
+  const hasContact = data.email || data.telephone;
+  
+  if (!hasContact) return null;
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Contact</Text>
@@ -301,13 +356,17 @@ interface SkillsSectionProps {
 }
 
 const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
-  // Parse les compétences (peut être string ou array de strings)
   const skillList = Array.isArray(skills)
+    ? skills.filter(Boolean).slice(0, 12)
+    : typeof skills === 'string'
     ? skills
-    : skills
         .split(/[,\n]/)
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .slice(0, 12)
+    : [];
+
+  if (skillList.length === 0) return null;
 
   return (
     <View style={styles.section}>
@@ -316,9 +375,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
         <SkillBar 
           key={index} 
           name={skill} 
-          // Pour un rendu plus dynamique, vous pourriez attribuer des niveaux aléatoires
-          // ou les récupérer depuis les données. Ici, affichage simple.
-          level={undefined} 
+          level={undefined}
         />
       ))}
     </View>
@@ -333,6 +390,8 @@ interface ObjectiveSectionProps {
 }
 
 const ObjectiveSection: React.FC<ObjectiveSectionProps> = ({ objective }) => {
+  if (!objective || objective.trim().length === 0) return null;
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Objectif Professionnel</Text>
@@ -349,24 +408,36 @@ interface ExperiencesSectionProps {
 }
 
 const ExperiencesSection: React.FC<ExperiencesSectionProps> = ({ experiences }) => {
+  if (!experiences || experiences.length === 0) return null;
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Expériences Professionnelles</Text>
-      {experiences.map((exp, index) => (
-        <View key={index} style={styles.experienceItem}>
-          {/* En-tête : Titre + Date */}
-          <View style={styles.experienceHeader}>
-            <Text style={styles.experienceTitle}>{exp.poste}</Text>
-            <Text style={styles.experienceDate}>{exp.periode}</Text>
+      {experiences.map((exp, index) => {
+        const bulletPoints = extractBulletPoints(exp.description);
+        
+        return (
+          <View key={index} style={styles.experienceItem}>
+            <View style={styles.experienceHeader}>
+              <Text style={styles.experienceTitle}>{exp.poste}</Text>
+              <Text style={styles.experienceDate}>{exp.periode}</Text>
+            </View>
+            
+            <Text style={styles.experienceCompany}>{exp.entreprise}</Text>
+            
+            {bulletPoints.length > 0 ? (
+              bulletPoints.map((point, i) => (
+                <View key={i} style={styles.bulletPoint}>
+                  <View style={styles.bullet} />
+                  <Text style={styles.bulletText}>{point}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.experienceDescription}>{exp.description}</Text>
+            )}
           </View>
-          
-          {/* Entreprise */}
-          <Text style={styles.experienceCompany}>{exp.entreprise}</Text>
-          
-          {/* Description */}
-          <Text style={styles.experienceDescription}>{exp.description}</Text>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 };
@@ -375,14 +446,25 @@ const ExperiencesSection: React.FC<ExperiencesSectionProps> = ({ experiences }) 
 // COMPOSANT : Section Formation
 // ========================================
 interface FormationSectionProps {
-  formation: string;
+  data: GeneratedCV;
 }
 
-const FormationSection: React.FC<FormationSectionProps> = ({ formation }) => {
+const FormationSection: React.FC<FormationSectionProps> = ({ data }) => {
+  if (!data.formation) return null;
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Formation</Text>
-      <Text style={styles.formationText}>{formation}</Text>
+      <View style={styles.formationItem}>
+        <Text style={styles.formationTitle}>{data.formation}</Text>
+        {(data.ecole || data.anneeFormation) && (
+          <Text style={styles.formationDetails}>
+            {data.ecole}
+            {data.ecole && data.anneeFormation && " • "}
+            {data.anneeFormation}
+          </Text>
+        )}
+      </View>
     </View>
   );
 };
@@ -395,74 +477,46 @@ interface PremiumCVTemplateProps {
 }
 
 export const PremiumCVTemplate: React.FC<PremiumCVTemplateProps> = ({ data }) => {
-  // Formater la date actuelle pour le pied de page
   const currentDate = new Date().toLocaleDateString("fr-FR", {
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
 
+  const headerSubtitle = data.entrepriseCiblee
+    ? `Candidat(e) pour ${data.entrepriseCiblee}`
+    : data.formation || "Professionnel(le) en recherche d'opportunités";
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* ===========================
-            EN-TÊTE
-        =========================== */}
+        {/* EN-TÊTE */}
         <View style={styles.header}>
           <Text style={styles.headerName}>
             {data.prenom} {data.nom}
           </Text>
           <Text style={styles.headerTitle}>
-            {data.entrepriseCiblee
-              ? `Candidat(e) pour ${data.entrepriseCiblee}`
-              : "Étudiant(e) en recherche d'alternance"}
+            {headerSubtitle}
           </Text>
         </View>
 
-        {/* ===========================
-            CONTENU DEUX COLONNES
-        =========================== */}
+        {/* CONTENU DEUX COLONNES */}
         <View style={styles.contentContainer}>
           {/* COLONNE GAUCHE (30%) */}
           <View style={styles.leftColumn}>
-            {/* Coordonnées */}
             <ContactSection data={data} />
-
-            {/* Compétences */}
             <SkillsSection skills={data.competencesAmeliorees || data.competences} />
-
-            {/* SECTION BONUS : Langues (optionnel, à ajouter si besoin) */}
-            {/* <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Langues</Text>
-              <Text style={styles.contactItem}>Français : Natif</Text>
-              <Text style={styles.contactItem}>Anglais : Courant</Text>
-            </View> */}
-
-            {/* SECTION BONUS : Centres d'intérêt (optionnel) */}
-            {/* <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Centres d&apos;intérêt</Text>
-              <Text style={styles.skillTag}>• Développement open-source</Text>
-              <Text style={styles.skillTag}>• Photographie</Text>
-              <Text style={styles.skillTag}>• Voyages</Text>
-            </View> */}
           </View>
 
           {/* COLONNE DROITE (70%) */}
           <View style={styles.rightColumn}>
-            {/* Objectif professionnel */}
             <ObjectiveSection objective={data.objectifAmeliore || data.objectif} />
-
-            {/* Expériences professionnelles */}
             <ExperiencesSection experiences={data.experiencesAmeliorees} />
-
-            {/* Formation */}
-            <FormationSection formation={data.formation} />
+            <FormationSection data={data} />
           </View>
         </View>
 
-        {/* ===========================
-            PIED DE PAGE
-        =========================== */}
+        {/* PIED DE PAGE */}
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>CV généré le {currentDate}</Text>
           <Text style={styles.footerLogo}>AlternaBoost</Text>
@@ -471,4 +525,3 @@ export const PremiumCVTemplate: React.FC<PremiumCVTemplateProps> = ({ data }) =>
     </Document>
   );
 };
-
