@@ -7,20 +7,28 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CVPreviewHTML } from "@/components/preview/CVPreviewHTML";
 import { CVAnalysis } from "@/components/preview/CVAnalysis";
-import { CVCustomizer } from "@/components/cv/CVCustomizer";
 import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { Footer } from "@/components/landing/Footer";
+import { TemplateSelector } from "@/components/cv/TemplateSelector";
+import { ModernCVTemplate } from "@/components/preview/templates/ModernCVTemplate";
+import { PremiumCVTemplate } from "@/components/preview/templates/PremiumCVTemplate";
+import { CreativeCVTemplate } from "@/components/preview/templates/CreativeCVTemplate";
+import { MinimalCVTemplate } from "@/components/preview/templates/MinimalCVTemplate";
+import { useUser } from "@clerk/nextjs";
 import type { GeneratedCV, CVStyle, CVSection } from "@/types/cv";
 
 export default function PreviewCVPage() {
   const router = useRouter();
+  const { user } = useUser();
   const [cvData, setCvData] = useState<GeneratedCV | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<"premium" | "modern">("modern");
+  const [selectedTemplate, setSelectedTemplate] = useState<"modern" | "premium" | "creative" | "minimal">("modern");
   const [profileImage, setProfileImage] = useState<string>("");
+  
+  // Récupérer le plan de l'utilisateur
+  const userPlan = (user?.publicMetadata?.plan as string) || "FREE";
   
   // Style et sections personnalisées
   const [cvStyle, setCvStyle] = useState<CVStyle>({
@@ -95,10 +103,8 @@ export default function PreviewCVPage() {
       // Inclure toutes les options de personnalisation dans les données envoyées
       const dataToSend = {
         ...cvData,
-        template: cvStyle.template,
+        template: selectedTemplate,
         profileImageUrl: profileImage || undefined,
-        style: cvStyle,
-        sectionsPersonnalisees: customSections,
       };
 
       const response = await fetch("/api/generate-cv", {
@@ -316,19 +322,23 @@ export default function PreviewCVPage() {
 
         {/* Grille 3 colonnes : Personnalisation + Aperçu + Analyse */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Colonne gauche : Personnalisation (1/4) */}
+          {/* Colonne gauche : Sélection de template (1/4) */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-1"
+            className="lg:col-span-1 space-y-6"
           >
-            <CVCustomizer
-              style={cvStyle}
-              sections={customSections}
-              onStyleChange={setCvStyle}
-              onSectionsChange={setCustomSections}
-            />
+            <Card className="p-6 shadow-lg border-2 border-blue-100">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Choisissez votre template
+              </h3>
+              <TemplateSelector
+                selected={selectedTemplate}
+                onSelect={setSelectedTemplate}
+                userPlan={userPlan}
+              />
+            </Card>
           </motion.div>
 
           {/* Colonne centrale : Aperçu du CV (2/4) */}
@@ -347,13 +357,38 @@ export default function PreviewCVPage() {
               </div>
             )}
 
-            <CVPreviewHTML
-              data={cvData}
-              isEditing={isEditing}
-              onUpdate={handleUpdate}
-              style={cvStyle}
-              customSections={customSections}
-            />
+            {/* Rendu du template sélectionné */}
+            {selectedTemplate === "modern" && (
+              <ModernCVTemplate
+                data={cvData}
+                isEditing={isEditing}
+                onUpdate={handleUpdate}
+                profileImage={profileImage}
+              />
+            )}
+            {selectedTemplate === "premium" && (
+              <PremiumCVTemplate
+                data={cvData}
+                isEditing={isEditing}
+                onUpdate={handleUpdate}
+                profileImage={profileImage}
+              />
+            )}
+            {selectedTemplate === "creative" && (
+              <CreativeCVTemplate
+                data={cvData}
+                isEditing={isEditing}
+                onUpdate={handleUpdate}
+                profileImage={profileImage}
+              />
+            )}
+            {selectedTemplate === "minimal" && (
+              <MinimalCVTemplate
+                data={cvData}
+                isEditing={isEditing}
+                onUpdate={handleUpdate}
+              />
+            )}
           </motion.div>
 
           {/* Colonne droite : Photo + Analyse IA (1/4) */}
@@ -363,8 +398,8 @@ export default function PreviewCVPage() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="space-y-6"
           >
-            {/* Upload de photo (si template moderne) */}
-            {cvStyle.template === "modern" && (
+            {/* Upload de photo (pour tous les templates sauf Minimal) */}
+            {selectedTemplate !== "minimal" && (
               <Card className="p-6 shadow-lg border-2 border-blue-100">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <svg

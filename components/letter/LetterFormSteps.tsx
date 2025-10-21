@@ -20,12 +20,15 @@ import {
   Sparkles
 } from "lucide-react";
 import type { LetterFormData } from "@/types/letter";
+import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 
 const AUTOSAVE_KEY = "letter_draft";
 
 export function LetterFormSteps() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeData, setUpgradeData] = useState<{ current?: number; limit?: number }>({});
   const totalSteps = 3;
 
   const {
@@ -131,6 +134,25 @@ export function LetterFormSteps() {
 
       if (!response.ok) {
         const error = await response.json();
+        
+        // Vérifier si c'est une erreur de limite atteinte
+        if (response.status === 403 && error.error === 'Limite atteinte') {
+          setUpgradeData({ current: error.current, limit: error.limit });
+          setShowUpgradeModal(true);
+          setIsGenerating(false);
+          return;
+        }
+        
+        // Vérifier si c'est une erreur d'authentification
+        if (response.status === 401) {
+          toast.error("Veuillez vous connecter pour créer une lettre");
+          setTimeout(() => {
+            window.location.href = "/sign-in?redirect_url=/create-letter";
+          }, 1500);
+          setIsGenerating(false);
+          return;
+        }
+        
         throw new Error(error.error || "Erreur lors de la génération");
       }
 
@@ -555,13 +577,22 @@ export function LetterFormSteps() {
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  Générer ma lettre
+                  Générer ma lettre avec l'IA
                 </>
               )}
             </Button>
           )}
         </div>
       </div>
+      
+      {/* Modal d'upgrade */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        type="letter"
+        current={upgradeData.current}
+        limit={upgradeData.limit}
+      />
     </form>
   );
 }

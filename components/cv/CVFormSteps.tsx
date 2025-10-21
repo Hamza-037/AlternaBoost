@@ -27,6 +27,7 @@ import {
   Upload
 } from "lucide-react";
 import type { ExtractedCVData } from "@/types/cv-extraction";
+import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 
 const AUTOSAVE_KEY = "cv_draft";
 
@@ -34,6 +35,8 @@ export function CVFormSteps() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0); // Commencer à 0 pour l'import
   const [showImportStep, setShowImportStep] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeData, setUpgradeData] = useState<{ current?: number; limit?: number }>({});
   const totalSteps = 4;
 
   const {
@@ -151,6 +154,25 @@ export function CVFormSteps() {
 
       if (!response.ok) {
         const error = await response.json();
+        
+        // Vérifier si c'est une erreur de limite atteinte
+        if (response.status === 403 && error.error === 'Limite atteinte') {
+          setUpgradeData({ current: error.current, limit: error.limit });
+          setShowUpgradeModal(true);
+          setIsGenerating(false);
+          return;
+        }
+        
+        // Vérifier si c'est une erreur d'authentification
+        if (response.status === 401) {
+          toast.error("Veuillez vous connecter pour créer un CV");
+          setTimeout(() => {
+            window.location.href = "/sign-in?redirect_url=/create-cv";
+          }, 1500);
+          setIsGenerating(false);
+          return;
+        }
+        
         throw new Error(error.error || "Erreur lors de la génération");
       }
 
@@ -621,12 +643,16 @@ export function CVFormSteps() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="objectif">
+                  <Label htmlFor="objectif" className="flex items-center gap-2">
                     Votre objectif <span className="text-red-500">*</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                      <Sparkles className="w-3 h-3" />
+                      IA
+                    </span>
                   </Label>
                   <Textarea
                     id="objectif"
-                    placeholder="Décrivez votre objectif professionnel..."
+                    placeholder="Ex: Recherche une alternance en développement web... (l'IA va reformuler professionnellement)"
                     rows={4}
                     {...register("objectif")}
                   />
@@ -636,12 +662,16 @@ export function CVFormSteps() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="competences">
+                  <Label htmlFor="competences" className="flex items-center gap-2">
                     Compétences <span className="text-red-500">*</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                      <Sparkles className="w-3 h-3" />
+                      IA
+                    </span>
                   </Label>
                   <Textarea
                     id="competences"
-                    placeholder="Listez vos compétences (séparées par des virgules)"
+                    placeholder="Ex: JavaScript, React, Communication... (l'IA va les organiser par catégorie)"
                     rows={3}
                     {...register("competences")}
                   />
@@ -747,7 +777,7 @@ export function CVFormSteps() {
             ) : (
               <>
                 <Sparkles className="w-5 h-5" />
-                Générer mon CV
+                Générer mon CV avec l'IA
               </>
             )}
           </Button>
@@ -756,6 +786,15 @@ export function CVFormSteps() {
       </div>
       </>
       )}
+      
+      {/* Modal d'upgrade */}
+      <UpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        type="cv"
+        current={upgradeData.current}
+        limit={upgradeData.limit}
+      />
     </form>
   );
 }

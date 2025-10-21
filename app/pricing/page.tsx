@@ -88,8 +88,9 @@ export default function PricingPage() {
   const { isSignedIn } = useUser();
 
   const handleSubscribe = async (priceId: string | null | undefined, planName: string) => {
+    // Plan gratuit : rediriger vers inscription
     if (!priceId) {
-      toast.error("Ce plan n'est pas encore disponible");
+      window.location.href = "/sign-up";
       return;
     }
 
@@ -238,17 +239,19 @@ export default function PricingPage() {
                       
                       <Button
                         onClick={() => handleSubscribe(plan.priceId, plan.name)}
-                        disabled={loading === plan.name || plan.price === 0}
+                        disabled={loading === plan.name}
                         className={`w-full ${
                           plan.popular
                             ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+                            : plan.price === 0
+                            ? 'bg-gray-600 hover:bg-gray-700'
                             : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
                         } text-white`}
                       >
                         {loading === plan.name ? (
                           "Chargement..."
                         ) : plan.price === 0 ? (
-                          "Actuel"
+                          "S'inscrire gratuitement"
                         ) : (
                           `Essayer ${plan.name}`
                         )}

@@ -17,6 +17,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 1. Vérifier l'authentification
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Non authentifié' },
+        { status: 401 }
+      );
+    }
+
+    // 2. Vérifier les limites d'usage
+    const usageResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/user/usage`, {
+      headers: {
+        'Cookie': request.headers.get('cookie') || '',
+      },
+    });
+
+    if (!usageResponse.ok) {
+      logger.error("Erreur lors de la récupération de l'usage", { userId });
+    }
+
+    const usage = await usageResponse.json();
+
+    // Vérifier si l'utilisateur a atteint sa limite
+    if (!usage.usage.letters.unlimited && usage.usage.letters.remaining <= 0) {
+      return NextResponse.json({
+        error: 'Limite atteinte',
+        message: `Vous avez atteint votre limite de ${usage.usage.letters.limit} lettre(s) par mois. Passez au plan supérieur pour créer plus de lettres.`,
+        upgradeUrl: '/pricing',
+        current: usage.usage.letters.current,
+        limit: usage.usage.letters.limit,
+      }, { status: 403 });
+    }
+
     const formData: LetterFormData = await request.json();
 
     const ton = formData.tonSouhaite ?? "professionnel et chaleureux";

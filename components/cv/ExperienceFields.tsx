@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Sparkles } from "lucide-react";
 import type { CVFormValues } from "@/lib/validations/cv-schema";
 
 interface ExperienceFieldsProps {
@@ -95,12 +96,16 @@ export function ExperienceFields({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor={`experiences.${index}.description`}>
+            <Label htmlFor={`experiences.${index}.description`} className="flex items-center gap-2">
               Description <span className="text-red-500">*</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                <Sparkles className="w-3 h-3" />
+                IA optimisée
+              </span>
             </Label>
             <Textarea
               id={`experiences.${index}.description`}
-              placeholder="Décrivez vos missions, réalisations et responsabilités..."
+              placeholder="Ex: Développement de features, collaboration équipe... (l'IA va reformuler professionnellement)"
               rows={4}
               {...register(`experiences.${index}.description`)}
             />

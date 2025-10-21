@@ -1,24 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Lock, Eye, FileText } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import { Lock, Check, Crown, Sparkles, FileText, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface Template {
-  id: string;
+  id: "modern" | "premium" | "creative" | "minimal";
   name: string;
   description: string;
-  category: "Moderne" | "Élégant" | "Créatif" | "Minimaliste";
-  isPremium: boolean;
-  requiredPlan: "FREE" | "STARTER" | "PRO" | "PREMIUM";
-  isPopular?: boolean;
-  isNew?: boolean;
-  previewImage?: string;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
+  isPremium: boolean;
+  requiredPlan: string;
+  preview: string;
 }
 
 const templates: Template[] = [
@@ -26,275 +31,217 @@ const templates: Template[] = [
     id: "modern",
     name: "Moderne",
     description: "Design épuré et professionnel, parfait pour tous les secteurs",
-    category: "Moderne",
+    icon: FileText,
+    color: "from-blue-500 to-cyan-500",
     isPremium: false,
-    requiredPlan: "FREE",
-    isPopular: true,
-    color: "from-blue-500 to-cyan-600",
+    requiredPlan: "GRATUIT",
+    preview: "bg-gradient-to-br from-blue-100 to-cyan-100",
   },
   {
     id: "premium",
     name: "Premium",
     description: "Template élégant avec mise en page sophistiquée",
-    category: "Élégant",
+    icon: Crown,
+    color: "from-purple-500 to-pink-500",
     isPremium: true,
     requiredPlan: "STARTER",
-    color: "from-purple-500 to-pink-600",
+    preview: "bg-gradient-to-br from-purple-100 to-pink-100",
   },
   {
     id: "creative",
     name: "Créatif",
     description: "Design audacieux pour les métiers créatifs",
-    category: "Créatif",
+    icon: Sparkles,
+    color: "from-pink-500 to-orange-500",
     isPremium: true,
     requiredPlan: "PRO",
-    isNew: true,
-    color: "from-orange-500 to-red-600",
+    preview: "bg-gradient-to-br from-pink-100 to-orange-100",
   },
   {
     id: "minimal",
     name: "Minimaliste",
-    description: "Simplicité et clarté pour un impact maximum",
-    category: "Minimaliste",
+    description: "Simplicité et clarté pour un impact maximum (ATS-friendly)",
+    icon: Zap,
+    color: "from-gray-600 to-gray-800",
     isPremium: true,
     requiredPlan: "PRO",
-    color: "from-gray-600 to-gray-800",
+    preview: "bg-gradient-to-br from-gray-100 to-gray-200",
   },
 ];
 
 interface TemplateSelectorProps {
-  selectedTemplate: string;
-  onSelectTemplate: (templateId: string) => void;
+  selected: string;
+  onSelect: (template: "modern" | "premium" | "creative" | "minimal") => void;
+  userPlan?: string;
 }
 
-export function TemplateSelector({
-  selectedTemplate,
-  onSelectTemplate,
-}: TemplateSelectorProps) {
-  const { user } = useUser();
-  const [filter, setFilter] = useState<string>("Tous");
-  const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
+export function TemplateSelector({ selected, onSelect, userPlan = "FREE" }: TemplateSelectorProps) {
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedPremiumTemplate, setSelectedPremiumTemplate] = useState<Template | null>(null);
 
-  const userPlan = (user?.publicMetadata?.plan as string) || "FREE";
-
-  const planHierarchy: Record<string, number> = {
-    FREE: 0,
-    STARTER: 1,
-    PRO: 2,
-    PREMIUM: 3,
+  const handleTemplateClick = (template: Template) => {
+    if (template.isPremium && userPlan === "FREE") {
+      setSelectedPremiumTemplate(template);
+      setShowUpgradeModal(true);
+    } else {
+      onSelect(template.id);
+    }
   };
 
-  const canUseTemplate = (template: Template): boolean => {
-    return planHierarchy[userPlan] >= planHierarchy[template.requiredPlan];
+  const canUseTemplate = (template: Template) => {
+    if (!template.isPremium) return true;
+    if (userPlan === "PRO" || userPlan === "PREMIUM") return true;
+    if (userPlan === "STARTER" && template.id === "premium") return true;
+    return false;
   };
-
-  const categories = ["Tous", "Moderne", "Élégant", "Créatif", "Minimaliste"];
-
-  const filteredTemplates = templates.filter(
-    (t) => filter === "Tous" || t.category === filter
-  );
 
   return (
-    <div className="space-y-6">
-      {/* En-tête */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Choisissez votre template
-        </h2>
-        <p className="text-gray-600">
-          Sélectionnez le design qui correspond le mieux à votre profil
-        </p>
-      </div>
+    <>
+      <div className="grid grid-cols-2 gap-4">
+        {templates.map((template) => {
+          const Icon = template.icon;
+          const isSelected = selected === template.id;
+          const canUse = canUseTemplate(template);
+          const isLocked = template.isPremium && !canUse;
 
-      {/* Filtres */}
-      <div className="flex flex-wrap justify-center gap-2">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={filter === category ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter(category)}
-            className="transition-all"
-          >
-            {category}
-          </Button>
-        ))}
-      </div>
-
-      {/* Grille de templates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <AnimatePresence mode="popLayout">
-          {filteredTemplates.map((template) => {
-            const isSelected = selectedTemplate === template.id;
-            const isLocked = !canUseTemplate(template);
-            const isHovered = hoveredTemplate === template.id;
-
-            return (
-              <motion.div
-                key={template.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.2 }}
+          return (
+            <motion.div
+              key={template.id}
+              whileHover={{ scale: isLocked ? 1 : 1.02 }}
+              whileTap={{ scale: isLocked ? 1 : 0.98 }}
+            >
+              <Card
+                className={`relative p-4 cursor-pointer transition-all ${
+                  isSelected
+                    ? "ring-2 ring-offset-2 shadow-xl"
+                    : "hover:shadow-lg"
+                } ${isLocked ? "opacity-75" : ""}`}
+                style={{
+                  ringColor: isSelected ? template.color : undefined,
+                }}
+                onClick={() => handleTemplateClick(template)}
               >
-                <Card
-                  className={`relative overflow-hidden cursor-pointer transition-all duration-300 ${
-                    isSelected
-                      ? "ring-4 ring-blue-500 shadow-2xl"
-                      : "hover:shadow-xl hover:scale-105"
-                  } ${isLocked ? "opacity-75" : ""}`}
-                  onMouseEnter={() => setHoveredTemplate(template.id)}
-                  onMouseLeave={() => setHoveredTemplate(null)}
-                  onClick={() => !isLocked && onSelectTemplate(template.id)}
+                {/* Badge Selected */}
+                {isSelected && (
+                  <div className="absolute -top-2 -right-2 z-10">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br ${template.color} shadow-lg`}
+                    >
+                      <Check className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                )}
+
+                {/* Lock overlay pour les templates premium */}
+                {isLocked && (
+                  <div className="absolute inset-0 bg-gray-900/10 backdrop-blur-[1px] rounded-lg flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <Lock className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                      <Badge variant="secondary" className="text-xs">
+                        {template.requiredPlan} requis
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+
+                {/* Preview couleur */}
+                <div
+                  className={`w-full h-20 rounded-lg mb-3 ${template.preview} flex items-center justify-center relative overflow-hidden`}
                 >
-                  {/* Badges */}
-                  <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-                    {template.isPopular && (
-                      <Badge className="bg-amber-500 text-white border-0">
-                        Populaire
-                      </Badge>
-                    )}
-                    {template.isNew && (
-                      <Badge className="bg-green-500 text-white border-0">
-                        Nouveau
-                      </Badge>
-                    )}
+                  {/* Motif décoratif */}
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute top-2 left-2 w-16 h-16 border-2 border-white rounded-lg" />
+                    <div className="absolute bottom-2 right-2 w-12 h-12 border-2 border-white rounded-lg" />
+                  </div>
+                  <Icon className="w-10 h-10 text-gray-700 relative z-10" />
+                </div>
+
+                {/* Infos template */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-gray-900">{template.name}</h3>
                     {template.isPremium && (
                       <Badge
-                        variant="outline"
-                        className="bg-white/90 backdrop-blur-sm"
+                        className={`text-xs bg-gradient-to-r ${template.color} text-white border-0`}
                       >
-                        {template.requiredPlan}
+                        {template.id === "premium" ? "STARTER" : "PRO"}
+                      </Badge>
+                    )}
+                    {!template.isPremium && (
+                      <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
+                        GRATUIT
                       </Badge>
                     )}
                   </div>
-
-                  {/* Icône de sélection */}
-                  {isSelected && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute top-3 right-3 z-10"
-                    >
-                      <div className="bg-blue-500 text-white rounded-full p-2 shadow-lg">
-                        <Check className="w-5 h-5" />
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Aperçu du template */}
-                  <div
-                    className={`h-64 bg-gradient-to-br ${template.color} flex items-center justify-center relative overflow-hidden`}
-                  >
-                    {/* Pattern de fond */}
-                    <div className="absolute inset-0 opacity-10">
-                      <div className="grid grid-cols-12 gap-2 p-4 h-full">
-                        {Array.from({ length: 48 }).map((_, i) => (
-                          <div key={i} className="bg-white rounded"></div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Icône centrale */}
-                    <FileText className="w-24 h-24 text-white opacity-30" />
-
-                    {/* Overlay au hover */}
-                    <AnimatePresence>
-                      {isHovered && !isLocked && (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="absolute inset-0 bg-black/50 flex items-center justify-center"
-                        >
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="gap-2"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // TODO: Ouvrir modal de preview
-                            }}
-                          >
-                            <Eye className="w-4 h-4" />
-                            Aperçu
-                          </Button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Overlay si verrouillé */}
-                    {isLocked && (
-                      <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                        <Lock className="w-12 h-12 text-white mb-2" />
-                        <p className="text-white text-sm font-medium">
-                          Plan {template.requiredPlan} requis
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Informations */}
-                  <CardContent className="p-4">
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">
-                      {template.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {template.description}
-                    </p>
-
-                    <Button
-                      className="w-full"
-                      variant={isSelected ? "default" : "outline"}
-                      size="sm"
-                      disabled={isLocked}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        !isLocked && onSelectTemplate(template.id);
-                      }}
-                    >
-                      {isLocked ? (
-                        <>
-                          <Lock className="w-4 h-4 mr-2" />
-                          Passer au plan {template.requiredPlan}
-                        </>
-                      ) : isSelected ? (
-                        <>
-                          <Check className="w-4 h-4 mr-2" />
-                          Sélectionné
-                        </>
-                      ) : (
-                        "Utiliser ce modèle"
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                  <p className="text-xs text-gray-600 leading-tight">
+                    {template.description}
+                  </p>
+                </div>
+              </Card>
+            </motion.div>
+          );
+        })}
       </div>
 
-      {/* Message si aucun template disponible */}
-      {filteredTemplates.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">
-            Aucun template trouvé dans cette catégorie
-          </p>
-        </div>
-      )}
+      {/* Modal d'upgrade */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Crown className="w-6 h-6 text-yellow-500" />
+              Template Premium
+            </DialogTitle>
+            <DialogDescription>
+              Ce template nécessite un abonnement{" "}
+              <span className="font-semibold">{selectedPremiumTemplate?.requiredPlan}</span> ou supérieur.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {selectedPremiumTemplate && (
+              <Card className={`p-4 bg-gradient-to-br ${selectedPremiumTemplate.preview}`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${selectedPremiumTemplate.color} flex items-center justify-center`}>
+                    {selectedPremiumTemplate.icon && <selectedPremiumTemplate.icon className="w-6 h-6 text-white" />}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900">{selectedPremiumTemplate.name}</h4>
+                    <p className="text-sm text-gray-600">{selectedPremiumTemplate.description}</p>
+                  </div>
+                </div>
+              </Card>
+            )}
 
-      {/* Info plan */}
-      {userPlan === "FREE" && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
-          <p className="text-sm text-purple-900 text-center">
-            💡 <strong>Passez au plan Starter</strong> pour débloquer plus de
-            templates professionnels
-          </p>
-        </div>
-      )}
-    </div>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-gray-700">Débloquez ce template et bien plus :</p>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>✨ Tous les templates premium</li>
+                <li>✨ CVs et lettres illimités</li>
+                <li>✨ Analyse IA avancée</li>
+                <li>✨ Export PDF + DOCX</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowUpgradeModal(false)}
+              className="flex-1"
+            >
+              Annuler
+            </Button>
+            <Link href="/pricing" className="flex-1">
+              <Button
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Voir les offres
+              </Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
-

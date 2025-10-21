@@ -128,6 +128,36 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     console.error('❌ Error updating user metadata:', error);
   }
 
+  // Synchroniser avec Supabase
+  try {
+    const { db } = await import('@/lib/db');
+    await db.user.upsert({
+      where: { clerkUserId: userId },
+      update: {
+        plan: planType,
+        stripeCustomerId: session.customer as string,
+        stripeSubscriptionId: subscriptionId,
+        stripePriceId: subscription.items.data[0]?.price.id,
+        subscriptionStatus: subscription.status,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      },
+      create: {
+        clerkUserId: userId,
+        email: session.customer_email || session.customer_details?.email || '',
+        plan: planType,
+        stripeCustomerId: session.customer as string,
+        stripeSubscriptionId: subscriptionId,
+        stripePriceId: subscription.items.data[0]?.price.id,
+        subscriptionStatus: subscription.status,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      }
+    });
+
+    console.log('✅ User synced to Supabase:', userId);
+  } catch (error) {
+    console.error('❌ Error syncing to Supabase:', error);
+  }
+
   // TODO: Envoyer un email de bienvenue
   console.log('📧 Email de bienvenue à envoyer à:', userId);
 }
@@ -161,6 +191,23 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   } catch (error) {
     console.error('❌ Error updating subscription:', error);
   }
+
+  // Synchroniser avec Supabase
+  try {
+    const { db } = await import('@/lib/db');
+    await db.user.update({
+      where: { clerkUserId: userId },
+      data: {
+        subscriptionStatus: subscription.status,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+      }
+    });
+
+    console.log('✅ Subscription updated in Supabase:', userId);
+  } catch (error) {
+    console.error('❌ Error updating subscription in Supabase:', error);
+  }
 }
 
 // ❌ Gérer l'annulation d'abonnement
@@ -191,6 +238,24 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     console.log('✅ User downgraded to FREE plan:', userId);
   } catch (error) {
     console.error('❌ Error downgrading user:', error);
+  }
+
+  // Synchroniser avec Supabase
+  try {
+    const { db } = await import('@/lib/db');
+    await db.user.update({
+      where: { clerkUserId: userId },
+      data: {
+        plan: 'FREE',
+        subscriptionStatus: 'canceled',
+        stripeSubscriptionId: null,
+        stripePriceId: null,
+      }
+    });
+
+    console.log('✅ User downgraded to FREE in Supabase:', userId);
+  } catch (error) {
+    console.error('❌ Error downgrading user in Supabase:', error);
   }
 
   // TODO: Envoyer un email de confirmation d'annulation

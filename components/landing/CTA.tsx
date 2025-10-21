@@ -67,11 +67,11 @@ export function CTA() {
           <p className="text-xl md:text-2xl text-blue-100 mb-12 max-w-3xl mx-auto leading-relaxed">
             Rejoignez les étudiants qui ont transformé leur recherche d'alternance avec AlternaBoost.
             <br />
-            <span className="font-semibold text-white">Commencez gratuitement en 2 minutes.</span>
+            <span className="font-semibold text-white">Inscription gratuite · Résultat en 2 minutes</span>
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
-            <Link href="/create-cv-v2">
+            <Link href="/create-cv">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -115,11 +115,11 @@ export function CTA() {
           >
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-300" />
-              <span className="text-sm font-medium">Aucune carte bancaire</span>
+              <span className="text-sm font-medium">Inscription gratuite</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-300" />
-              <span className="text-sm font-medium">Pas d'inscription</span>
+              <span className="text-sm font-medium">Aucune carte bancaire requise</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-300" />

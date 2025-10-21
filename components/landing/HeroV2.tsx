@@ -101,8 +101,8 @@ export function HeroV2() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed"
         >
-          L'IA génère un CV sur mesure, vous le personnalisez à votre goût, 
-          et vous le téléchargez en PDF. Simple, rapide, efficace.
+          Inscrivez-vous gratuitement, notre IA génère votre CV sur mesure, 
+          personnalisez-le à votre goût et téléchargez-le en PDF.
         </motion.p>
 
 
@@ -113,7 +113,7 @@ export function HeroV2() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
         >
-          <Link href="/create-cv-v2">
+          <Link href="/create-cv">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button 
                 size="lg" 

@@ -289,7 +289,7 @@ export default function DashboardClientV2() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Créer un CV */}
-              <Link href="/create-cv-v2">
+              <Link href="/create-cv">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Card className="group h-full border-2 border-transparent hover:border-blue-300 hover:shadow-2xl transition-all duration-300 cursor-pointer relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
