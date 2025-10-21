@@ -41,6 +41,7 @@ import { ModernCVTemplate } from "@/components/preview/templates/ModernCVTemplat
 import { PremiumCVTemplate } from "@/components/preview/templates/PremiumCVTemplate";
 import { CreativeCVTemplate } from "@/components/preview/templates/CreativeCVTemplate";
 import { MinimalCVTemplate } from "@/components/preview/templates/MinimalCVTemplate";
+import { CVBuilderTemplate } from "@/components/preview/templates/CVBuilderTemplate";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import confetti from "canvas-confetti";
@@ -116,7 +117,7 @@ export default function CreateCVFusionPage() {
   // États
   const [theme, setTheme] = useState("dark");
   const [zoom, setZoom] = useState(163);
-  const [selectedTemplate, setSelectedTemplate] = useState<"modern" | "premium" | "creative" | "minimal">("modern");
+  const [selectedTemplate, setSelectedTemplate] = useState<"modern" | "premium" | "creative" | "minimal" | "cvbuilder">("cvbuilder");
   const [profileImage, setProfileImage] = useState<string>("");
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -291,6 +292,30 @@ export default function CreateCVFusionPage() {
   };
 
   const renderTemplate = () => {
+    // Props pour CVBuilderTemplate
+    if (selectedTemplate === "cvbuilder") {
+      return (
+        <CVBuilderTemplate
+          prenom={prenom}
+          nom={nom}
+          email={email}
+          telephone={telephone}
+          adresse={adresse}
+          posteRecherche={posteRecherche}
+          objectif={objectifOptimise || objectif}
+          profileImage={profileImage}
+          experiences={experiences}
+          competences={competences}
+          languages={languages}
+          hobbies={hobbies}
+          formation={formation}
+          ecole={ecole}
+          anneeFormation={anneeFormation}
+        />
+      );
+    }
+    
+    // Props pour les autres templates
     const props = { cvData, profileImage, customColors: { primary: "#2563EB", secondary: "#3B82F6" } };
     
     switch (selectedTemplate) {
@@ -667,6 +692,7 @@ export default function CreateCVFusionPage() {
                 onChange={(e) => setSelectedTemplate(e.target.value as any)}
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 text-sm focus:border-blue-500 focus:ring-blue-500"
               >
+                <option value="cvbuilder">CVBuilder (Recommandé)</option>
                 <option value="modern">Modern</option>
                 <option value="premium">Premium</option>
                 <option value="creative">Creative</option>
