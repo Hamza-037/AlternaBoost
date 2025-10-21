@@ -34,6 +34,9 @@ import { Separator } from "@/components/ui/separator";
 import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { PhotoUpload } from "@/components/cv/PhotoUpload";
 import { DateRangeInput } from "@/components/ui/date-range-input";
+import { ExperienceTimeline } from "@/components/cv/ExperienceTimeline";
+import { LanguageStars } from "@/components/cv/LanguageStars";
+import { SkillBadges } from "@/components/cv/SkillBadges";
 import { ModernCVTemplate } from "@/components/preview/templates/ModernCVTemplate";
 import { PremiumCVTemplate } from "@/components/preview/templates/PremiumCVTemplate";
 import { CreativeCVTemplate } from "@/components/preview/templates/CreativeCVTemplate";
@@ -447,25 +450,35 @@ export default function CreateCVFusionPage() {
                   {isOptimizing ? "IA optimise..." : "Ajouter (IA optimisera)"}
                 </Button>
                 
-                {experiences.map((exp, index) => (
-                  <div key={index} className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900 text-sm">{exp.poste}</p>
-                        <p className="text-xs text-blue-600">{exp.entreprise}</p>
-                        <p className="text-xs text-gray-500 mt-1">{exp.periode}</p>
-                      </div>
-                      <Button 
-                        size="sm" 
-                        variant="ghost"
-                        onClick={() => setExperiences(experiences.filter((_, i) => i !== index))}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-950/30"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                {experiences.length > 0 && (
+                  <div className="pt-4">
+                    <Separator className="mb-4" />
+                    <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-blue-600" />
+                      Aperçu Timeline
+                    </h3>
+                    <ExperienceTimeline experiences={experiences} />
+                    
+                    <div className="mt-4 space-y-2">
+                      {experiences.map((exp, index) => (
+                        <div key={index} className="flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-200">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-xs truncate">{exp.poste}</p>
+                            <p className="text-xs text-blue-600 truncate">{exp.entreprise}</p>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => setExperiences(experiences.filter((_, i) => i !== index))}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-100 ml-2"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             </SectionCard>
 
@@ -509,19 +522,30 @@ export default function CreateCVFusionPage() {
                   </Button>
                 </div>
                 
-                <div className="flex flex-wrap gap-2">
-                  {competences.map((comp, i) => (
-                    <Badge key={i} className="bg-blue-600/20 text-blue-400 border-blue-600/30 gap-2 px-3 py-1">
-                      {comp}
-                      <button 
-                        onClick={() => setCompetences(competences.filter((_, idx) => idx !== i))}
-                        className="hover:text-blue-200"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
+                {competences.length > 0 && (
+                  <div>
+                    <Separator className="mb-4" />
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-purple-600" />
+                      Vos Compétences
+                    </h3>
+                    <SkillBadges competences={competences} />
+                    
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {competences.map((comp, i) => (
+                        <div key={i} className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm">
+                          <span className="text-gray-700">{comp}</span>
+                          <button 
+                            onClick={() => setCompetences(competences.filter((_, idx) => idx !== i))}
+                            className="text-gray-500 hover:text-red-600 font-bold"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </SectionCard>
 
@@ -548,12 +572,35 @@ export default function CreateCVFusionPage() {
                   Ajouter
                 </Button>
                 
-                {languages.map((lang, i) => (
-                  <div key={i} className="flex justify-between items-center bg-purple-50 p-3 rounded-lg border border-purple-200">
-                    <span className="text-gray-900 text-sm">{lang.language}</span>
-                    <Badge className="bg-purple-100 text-purple-700">{lang.proficiency}</Badge>
+                {languages.length > 0 && (
+                  <div>
+                    <Separator className="mb-4" />
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-pink-600" />
+                      Vos Langues
+                    </h3>
+                    <LanguageStars languages={languages} />
+                    
+                    <div className="mt-4 space-y-2">
+                      {languages.map((lang, i) => (
+                        <div key={i} className="flex items-center justify-between bg-purple-50 p-2 rounded-lg border border-purple-200">
+                          <span className="text-gray-900 text-sm">{lang.language}</span>
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-purple-100 text-purple-700 text-xs">{lang.proficiency}</Badge>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => setLanguages(languages.filter((_, idx) => idx !== i))}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-100 h-6 w-6 p-0"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
             </SectionCard>
 
