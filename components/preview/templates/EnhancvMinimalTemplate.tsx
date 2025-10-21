@@ -54,6 +54,13 @@ interface EnhancvMinimalTemplateProps {
     source: string;
     annee: string;
   }[];
+  customization?: {
+    primaryColor?: string;
+    fontFamily?: string;
+    fontSize?: number;
+    photoSize?: number;
+    spacing?: number;
+  };
 }
 
 export const EnhancvMinimalTemplate: React.FC<EnhancvMinimalTemplateProps> = ({
@@ -75,8 +82,16 @@ export const EnhancvMinimalTemplate: React.FC<EnhancvMinimalTemplateProps> = ({
   hobbies = [],
   liens = {},
   publications = [],
+  customization = {},
 }) => {
   const fullName = `${prenom} ${nom}`.trim();
+  
+  // Apply customization with defaults
+  const primaryColor = customization.primaryColor || "#3B82F6";
+  const fontFamily = customization.fontFamily || "'Georgia', 'Times New Roman', serif";
+  const fontSize = (customization.fontSize || 100) / 100;
+  const photoSize = (customization.photoSize || 100) / 100;
+  const spacing = (customization.spacing || 100) / 100;
 
   // Grouper les compétences par catégorie
   const groupedSkills = React.useMemo(() => {
@@ -104,15 +119,28 @@ export const EnhancvMinimalTemplate: React.FC<EnhancvMinimalTemplateProps> = ({
   }, [formation, ecole, anneeFormation]);
 
   return (
-    <div className="w-[21cm] h-[29.7cm] bg-white shadow-2xl mx-auto print:shadow-none" style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+    <div 
+      className="w-[21cm] h-[29.7cm] bg-white shadow-2xl mx-auto print:shadow-none" 
+      style={{ 
+        fontFamily,
+        fontSize: `${fontSize}rem`
+      }}
+    >
       {/* HEADER - Style Finance Classique */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-16 py-10">
+      <div 
+        className="text-white px-16"
+        style={{ 
+          background: `linear-gradient(to right, ${primaryColor}ee, ${primaryColor}cc)`,
+          paddingTop: `${2.5 * spacing}rem`,
+          paddingBottom: `${2.5 * spacing}rem`
+        }}
+      >
         <div className="flex items-start justify-between gap-8">
           <div className="flex-1">
             <h1 className="text-5xl font-light tracking-wide mb-3" style={{ fontFamily: "'Georgia', serif" }}>
               {fullName.toUpperCase()}
             </h1>
-            <div className="h-0.5 w-32 bg-gradient-to-r from-blue-400 to-transparent mb-4"></div>
+            <div className="h-0.5 w-32 mb-4" style={{ background: `linear-gradient(to right, ${primaryColor}88, transparent)` }}></div>
             <p className="text-lg text-blue-200 font-light tracking-wide mb-6">
               {posteRecherche || "Financial Professional"}
             </p>
@@ -156,7 +184,14 @@ export const EnhancvMinimalTemplate: React.FC<EnhancvMinimalTemplateProps> = ({
           </div>
           
           {profileImage && (
-            <div className="w-32 h-32 rounded-sm overflow-hidden border-2 border-blue-300/30 shadow-xl flex-shrink-0">
+            <div 
+              className="rounded-sm overflow-hidden shadow-xl flex-shrink-0"
+              style={{ 
+                width: `${8 * photoSize}rem`,
+                height: `${8 * photoSize}rem`,
+                border: `2px solid ${primaryColor}33`
+              }}
+            >
               <img src={profileImage} alt="Profile" className="w-full h-full object-cover grayscale" />
             </div>
           )}

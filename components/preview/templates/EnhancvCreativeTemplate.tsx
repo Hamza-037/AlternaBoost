@@ -71,11 +71,27 @@ export const EnhancvCreativeTemplate: React.FC<EnhancvCreativeTemplateProps> = (
 
       <div className="relative z-10 flex h-full">
         {/* SIDEBAR GAUCHE - Violet foncé */}
-        <div className="w-[35%] bg-gradient-to-b from-purple-950 to-indigo-950 p-10 text-white relative">
+        <div 
+          className="w-[35%] text-white relative"
+          style={{ 
+            background: `linear-gradient(to bottom, ${primaryColor}ee, ${primaryColor}cc)`,
+            padding: `${2.5 * spacing}rem`
+          }}
+        >
           {/* Photo héxagonale */}
           {profileImage && (
-            <div className="relative w-48 h-48 mx-auto mb-8">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-cyan-500 rounded-3xl rotate-6"></div>
+            <div 
+              className="relative mx-auto"
+              style={{ 
+                width: `${12 * photoSize}rem`,
+                height: `${12 * photoSize}rem`,
+                marginBottom: `${2 * spacing}rem`
+              }}
+            >
+              <div 
+                className="absolute inset-0 rounded-3xl rotate-6"
+                style={{ background: `linear-gradient(to bottom right, ${primaryColor}, ${primaryColor}88)` }}
+              ></div>
               <div className="absolute inset-2 rounded-3xl overflow-hidden border-4 border-white/20">
                 <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
               </div>
