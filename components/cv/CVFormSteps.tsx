@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cvFormSchema, type CVFormValues } from "@/lib/validations/cv-schema";
 import { CVUploader } from "@/components/cv/CVUploader";
+import { PhotoUpload } from "@/components/cv/PhotoUpload";
 import { toast } from "sonner";
 import { 
   User, 
@@ -37,6 +38,7 @@ export function CVFormSteps() {
   const [showImportStep, setShowImportStep] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeData, setUpgradeData] = useState<{ current?: number; limit?: number }>({});
+  const [profilePhoto, setProfilePhoto] = useState<string | undefined>(undefined);
   const totalSteps = 4;
 
   const {
@@ -144,12 +146,18 @@ export function CVFormSteps() {
   const onSubmit = async (data: CVFormValues) => {
     setIsGenerating(true);
     try {
+      // Ajouter la photo de profil aux données
+      const cvData = {
+        ...data,
+        profileImageUrl: profilePhoto,
+      };
+
       const response = await fetch("/api/generate-cv-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(cvData),
       });
 
       if (!response.ok) {
@@ -383,7 +391,19 @@ export function CVFormSteps() {
                   Informations personnelles
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
+                {/* Photo de profil */}
+                <div className="pb-6 border-b">
+                  <Label className="text-base font-semibold mb-4 block">
+                    Photo de profil (optionnel)
+                  </Label>
+                  <PhotoUpload
+                    onUpload={(url) => setProfilePhoto(url)}
+                    currentPhoto={profilePhoto}
+                    onRemove={() => setProfilePhoto(undefined)}
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="prenom">
