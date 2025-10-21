@@ -121,7 +121,7 @@ Répondez uniquement par le corps de la lettre (3 paragraphes).`,
     };
 
     // Sauvegarder automatiquement en DB si utilisateur authentifié
-    const { userId } = await auth();
+    // userId est déjà déclaré au début de la fonction, on le réutilise directement
     let letterId: string | undefined;
     
     if (userId) {
