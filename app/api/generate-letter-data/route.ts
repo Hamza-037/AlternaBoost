@@ -2,6 +2,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { openai } from "@/lib/openai";
 import { logger } from "@/lib/errors";
+import { getBaseUrlFromRequest } from "@/lib/get-base-url";
 import type { LetterFormData, GeneratedLetter } from "@/types/letter";
 
 /**
@@ -34,7 +35,8 @@ export async function POST(request: NextRequest) {
     };
 
     try {
-      const usageResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/user/usage`, {
+      const baseUrl = getBaseUrlFromRequest(request);
+      const usageResponse = await fetch(`${baseUrl}/api/user/usage`, {
         headers: {
           'Cookie': request.headers.get('cookie') || '',
         },
