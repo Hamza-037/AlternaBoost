@@ -7,11 +7,14 @@ export const applicationSchema = z.object({
     required_error: "Le statut est requis",
   }),
   appliedDate: z.string().min(1, "La date de candidature est requise"),
-  lastContactDate: z.string().optional().nullable(),
+  lastContactDate: z.union([z.string().min(1), z.literal("")]).optional().nullable(),
   contactPerson: z.string().max(100).optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
-  jobUrl: z.string().url("L'URL doit être valide").optional().or(z.literal("")),
-  nextFollowUp: z.string().optional().nullable(),
+  jobUrl: z.string().optional().nullable().refine(
+    (val) => !val || val === "" || z.string().url().safeParse(val).success,
+    { message: "L'URL doit être valide" }
+  ),
+  nextFollowUp: z.union([z.string().min(1), z.literal("")]).optional().nullable(),
   salary: z.string().max(50).optional().nullable(),
   location: z.string().max(100).optional().nullable(),
   contractType: z.string().max(50).optional().nullable(),
