@@ -55,6 +55,14 @@ import jsPDF from "jspdf";
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import type { GeneratedCV } from "@/types/cv";
+import { 
+  personalDetailsPreset, 
+  experiencesPreset, 
+  formationPreset, 
+  competencesPreset, 
+  languagesPreset, 
+  hobbiesPreset 
+} from "@/lib/cv-presets";
 
 type Experience = {
   poste: string;
@@ -80,23 +88,37 @@ const THEMES = [
 ];
 
 // Composant SectionCard extrait pour éviter les re-renders
-const SectionCard = ({ id, title, icon: Icon, children, expandedSection, setExpandedSection }: any) => {
+const SectionCard = ({ id, title, icon: Icon, children, expandedSection, setExpandedSection, onReset }: any) => {
   const isExpanded = expandedSection === id;
   
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-300">
-      <button
-        onClick={() => setExpandedSection(isExpanded ? "" : id)}
-        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-      >
-        <div className="flex items-center gap-3">
+      <div className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+        <button
+          onClick={() => setExpandedSection(isExpanded ? "" : id)}
+          className="flex-1 flex items-center gap-3 text-left"
+        >
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
             <Icon className="w-5 h-5 text-blue-600" />
           </div>
           <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+        </button>
+        
+        <div className="flex items-center gap-2">
+          {onReset && (
+            <button
+              onClick={onReset}
+              className="p-2 hover:bg-red-50 rounded-lg transition-colors group"
+              title="Réinitialiser cette section"
+            >
+              <RotateCw className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" />
+            </button>
+          )}
+          <button onClick={() => setExpandedSection(isExpanded ? "" : id)}>
+            <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+          </button>
         </div>
-        <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-      </button>
+      </div>
       
       <AnimatePresence>
         {isExpanded && (
@@ -266,6 +288,60 @@ export default function CreateCVFusionPage() {
     setCustomSections(customSections.filter(section => section.id !== sectionId));
   };
 
+  // Boutons Reset par section
+  const handleResetPersonalInfo = () => {
+    setPrenom("");
+    setNom("");
+    setEmail("");
+    setTelephone("");
+    setAdresse("");
+    setPosteRecherche("");
+    setObjectif("");
+    setObjectifOptimise("");
+    setProfileImage(undefined);
+  };
+
+  const handleResetExperiences = () => {
+    setExperiences([]);
+  };
+
+  const handleResetFormation = () => {
+    setFormation("");
+    setEcole("");
+    setAnneeFormation("");
+  };
+
+  const handleResetCompetences = () => {
+    setCompetences([]);
+  };
+
+  const handleResetLanguages = () => {
+    setLanguages([]);
+  };
+
+  const handleResetHobbies = () => {
+    setHobbies([]);
+  };
+
+  // Charger les données d'exemple
+  const handleLoadPresets = () => {
+    setPrenom(personalDetailsPreset.prenom);
+    setNom(personalDetailsPreset.nom);
+    setEmail(personalDetailsPreset.email);
+    setTelephone(personalDetailsPreset.telephone);
+    setAdresse(personalDetailsPreset.adresse);
+    setPosteRecherche(personalDetailsPreset.posteRecherche);
+    setObjectif(personalDetailsPreset.objectif);
+    setExperiences(experiencesPreset);
+    setFormation(formationPreset.formation);
+    setEcole(formationPreset.ecole);
+    setAnneeFormation(formationPreset.anneeFormation);
+    setCompetences(competencesPreset);
+    setLanguages(languagesPreset);
+    setHobbies(hobbiesPreset);
+    toast.success("📝 Données d'exemple chargées ! Personnalisez-les maintenant.");
+  };
+
   // Optimiser l'objectif
   const handleOptimizeObjectif = async () => {
     const optimized = await optimizeWithAI("objectif", objectif);
@@ -393,6 +469,14 @@ export default function CreateCVFusionPage() {
           
           <div className="flex items-center gap-3">
             <Button 
+              onClick={handleLoadPresets}
+              variant="outline"
+              className="border-blue-300 text-blue-600 hover:bg-blue-50 gap-2"
+            >
+              <Zap className="w-4 h-4" />
+              Charger exemple
+            </Button>
+            <Button 
               onClick={() => router.push(user ? '/dashboard' : '/')}
               variant="outline"
               className="border-gray-300 text-gray-700 hover:bg-gray-100 gap-2"
@@ -416,7 +500,7 @@ export default function CreateCVFusionPage() {
         <div className="w-[420px] h-[calc(100vh-80px)] border-r border-gray-200 overflow-y-auto bg-white/60 backdrop-blur-sm scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
           <div className="p-6 space-y-4">
             {/* Section: Qui êtes-vous ? */}
-            <SectionCard id="personal" title="Qui êtes-vous ?" icon={User} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
+            <SectionCard id="personal" title="Qui êtes-vous ?" icon={User} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetPersonalInfo}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Prénom" 
@@ -488,7 +572,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Expériences */}
-            <SectionCard id="experiences" title="Expériences" icon={Briefcase} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
+            <SectionCard id="experiences" title="Expériences" icon={Briefcase} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetExperiences}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Poste" 
@@ -555,7 +639,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Formation */}
-            <SectionCard id="formation" title="Formation" icon={GraduationCap} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
+            <SectionCard id="formation" title="Formation" icon={GraduationCap} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetFormation}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Diplôme (ex: Master Informatique)" 
@@ -579,7 +663,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Compétences */}
-            <SectionCard id="competences" title="Compétences" icon={Award} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
+            <SectionCard id="competences" title="Compétences" icon={Award} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetCompetences}>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input 
@@ -622,7 +706,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Langues */}
-            <SectionCard id="langues" title="Langues" icon={Globe} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
+            <SectionCard id="langues" title="Langues" icon={Globe} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetLanguages}>
               <div className="space-y-4">
                 <Input 
                   placeholder="Ex: Anglais" 
@@ -677,7 +761,7 @@ export default function CreateCVFusionPage() {
             </SectionCard>
 
             {/* Section: Loisirs */}
-            <SectionCard id="loisirs" title="Loisirs" icon={Heart} expandedSection={expandedSection} setExpandedSection={setExpandedSection}>
+            <SectionCard id="loisirs" title="Loisirs" icon={Heart} expandedSection={expandedSection} setExpandedSection={setExpandedSection} onReset={handleResetHobbies}>
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input 
