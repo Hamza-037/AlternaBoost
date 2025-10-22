@@ -1,223 +1,139 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Lock, FileText } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { Check } from "lucide-react";
 
-interface LetterTemplate {
-  id: string;
-  name: string;
-  description: string;
-  isPremium: boolean;
-  requiredPlan: "FREE" | "STARTER" | "PRO";
-  isPopular?: boolean;
-  color: string;
+interface TemplateSelectorProps {
+  selectedTemplate: "classic" | "modern" | "creative";
+  onTemplateChange: (template: "classic" | "modern" | "creative") => void;
 }
 
-const letterTemplates: LetterTemplate[] = [
+const templates = [
   {
-    id: "standard",
-    name: "Standard",
-    description: "Format classique et professionnel pour toutes les candidatures",
-    isPremium: false,
-    requiredPlan: "FREE",
-    isPopular: true,
-    color: "from-blue-500 to-blue-600",
+    id: "classic" as const,
+    name: "Classique",
+    description: "Style professionnel et traditionnel",
+    icon: "📋",
+    color: "from-gray-500 to-gray-600",
+    preview: "/letter-previews/classic.png",
+    bestFor: "Secteurs traditionnels, banque, juridique",
   },
   {
-    id: "professional",
-    name: "Professionnel",
-    description: "Mise en page élégante pour les postes de direction",
-    isPremium: true,
-    requiredPlan: "STARTER",
-    color: "from-purple-500 to-purple-600",
+    id: "modern" as const,
+    name: "Moderne",
+    description: "Design épuré et contemporain",
+    icon: "✨",
+    color: "from-blue-500 to-indigo-600",
+    preview: "/letter-previews/modern.png",
+    bestFor: "Tech, startups, marketing",
   },
   {
-    id: "creative",
+    id: "creative" as const,
     name: "Créatif",
-    description: "Design moderne pour les secteurs créatifs et startups",
-    isPremium: true,
-    requiredPlan: "PRO",
-    color: "from-pink-500 to-rose-600",
+    description: "Style audacieux avec dégradés",
+    icon: "🎨",
+    color: "from-purple-500 to-pink-600",
+    preview: "/letter-previews/creative.png",
+    bestFor: "Design, communication, métiers créatifs",
   },
 ];
 
-interface LetterTemplateSelectorProps {
-  selectedTemplate: string;
-  onSelectTemplate: (templateId: string) => void;
-}
-
-export function LetterTemplateSelector({
-  selectedTemplate,
-  onSelectTemplate,
-}: LetterTemplateSelectorProps) {
-  const { user } = useUser();
-  const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
-
-  const userPlan = (user?.publicMetadata?.plan as string) || "FREE";
-
-  const planHierarchy: Record<string, number> = {
-    FREE: 0,
-    STARTER: 1,
-    PRO: 2,
-    PREMIUM: 3,
-  };
-
-  const canUseTemplate = (template: LetterTemplate): boolean => {
-    return planHierarchy[userPlan] >= planHierarchy[template.requiredPlan];
-  };
-
+export function TemplateSelector({ selectedTemplate, onTemplateChange }: TemplateSelectorProps) {
   return (
-    <div className="space-y-6">
-      {/* En-tête */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Choisissez le style de votre lettre
-        </h2>
-        <p className="text-gray-600">
-          Sélectionnez le format qui correspond à votre candidature
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Template de lettre</h3>
+        <p className="text-sm text-gray-600">
+          Choisissez le style qui correspond le mieux à votre secteur
         </p>
       </div>
 
-      {/* Grille de templates */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        {letterTemplates.map((template) => {
-          const isSelected = selectedTemplate === template.id;
-          const isLocked = !canUseTemplate(template);
-          const isHovered = hoveredTemplate === template.id;
-
-          return (
-            <motion.div
-              key={template.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card
-                className={`relative overflow-hidden cursor-pointer transition-all duration-300 ${
-                  isSelected
-                    ? "ring-4 ring-purple-500 shadow-2xl"
-                    : "hover:shadow-xl hover:scale-105"
-                } ${isLocked ? "opacity-75" : ""}`}
-                onMouseEnter={() => setHoveredTemplate(template.id)}
-                onMouseLeave={() => setHoveredTemplate(null)}
-                onClick={() => !isLocked && onSelectTemplate(template.id)}
-              >
-                {/* Badges */}
-                <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-                  {template.isPopular && (
-                    <Badge className="bg-amber-500 text-white border-0">
-                      Populaire
-                    </Badge>
-                  )}
-                  {template.isPremium && (
-                    <Badge
-                      variant="outline"
-                      className="bg-white/90 backdrop-blur-sm"
-                    >
-                      {template.requiredPlan}
-                    </Badge>
-                  )}
+      <div className="grid grid-cols-1 gap-3">
+        {templates.map((template) => (
+          <Card
+            key={template.id}
+            className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+              selectedTemplate === template.id
+                ? "ring-2 ring-purple-600 shadow-lg"
+                : "hover:border-purple-300"
+            }`}
+            onClick={() => onTemplateChange(template.id)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                {/* Icône et badge */}
+                <div className="flex-shrink-0">
+                  <div
+                    className={`w-12 h-12 rounded-lg bg-gradient-to-br ${template.color} flex items-center justify-center text-2xl shadow-md`}
+                  >
+                    {template.icon}
+                  </div>
                 </div>
 
-                {/* Icône de sélection */}
-                {isSelected && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute top-3 right-3 z-10"
-                  >
-                    <div className="bg-purple-500 text-white rounded-full p-2 shadow-lg">
-                      <Check className="w-5 h-5" />
-                    </div>
-                  </motion.div>
-                )}
+                {/* Contenu */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-semibold text-gray-900">{template.name}</h4>
+                    {selectedTemplate === template.id && (
+                      <div className="flex items-center gap-1 text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                        <Check className="w-3 h-3" />
+                        Sélectionné
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">{template.description}</p>
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span>{template.bestFor}</span>
+                  </div>
+                </div>
 
-                {/* Aperçu du template */}
-                <div
-                  className={`h-48 bg-gradient-to-br ${template.color} flex items-center justify-center relative overflow-hidden`}
-                >
-                  {/* Pattern de lignes (lettre) */}
-                  <div className="absolute inset-0 opacity-20 p-6">
-                    <div className="space-y-2">
-                      {Array.from({ length: 8 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="h-2 bg-white rounded"
-                          style={{ width: `${90 - i * 5}%` }}
-                        ></div>
-                      ))}
+                {/* Indicateur sélectionné */}
+                {selectedTemplate === template.id && (
+                  <div className="flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center">
+                      <Check className="w-4 h-4 text-white" />
                     </div>
                   </div>
-
-                  {/* Icône centrale */}
-                  <FileText className="w-20 h-20 text-white opacity-30" />
-
-                  {/* Overlay si verrouillé */}
-                  {isLocked && (
-                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                      <Lock className="w-10 h-10 text-white mb-2" />
-                      <p className="text-white text-sm font-medium">
-                        Plan {template.requiredPlan} requis
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Informations */}
-                <CardContent className="p-4">
-                  <h3 className="font-bold text-lg text-gray-900 mb-1">
-                    {template.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {template.description}
-                  </p>
-
-                  <Button
-                    className="w-full"
-                    variant={isSelected ? "default" : "outline"}
-                    size="sm"
-                    disabled={isLocked}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      !isLocked && onSelectTemplate(template.id);
-                    }}
-                  >
-                    {isLocked ? (
-                      <>
-                        <Lock className="w-4 h-4 mr-2" />
-                        Passer au plan {template.requiredPlan}
-                      </>
-                    ) : isSelected ? (
-                      <>
-                        <Check className="w-4 h-4 mr-2" />
-                        Sélectionné
-                      </>
-                    ) : (
-                      "Utiliser ce modèle"
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        })}
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Info plan */}
-      {userPlan === "FREE" && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg max-w-2xl mx-auto">
-          <p className="text-sm text-purple-900 text-center">
-            💡 <strong>Passez au plan Starter</strong> pour accéder à des styles
-            de lettres plus sophistiqués
-          </p>
-        </div>
-      )}
+      {/* Info complémentaire */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <p className="text-xs text-blue-800 flex items-start gap-2">
+          <svg
+            className="w-4 h-4 flex-shrink-0 mt-0.5"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span>
+            Le template influence la mise en page et les couleurs. Vous pourrez personnaliser davantage avec les options ci-dessous.
+          </span>
+        </p>
+      </div>
     </div>
   );
 }
-

@@ -29,7 +29,7 @@ export default function PreviewLetterPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Style et sections personnalisÃ©es pour les lettres
+  // Style et sections personnalisées pour les lettres
   const [letterStyle, setLetterStyle] = useState<LetterStyle>({
     template: "classic",
     colorScheme: {
