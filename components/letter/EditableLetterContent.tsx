@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface EditableLetterContentProps {
   content: string;
-  onContentChange: (content: string);
+  onContentChange: (content: string) => void;
   onRegenerateParagraph?: (paragraphIndex: number) => Promise<void>;
 }
 
