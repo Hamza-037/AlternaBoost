@@ -393,18 +393,29 @@ export default function PreviewLetterPageV3() {
                   </Badge>
                 </div>
 
-                {/* Contenu de la lettre avec overlay éditable */}
+                {/* Contenu de la lettre avec styling selon template */}
                 <div className="relative">
-                  {/* Preview du template en arrière-plan (lecture seule) */}
-                  <div className="absolute inset-0 pointer-events-none opacity-0">
-                    {renderLetterPreview()}
-                  </div>
-
-                  {/* Contenu éditable par-dessus */}
-                  <div className="bg-white p-12 min-h-[1000px]">
-                    {/* Header de la lettre (non éditable) */}
-                    <div className="mb-8 pb-6 border-b-2 border-purple-600">
-                      <h2 className="text-2xl font-bold text-gray-900">
+                  {/* Contenu éditable avec style du template */}
+                  <div 
+                    className="bg-white p-12 min-h-[1000px]"
+                    style={{
+                      fontFamily: letterStyle.typography.bodyFont,
+                    }}
+                  >
+                    {/* Header de la lettre avec couleur du template */}
+                    <div 
+                      className="mb-8 pb-6 border-b-2"
+                      style={{ 
+                        borderColor: letterStyle.colorScheme.primary,
+                      }}
+                    >
+                      <h2 
+                        className="text-2xl font-bold"
+                        style={{ 
+                          color: letterStyle.template === "classic" ? "#111827" : letterStyle.colorScheme.primary,
+                          fontFamily: letterStyle.typography.headingFont,
+                        }}
+                      >
                         {letterData.prenom} {letterData.nom}
                       </h2>
                       <div className="mt-2 text-sm text-gray-600 space-y-1">
@@ -429,11 +440,16 @@ export default function PreviewLetterPageV3() {
                       </p>
                     </div>
 
-                    {/* Objet */}
+                    {/* Objet avec couleur selon template */}
                     <div className="mb-8">
                       <p className="text-sm">
-                        <span className="font-semibold">Objet :</span> Candidature au poste de{" "}
-                        {letterData.posteVise}
+                        <span 
+                          className="font-semibold"
+                          style={{ color: letterStyle.template === "creative" ? letterStyle.colorScheme.primary : "#111827" }}
+                        >
+                          Objet :
+                        </span>{" "}
+                        Candidature au poste de {letterData.posteVise}
                       </p>
                     </div>
 
@@ -447,14 +463,21 @@ export default function PreviewLetterPageV3() {
                       content={letterData.contenuGenere}
                       onContentChange={handleContentChange}
                       onRegenerateParagraph={handleRegenerateParagraph}
+                      primaryColor={letterStyle.colorScheme.primary}
+                      template={letterStyle.template}
                     />
 
-                    {/* Formule de politesse (non éditable pour l'instant) */}
+                    {/* Formule de politesse */}
                     <div className="mt-8 pt-6 border-t border-gray-200">
                       <p className="text-gray-800 mb-8">
                         Je vous prie d'agréer, {letterData.destinataire || "Madame, Monsieur"}, l'expression de mes salutations distinguées.
                       </p>
-                      <p className="font-semibold text-gray-900">
+                      <p 
+                        className="font-semibold"
+                        style={{ 
+                          color: letterStyle.template === "classic" ? "#111827" : letterStyle.colorScheme.primary 
+                        }}
+                      >
                         {letterData.prenom} {letterData.nom}
                       </p>
                     </div>

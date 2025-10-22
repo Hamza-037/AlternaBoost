@@ -10,12 +10,16 @@ interface EditableLetterContentProps {
   content: string;
   onContentChange: (content: string) => void;
   onRegenerateParagraph?: (paragraphIndex: number) => Promise<void>;
+  primaryColor?: string;
+  template?: string;
 }
 
 export function EditableLetterContent({
   content,
   onContentChange,
   onRegenerateParagraph,
+  primaryColor = "#7C3AED",
+  template = "modern",
 }: EditableLetterContentProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editedText, setEditedText] = useState("");
@@ -87,7 +91,11 @@ export function EditableLetterContent({
                 value={editedText}
                 onChange={(e) => setEditedText(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full min-h-[150px] p-4 border-2 border-purple-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none text-gray-800 leading-relaxed"
+                className="w-full min-h-[150px] p-4 border-2 rounded-lg focus:outline-none focus:ring-2 resize-none text-gray-800 leading-relaxed"
+                style={{
+                  borderColor: primaryColor,
+                  '--tw-ring-color': primaryColor,
+                } as React.CSSProperties}
                 autoFocus
               />
               <div className="flex gap-2 mt-2 justify-end">
@@ -102,7 +110,10 @@ export function EditableLetterContent({
                 <Button
                   size="sm"
                   onClick={handleSaveEdit}
-                  className="gap-1 bg-purple-600 hover:bg-purple-700"
+                  className="gap-1"
+                  style={{
+                    backgroundColor: primaryColor,
+                  }}
                 >
                   <Check className="w-4 h-4" />
                   Sauvegarder (Ctrl+Enter)
@@ -112,11 +123,15 @@ export function EditableLetterContent({
           ) : (
             // Mode visualisation avec édition au clic
             <div
-              className={`relative p-4 rounded-lg cursor-text transition-all duration-200 ${
+              className={`relative p-4 rounded-lg cursor-text transition-all duration-200 border-2 ${
                 hoveredIndex === index
-                  ? "bg-purple-50 border-2 border-purple-200"
-                  : "border-2 border-transparent"
+                  ? "bg-opacity-10"
+                  : "border-transparent"
               }`}
+              style={{
+                backgroundColor: hoveredIndex === index ? `${primaryColor}15` : "transparent",
+                borderColor: hoveredIndex === index ? `${primaryColor}40` : "transparent",
+              }}
               onClick={() => handleStartEdit(index, paragraph)}
             >
               <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
@@ -139,7 +154,10 @@ export function EditableLetterContent({
                         e.stopPropagation();
                         handleStartEdit(index, paragraph);
                       }}
-                      className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-100 shadow-sm bg-white"
+                      className="gap-1 shadow-sm bg-white"
+                      style={{
+                        color: primaryColor,
+                      }}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -167,7 +185,10 @@ export function EditableLetterContent({
                           handleRegenerate(index);
                         }}
                         disabled={regeneratingIndex === index}
-                        className="gap-1 text-purple-600 hover:text-purple-700 hover:bg-purple-100 shadow-sm bg-white"
+                        className="gap-1 shadow-sm bg-white"
+                        style={{
+                          color: primaryColor,
+                        }}
                       >
                         {regeneratingIndex === index ? (
                           <>
@@ -188,7 +209,10 @@ export function EditableLetterContent({
 
               {/* Indicateur de clic */}
               {hoveredIndex === index && (
-                <div className="absolute bottom-2 left-2 text-xs text-purple-600 opacity-70">
+                <div 
+                  className="absolute bottom-2 left-2 text-xs opacity-70"
+                  style={{ color: primaryColor }}
+                >
                   💡 Cliquez pour modifier
                 </div>
               )}
