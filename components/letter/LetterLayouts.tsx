@@ -2,6 +2,7 @@
 
 import React from "react";
 import { EditableLetterContent } from "./EditableLetterContent";
+import { Mail, Phone, MapPin, Calendar, Briefcase } from "lucide-react";
 
 interface LetterLayoutProps {
   letterData: {
@@ -37,42 +38,61 @@ export function ClassicLetterLayout({
       className="bg-white p-12 min-h-[1000px]"
       style={{ fontFamily: bodyFont }}
     >
-      {/* Header simple - Aligné à gauche */}
-      <div className="mb-8">
+      {/* Header simple - Aligné à gauche - AMÉLIORÉ */}
+      <div className="mb-10">
         <h2 
-          className="text-2xl font-bold text-gray-900 mb-2"
+          className="text-4xl font-bold text-gray-900 mb-4"
           style={{ fontFamily: headingFont }}
         >
           {letterData.prenom} {letterData.nom}
         </h2>
-        <div className="text-sm text-gray-600 space-y-0.5">
-          <p>{letterData.adresse}</p>
-          <p>{letterData.telephone} • {letterData.email}</p>
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 text-sm text-gray-600">
+            <MapPin className="w-4 h-4 text-gray-500" />
+            <span>{letterData.adresse}</span>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-gray-500" />
+              <span>{letterData.telephone}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-gray-500" />
+              <span>{letterData.email}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Séparateur discret */}
-      <div className="border-t border-gray-300 my-8"></div>
+      {/* Séparateur plus épais */}
+      <div className="border-t-2 border-gray-400 my-8"></div>
 
-      {/* Destinataire */}
-      <div className="mb-8 text-sm">
-        <p className="font-semibold text-gray-900">{letterData.entreprise}</p>
+      {/* Destinataire avec espacement amélioré */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-2">
+          <Briefcase className="w-4 h-4 text-gray-500" />
+          <p className="font-bold text-gray-900 text-base">{letterData.entreprise}</p>
+        </div>
         {letterData.destinataire && (
-          <p className="text-gray-700">À l'attention de {letterData.destinataire}</p>
+          <p className="text-gray-700 ml-6">À l'attention de {letterData.destinataire}</p>
         )}
-        <p className="mt-6 text-gray-600">
-          {new Date().toLocaleDateString("fr-FR", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </p>
+        <div className="flex items-center gap-2 mt-6 text-gray-600">
+          <Calendar className="w-4 h-4 text-gray-500" />
+          <p>
+            {new Date().toLocaleDateString("fr-FR", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+        </div>
       </div>
 
-      {/* Objet */}
-      <div className="mb-8">
+      {/* Objet avec séparation */}
+      <div className="mb-8 pb-4 border-b border-gray-200">
         <p className="text-sm">
-          <span className="font-bold">Objet :</span> Candidature au poste de {letterData.posteVise}
+          <span className="font-bold uppercase tracking-wide text-gray-700">Objet :</span>{" "}
+          <span className="text-gray-900">Candidature au poste de {letterData.posteVise}</span>
         </p>
       </div>
 
@@ -126,32 +146,38 @@ export function ModernLetterLayout({
         ></div>
         
         <div className="flex-1 p-12">
-          {/* Nom en grand avec couleur */}
-          <div className="mb-8">
+          {/* Nom en TRÈS grand avec couleur - AMÉLIORÉ */}
+          <div className="mb-10">
             <h1 
-              className="text-4xl font-bold mb-3"
+              className="text-6xl font-black mb-4"
               style={{ 
                 color: primaryColor,
                 fontFamily: headingFont,
+                lineHeight: "1.1",
               }}
             >
               {letterData.prenom} {letterData.nom}
             </h1>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                {letterData.email}
-              </span>
-              <span className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                {letterData.telephone}
-              </span>
+            <p 
+              className="text-xl font-medium mb-6"
+              style={{ color: `${primaryColor}cc` }}
+            >
+              {letterData.posteVise}
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Mail className="w-4 h-4" style={{ color: primaryColor }} />
+                <span>{letterData.email}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Phone className="w-4 h-4" style={{ color: primaryColor }} />
+                <span>{letterData.telephone}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <MapPin className="w-4 h-4" style={{ color: primaryColor }} />
+                <span>{letterData.adresse}</span>
+              </div>
             </div>
-            <p className="text-sm text-gray-500 mt-1">{letterData.adresse}</p>
           </div>
 
           {/* Ligne de séparation */}
@@ -179,17 +205,27 @@ export function ModernLetterLayout({
             </div>
           </div>
 
-          {/* Objet stylisé */}
-          <div className="mb-8 pb-4 border-b border-gray-200">
-            <p className="text-sm">
+          {/* Objet stylisé avec timeline */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div 
+                className="h-8 w-1 rounded-full"
+                style={{ backgroundColor: primaryColor }}
+              ></div>
               <span 
-                className="font-bold uppercase tracking-wide"
+                className="font-bold uppercase tracking-wider text-xs"
                 style={{ color: primaryColor }}
               >
-                Objet :
-              </span>{" "}
-              <span className="text-gray-900">{letterData.posteVise}</span>
+                Objet de la candidature
+              </span>
+            </div>
+            <p className="text-base font-medium text-gray-900 ml-4 pl-3">
+              Candidature au poste de {letterData.posteVise}
             </p>
+            <div 
+              className="h-0.5 w-full mt-4"
+              style={{ background: `linear-gradient(to right, ${primaryColor}, transparent)` }}
+            ></div>
           </div>
 
           {/* Formule d'appel */}
@@ -256,41 +292,43 @@ export function CreativeLetterLayout({
       </div>
 
       <div className="p-12">
-        {/* Infos de contact - Style carte */}
-        <div className="flex gap-6 mb-8 text-sm">
-          <div className="flex items-center gap-2">
+        {/* Infos de contact - Style carte modernisé */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm"
               style={{ backgroundColor: primaryColor }}
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+              <Mail className="w-5 h-5" />
             </div>
-            <span className="text-gray-700">{letterData.email}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-500 font-medium">Email</p>
+              <p className="text-sm text-gray-900 truncate">{letterData.email}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm"
               style={{ backgroundColor: secondaryColor }}
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
+              <Phone className="w-5 h-5" />
             </div>
-            <span className="text-gray-700">{letterData.telephone}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-500 font-medium">Téléphone</p>
+              <p className="text-sm text-gray-900">{letterData.telephone}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm"
               style={{ backgroundColor: primaryColor }}
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              <MapPin className="w-5 h-5" />
             </div>
-            <span className="text-gray-700">{letterData.adresse}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-500 font-medium">Adresse</p>
+              <p className="text-sm text-gray-900 truncate">{letterData.adresse}</p>
+            </div>
           </div>
         </div>
 
