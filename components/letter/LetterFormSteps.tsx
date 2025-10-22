@@ -22,6 +22,8 @@ import {
 import type { LetterFormData } from "@/types/letter";
 import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 import { ImportFromCVButton } from "./ImportFromCVButton";
+import { CVSourceModal } from "./CVSourceModal";
+import { SelectCreatedCVModal } from "./SelectCreatedCVModal";
 
 const AUTOSAVE_KEY = "letter_draft";
 
@@ -30,6 +32,8 @@ export function LetterFormSteps() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradeData, setUpgradeData] = useState<{ current?: number; limit?: number }>({});
+  const [showCVSourceModal, setShowCVSourceModal] = useState(false);
+  const [showSelectCVModal, setShowSelectCVModal] = useState(false);
   const totalSteps = 3;
 
   const {
@@ -54,6 +58,21 @@ export function LetterFormSteps() {
     },
   });
 
+  // Afficher le modal de sélection au chargement initial (si le formulaire est vide)
+  useEffect(() => {
+    const formData = watch();
+    const isEmpty = !formData.prenom && !formData.nom && !formData.email;
+    
+    // Si le formulaire est vide et qu'on n'a pas encore montré le modal
+    if (isEmpty && currentStep === 1) {
+      const hasSeenModal = sessionStorage.getItem("cv_source_modal_shown");
+      if (!hasSeenModal) {
+        setShowCVSourceModal(true);
+        sessionStorage.setItem("cv_source_modal_shown", "true");
+      }
+    }
+  }, []);
+
   // Fonction pour importer les données depuis un CV
   const handleImportFromCV = (data: {
     prenom: string;
@@ -67,6 +86,10 @@ export function LetterFormSteps() {
     setValue("email", data.email);
     setValue("telephone", data.telephone);
     setValue("adresse", data.adresse);
+    
+    toast.success("Informations importées !", {
+      description: "Les données de votre CV ont été importées avec succès",
+    });
   };
 
   // Observer les valeurs du formulaire pour la validation
@@ -304,7 +327,15 @@ export function LetterFormSteps() {
               <CardContent className="space-y-4">
                 {/* Bouton Import depuis CV */}
                 <div className="flex justify-end mb-4">
-                  <ImportFromCVButton onImport={handleImportFromCV} />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCVSourceModal(true)}
+                    className="gap-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Importer depuis un CV
+                  </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -613,6 +644,27 @@ export function LetterFormSteps() {
         type="letter"
         current={upgradeData.current}
         limit={upgradeData.limit}
+      />
+
+      {/* Modal de choix de source de CV */}
+      <CVSourceModal
+        isOpen={showCVSourceModal}
+        onClose={() => setShowCVSourceModal(false)}
+        onImportFromCreatedCV={() => {
+          setShowCVSourceModal(false);
+          setShowSelectCVModal(true);
+        }}
+        onImportFromPDF={handleImportFromCV}
+        onFillManually={() => {
+          setShowCVSourceModal(false);
+        }}
+      />
+
+      {/* Modal de sélection d'un CV créé */}
+      <SelectCreatedCVModal
+        isOpen={showSelectCVModal}
+        onClose={() => setShowSelectCVModal(false)}
+        onSelect={handleImportFromCV}
       />
     </form>
   );
