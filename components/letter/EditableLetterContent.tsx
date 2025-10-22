@@ -72,14 +72,62 @@ export function EditableLetterContent({
     }
   };
 
+  // Calculer la longueur totale
+  const totalLength = content.length;
+  const optimalMin = 1500;
+  const optimalMax = 2500;
+  const progress = Math.min((totalLength / optimalMax) * 100, 100);
+
   return (
     <div className="space-y-4">
+      {/* Indicateur de longueur optimale */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-medium text-gray-700">Longueur de la lettre</span>
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1">
+              <div className={`w-2 h-2 rounded-full ${totalLength >= optimalMin * 0.3 ? 'bg-green-500' : 'bg-gray-300'}`} />
+              <div className={`w-2 h-2 rounded-full ${totalLength >= optimalMin * 0.6 ? 'bg-green-500' : 'bg-gray-300'}`} />
+              <div className={`w-2 h-2 rounded-full ${totalLength >= optimalMin ? 'bg-green-500' : 'bg-gray-300'}`} />
+              <div className={`w-2 h-2 rounded-full ${totalLength >= optimalMax ? 'bg-orange-500' : 'bg-gray-300'}`} />
+            </div>
+            <span className="text-xs text-gray-600">{totalLength} / {optimalMax} caractères</span>
+          </div>
+        </div>
+        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className={`h-full ${
+              totalLength < optimalMin ? 'bg-orange-500' :
+              totalLength > optimalMax ? 'bg-red-500' :
+              'bg-green-500'
+            }`}
+          />
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          {totalLength < optimalMin ? `Encore ${optimalMin - totalLength} caractères pour atteindre la longueur minimale` :
+           totalLength > optimalMax ? `${totalLength - optimalMax} caractères au-dessus du maximum recommandé` :
+           'Longueur optimale ✓'}
+        </p>
+      </motion.div>
+
       {paragraphs.map((paragraph, index) => (
         <motion.div
           key={index}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
+          transition={{ 
+            delay: index * 0.08,
+            duration: 0.5,
+            ease: [0.25, 0.1, 0.25, 1.0] // Custom ease
+          }}
+          whileHover={{ scale: 1.01 }}
           className="relative group"
           onMouseEnter={() => setHoveredIndex(index)}
           onMouseLeave={() => setHoveredIndex(null)}
@@ -107,17 +155,19 @@ export function EditableLetterContent({
                 >
                   Annuler (Esc)
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveEdit}
-                  className="gap-1"
-                  style={{
-                    backgroundColor: primaryColor,
-                  }}
-                >
-                  <Check className="w-4 h-4" />
-                  Sauvegarder (Ctrl+Enter)
-                </Button>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveEdit}
+                    className="gap-1"
+                    style={{
+                      backgroundColor: primaryColor,
+                    }}
+                  >
+                    <Check className="w-4 h-4" />
+                    Sauvegarder (Ctrl+Enter)
+                  </Button>
+                </motion.div>
               </div>
             </div>
           ) : (
