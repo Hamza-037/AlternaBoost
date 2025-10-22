@@ -2,6 +2,7 @@
 
 import React from "react";
 import { EditableLetterContent } from "./EditableLetterContent";
+import { OptionalSections } from "./OptionalSections";
 import { Mail, Phone, MapPin, Calendar, Briefcase } from "lucide-react";
 
 interface LetterLayoutProps {
@@ -232,6 +233,23 @@ export function ModernLetterLayout({
           <p className="mb-6 text-gray-900 font-medium">
             {letterData.destinataire || "Madame, Monsieur"},
           </p>
+
+          {/* Sections optionnelles - DÉMONSTRATION */}
+          <OptionalSections
+            primaryColor={primaryColor}
+            secondaryColor={secondaryColor}
+            skills={["Python & SQL", "Data Analysis", "Power BI", "Machine Learning", "Gestion de projet", "Communication"]}
+            achievements={[
+              { value: "+35%", label: "Performance" },
+              { value: "5 projets", label: "Livrés" },
+              { value: "100%", label: "Satisfaction" },
+            ]}
+            whyCompany={[
+              "Leader de la transition énergétique en France",
+              "Opportunités d'innovation et de développement de compétences",
+              "Culture d'entreprise axée sur la responsabilité sociale",
+            ]}
+          />
 
           {/* Contenu */}
           <EditableLetterContent
