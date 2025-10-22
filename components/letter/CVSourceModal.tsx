@@ -76,7 +76,15 @@ export function CVSourceModal({
         throw new Error("Échec de l'extraction");
       }
 
-      const data = await response.json();
+      const result = await response.json();
+
+      console.log("Réponse API extract-cv:", result);
+
+      if (!result.success || !result.data) {
+        throw new Error(result.message || "Échec de l'extraction");
+      }
+
+      const extractedData = result.data;
 
       toast.success("CV importé avec succès !", {
         description: "Vos informations ont été extraites",
@@ -84,18 +92,19 @@ export function CVSourceModal({
 
       // Transmettre les données extraites
       onImportFromPDF({
-        prenom: data.prenom || "",
-        nom: data.nom || "",
-        email: data.email || "",
-        telephone: data.telephone || "",
-        adresse: data.adresse || "",
+        prenom: extractedData.prenom || "",
+        nom: extractedData.nom || "",
+        email: extractedData.email || "",
+        telephone: extractedData.telephone || "",
+        adresse: extractedData.adresse || "",
       });
 
       onClose();
     } catch (error) {
       console.error("Erreur lors de l'extraction du CV:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
       toast.error("Erreur lors de l'extraction", {
-        description: "Impossible d'extraire les données de votre CV. Veuillez réessayer.",
+        description: errorMessage || "Impossible d'extraire les données de votre CV. Veuillez réessayer.",
       });
     } finally {
       setIsUploading(false);
