@@ -1,35 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { Footer } from "@/components/landing/Footer";
 import { LetterCustomizer } from "@/components/letter/LetterCustomizer";
-import { LetterContentEditor } from "@/components/letter/LetterContentEditor";
+import { EditableLetterContent } from "@/components/letter/EditableLetterContent";
 import { ClassicLetterTemplate } from "@/components/letter/templates/ClassicLetterTemplate";
 import { ModernLetterTemplate } from "@/components/letter/templates/ModernLetterTemplate";
 import { CreativeLetterTemplate } from "@/components/letter/templates/CreativeLetterTemplate";
 import type { GeneratedLetter, LetterStyle, LetterSection } from "@/types/letter";
 import { toast } from "sonner";
-import { Download, ArrowLeft, Sparkles, Eye } from "lucide-react";
+import {
+  Download,
+  ArrowLeft,
+  Eye,
+  SidebarClose,
+  SidebarOpen,
+  Save,
+  Info,
+  Sparkles,
+} from "lucide-react";
 
-export default function PreviewLetterPageEnhanced() {
+export default function PreviewLetterPageV3() {
   const router = useRouter();
   const [letterData, setLetterData] = useState<GeneratedLetter | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Style et sections personnalisées pour les lettres
+  // Style et sections personnalisées
   const [letterStyle, setLetterStyle] = useState<LetterStyle>({
-    template: "classic",
+    template: "modern",
     colorScheme: {
-      primary: "#2563EB",
-      secondary: "#3B82F6",
-      accent: "#60A5FA",
+      primary: "#7C3AED",
+      secondary: "#8B5CF6",
+      accent: "#A78BFA",
       text: "#111827",
       background: "#FFFFFF",
     },
@@ -46,23 +58,19 @@ export default function PreviewLetterPageEnhanced() {
   const [customSections, setCustomSections] = useState<LetterSection[]>([]);
 
   useEffect(() => {
-    // Récupérer les données de la lettre depuis sessionStorage
     const storedData = sessionStorage.getItem("generated_letter");
     if (storedData) {
       const data = JSON.parse(storedData);
       setLetterData(data);
-      
-      // Charger le style personnalisé s'il existe
+
       if (data.style) {
         setLetterStyle(data.style);
       }
-      
-      // Charger les sections personnalisées s'il y en a
+
       if (data.sectionsPersonnalisees) {
         setCustomSections(data.sectionsPersonnalisees);
       }
     } else {
-      // Si pas de données, rediriger vers le formulaire
       router.push("/create-letter");
     }
   }, [router]);
@@ -73,9 +81,10 @@ export default function PreviewLetterPageEnhanced() {
     setLetterData(updated);
     try {
       sessionStorage.setItem("generated_letter", JSON.stringify(updated));
-      toast.success("Contenu sauvegardé");
+      setLastSaved(new Date());
+      toast.success("Modifications sauvegardées");
     } catch {
-      // Ignorer les erreurs de stockage
+      toast.error("Erreur de sauvegarde");
     }
   };
 
@@ -105,15 +114,16 @@ export default function PreviewLetterPageEnhanced() {
       }
 
       const { newParagraph } = await response.json();
-      
-      // Remplacer le paragraphe dans le contenu
+
       const paragraphs = letterData.contenuGenere.split("\n\n");
       paragraphs[paragraphIndex] = newParagraph;
       const newContent = paragraphs.join("\n\n");
-      
+
       handleContentChange(newContent);
+      toast.success("Paragraphe régénéré avec succès");
     } catch (error) {
       console.error("Erreur:", error);
+      toast.error("Impossible de régénérer le paragraphe");
       throw error;
     }
   };
@@ -152,7 +162,7 @@ export default function PreviewLetterPageEnhanced() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast.success("Lettre de motivation téléchargée avec succès !");
+      toast.success("Lettre téléchargée avec succès !");
     } catch (error) {
       console.error("Erreur:", error);
       toast.error(
@@ -165,8 +175,7 @@ export default function PreviewLetterPageEnhanced() {
     }
   };
 
-  // Rendu du template approprié
-  const renderTemplate = () => {
+  const renderLetterPreview = () => {
     if (!letterData) return null;
 
     const templateProps = {
@@ -213,79 +222,65 @@ export default function PreviewLetterPageEnhanced() {
     <>
       <HeaderV2 />
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 pt-20">
-        <div className="container mx-auto px-4 py-8">
-          {/* Header */}
+        <div className="container mx-auto px-4 py-6">
+          {/* Header avec actions */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8"
+            className="mb-6"
           >
-            <div className="flex items-center justify-between mb-6">
-              <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
                 <Link href="/create-letter">
-                  <Button variant="ghost" className="mb-4 gap-2">
+                  <Button variant="ghost" className="gap-2">
                     <ArrowLeft className="w-4 h-4" />
-                    Retour au formulaire
+                    Retour
                   </Button>
                 </Link>
-                <h1 className="text-4xl font-bold text-gray-900">
-                  Aperçu de votre lettre de motivation
-                </h1>
-                <p className="text-lg text-gray-600 mt-2">
-                  Personnalisez le style et le contenu de votre lettre
-                </p>
-              </div>
-              <Badge className="h-8 px-4 bg-purple-600 hover:bg-purple-700 text-white">
-                <Eye className="w-4 h-4 mr-1" />
-                Mode Aperçu
-              </Badge>
-            </div>
-
-            {/* Actions */}
-            <Card className="p-4 bg-white/80 backdrop-blur-sm shadow-lg">
-              <div className="flex flex-wrap gap-3 items-center justify-between">
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const storedData = sessionStorage.getItem("generated_letter");
-                      if (storedData) {
-                        setLetterData(JSON.parse(storedData));
-                      }
-                    }}
-                    className="gap-2"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                      <path d="M21 3v5h-5" />
-                      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                      <path d="M3 16v5h5" />
-                    </svg>
-                    Réinitialiser
-                  </Button>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    Lettre de motivation
+                  </h1>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {letterData.posteVise} • {letterData.entreprise}
+                  </p>
                 </div>
+              </div>
 
+              <div className="flex items-center gap-3">
+                {lastSaved && (
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Save className="w-3 h-3" />
+                    Sauvegardé à {lastSaved.toLocaleTimeString("fr-FR")}
+                  </div>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="gap-2"
+                >
+                  {isSidebarOpen ? (
+                    <>
+                      <SidebarClose className="w-4 h-4" />
+                      Masquer
+                    </>
+                  ) : (
+                    <>
+                      <SidebarOpen className="w-4 h-4" />
+                      Options
+                    </>
+                  )}
+                </Button>
                 <Button
                   onClick={handleDownloadPDF}
                   disabled={isDownloading}
-                  size="lg"
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 gap-2"
                 >
                   {isDownloading ? (
                     <>
                       <svg
-                        className="animate-spin h-5 w-5"
+                        className="animate-spin h-4 w-4"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -308,125 +303,163 @@ export default function PreviewLetterPageEnhanced() {
                     </>
                   ) : (
                     <>
-                      <Download className="w-5 h-5" />
-                      Télécharger en PDF
+                      <Download className="w-4 h-4" />
+                      Télécharger PDF
                     </>
                   )}
                 </Button>
               </div>
-            </Card>
+            </div>
+
+            {/* Badges informatifs */}
+            <div className="flex gap-2">
+              <Badge className="bg-purple-600 hover:bg-purple-700">
+                <Eye className="w-3 h-3 mr-1" />
+                Mode Aperçu
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {letterStyle.template === "classic"
+                  ? "📋 Classique"
+                  : letterStyle.template === "modern"
+                  ? "✨ Moderne"
+                  : "🎨 Créatif"}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {letterData.contenuGenere.length} caractères
+              </Badge>
+            </div>
           </motion.div>
 
-          {/* Grille 3 colonnes : Personnalisation + Aperçu + Contenu */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Colonne gauche : Personnalisation (1/4) */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="lg:col-span-1"
-            >
-              <LetterCustomizer
-                style={letterStyle}
-                sections={customSections}
-                onStyleChange={(newStyle) => {
-                  setLetterStyle(newStyle);
-                  // Sauvegarder dans sessionStorage
-                  const updated = { ...letterData, style: newStyle };
-                  sessionStorage.setItem("generated_letter", JSON.stringify(updated));
-                }}
-                onSectionsChange={setCustomSections}
-              />
+          {/* Layout principal : 2 colonnes */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Sidebar gauche - Personnalisation */}
+            {isSidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="lg:col-span-3"
+              >
+                <div className="sticky top-24 space-y-4">
+                  <LetterCustomizer
+                    style={letterStyle}
+                    sections={customSections}
+                    onStyleChange={(newStyle) => {
+                      setLetterStyle(newStyle);
+                      const updated = { ...letterData, style: newStyle };
+                      sessionStorage.setItem("generated_letter", JSON.stringify(updated));
+                      setLastSaved(new Date());
+                    }}
+                    onSectionsChange={setCustomSections}
+                  />
 
-              {/* Informations */}
-              <Card className="p-6 shadow-lg border-2 border-purple-100 mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
-                  Informations
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <span className="font-medium text-gray-700">Poste visé :</span>
-                    <p className="text-gray-600">{letterData.posteVise}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Entreprise :</span>
-                    <p className="text-gray-600">{letterData.entreprise}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Template :</span>
-                    <p className="text-gray-600 capitalize">{letterStyle.template}</p>
-                  </div>
+                  {/* Conseils */}
+                  <Card className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 border-purple-200">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                      <Info className="w-4 h-4 text-purple-600" />
+                      💡 Astuces
+                    </h3>
+                    <ul className="space-y-1.5 text-xs text-gray-700">
+                      <li>• Cliquez sur un paragraphe pour le modifier</li>
+                      <li>• Survolez pour voir les boutons d'action</li>
+                      <li>• Ctrl+Enter pour sauvegarder rapidement</li>
+                      <li>• Les modifications sont auto-sauvegardées</li>
+                    </ul>
+                  </Card>
                 </div>
-              </Card>
-            </motion.div>
+              </motion.div>
+            )}
 
-            {/* Colonne centrale : Aperçu de la lettre (2/4) */}
+            {/* Zone centrale - Aperçu de la lettre ÉLARGI */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="lg:col-span-2"
+              className={`${isSidebarOpen ? "lg:col-span-9" : "lg:col-span-12"}`}
             >
-              <div className="bg-white rounded-lg shadow-2xl border-2 border-gray-200 overflow-hidden">
-                {/* Toolbar de zoom */}
-                <div className="bg-gray-100 border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-                  <span className="text-sm text-gray-600 font-medium">Aperçu de la lettre</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {letterStyle.template === "classic" ? "📋 Classique" : 
-                       letterStyle.template === "modern" ? "✨ Moderne" : 
-                       "🎨 Créatif"}
-                    </Badge>
+              <Card className="overflow-hidden shadow-2xl">
+                {/* Toolbar */}
+                <div className="bg-gray-100 border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-700 font-medium">
+                      ✏️ Cliquez sur un paragraphe pour modifier
+                    </span>
+                    <Separator orientation="vertical" className="h-5" />
+                    <div className="flex items-center gap-2 text-xs text-gray-600">
+                      <Sparkles className="w-3 h-3 text-purple-600" />
+                      Régénération IA disponible
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    Format A4
+                  </Badge>
+                </div>
+
+                {/* Contenu de la lettre avec overlay éditable */}
+                <div className="relative">
+                  {/* Preview du template en arrière-plan (lecture seule) */}
+                  <div className="absolute inset-0 pointer-events-none opacity-0">
+                    {renderLetterPreview()}
+                  </div>
+
+                  {/* Contenu éditable par-dessus */}
+                  <div className="bg-white p-12 min-h-[1000px]">
+                    {/* Header de la lettre (non éditable) */}
+                    <div className="mb-8 pb-6 border-b-2 border-purple-600">
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        {letterData.prenom} {letterData.nom}
+                      </h2>
+                      <div className="mt-2 text-sm text-gray-600 space-y-1">
+                        <p>📧 {letterData.email}</p>
+                        <p>📱 {letterData.telephone}</p>
+                        <p>📍 {letterData.adresse}</p>
+                      </div>
+                    </div>
+
+                    {/* Infos destinataire */}
+                    <div className="mb-8 text-sm">
+                      <p className="font-semibold text-gray-900">{letterData.entreprise}</p>
+                      {letterData.destinataire && (
+                        <p className="text-gray-600">À l'attention de {letterData.destinataire}</p>
+                      )}
+                      <p className="mt-4 text-gray-600">
+                        Le {new Date().toLocaleDateString("fr-FR", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+
+                    {/* Objet */}
+                    <div className="mb-8">
+                      <p className="text-sm">
+                        <span className="font-semibold">Objet :</span> Candidature au poste de{" "}
+                        {letterData.posteVise}
+                      </p>
+                    </div>
+
+                    {/* Formule d'appel */}
+                    <p className="mb-6 text-gray-800">
+                      {letterData.destinataire ? `${letterData.destinataire},` : "Madame, Monsieur,"}
+                    </p>
+
+                    {/* Contenu éditable */}
+                    <EditableLetterContent
+                      content={letterData.contenuGenere}
+                      onContentChange={handleContentChange}
+                      onRegenerateParagraph={handleRegenerateParagraph}
+                    />
+
+                    {/* Formule de politesse (non éditable pour l'instant) */}
+                    <div className="mt-8 pt-6 border-t border-gray-200">
+                      <p className="text-gray-800 mb-8">
+                        Je vous prie d'agréer, {letterData.destinataire || "Madame, Monsieur"}, l'expression de mes salutations distinguées.
+                      </p>
+                      <p className="font-semibold text-gray-900">
+                        {letterData.prenom} {letterData.nom}
+                      </p>
+                    </div>
                   </div>
                 </div>
-
-                {/* Rendu du template */}
-                <div className="overflow-auto max-h-[800px] bg-gray-50 p-8">
-                  {renderTemplate()}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Colonne droite : Éditeur de contenu (1/4) */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="space-y-6"
-            >
-              <Card className="p-6 border-purple-100 shadow-lg">
-                <LetterContentEditor
-                  content={letterData.contenuGenere}
-                  onContentChange={handleContentChange}
-                  onRegenerateParagraph={handleRegenerateParagraph}
-                />
-              </Card>
-
-              {/* Conseils */}
-              <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  ✨ Conseils d'écriture
-                </h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li>• Personnalisez pour chaque entreprise</li>
-                  <li>• Mentionnez des éléments concrets</li>
-                  <li>• Restez professionnel mais authentique</li>
-                  <li>• Relisez avant envoi</li>
-                </ul>
-              </Card>
-
-              {/* Prochaines étapes */}
-              <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-100">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  🚀 Prochaines étapes
-                </h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li>• Personnalisez le style</li>
-                  <li>• Modifiez le contenu si nécessaire</li>
-                  <li>• Téléchargez votre lettre en PDF</li>
-                  <li>• Envoyez avec votre CV</li>
-                </ul>
               </Card>
             </motion.div>
           </div>
