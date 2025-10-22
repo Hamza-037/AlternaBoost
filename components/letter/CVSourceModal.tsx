@@ -152,60 +152,58 @@ export function CVSourceModal({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div className="space-y-3 mt-6">
             {options.map((option, index) => {
               const Icon = option.icon;
               return (
                 <motion.div
                   key={option.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
                   <Card
-                    className="relative overflow-hidden cursor-pointer group hover:shadow-xl transition-all duration-300 border-2 hover:border-purple-400 hover:bg-purple-50/50 h-full"
+                    className="relative overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300 border-2 hover:border-purple-400 hover:bg-purple-50/50"
                     onClick={option.action}
                   >
-                    <div className="p-6 flex flex-col items-center text-center h-full">
+                    <div className="p-4 flex items-center gap-4">
                       {/* Gradient Background */}
                       <div
-                        className={`absolute inset-0 bg-gradient-to-br ${option.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+                        className={`absolute inset-0 bg-gradient-to-r ${option.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
                       />
 
                       {/* Icon */}
                       <div
-                        className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${option.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${option.color} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-md`}
                       >
-                        <Icon className="w-10 h-10 text-white" />
+                        <Icon className="w-7 h-7 text-white" />
                       </div>
 
                       {/* Content */}
-                      <div className="flex-1 flex flex-col justify-center">
-                        <h3 className="font-bold text-lg mb-2 group-hover:text-purple-600 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-base mb-1 group-hover:text-purple-600 transition-colors">
                           {option.title}
                         </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
+                        <p className="text-sm text-gray-600">
                           {option.description}
                         </p>
                       </div>
 
                       {/* Hover Arrow */}
-                      <div className="mt-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-1 transition-all duration-300">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                          <svg
-                            className="w-5 h-5 text-purple-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
-                        </div>
+                      <div className="flex-shrink-0 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300">
+                        <svg
+                          className="w-6 h-6 text-purple-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
                       </div>
                     </div>
                   </Card>
