@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 
 import type { LetterStyle, LetterSection } from "@/types/letter";
+import { TemplateSelector } from "./TemplateSelector";
 
 interface LetterCustomizerProps {
   style: LetterStyle;
@@ -147,30 +148,10 @@ export function LetterCustomizer({
 
         {/* Onglet Style */}
         <TabsContent value="style" className="space-y-6">
-          <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block">
-              Template de lettre
-            </Label>
-            <div className="grid grid-cols-2 gap-3">
-              {templates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => onStyleChange({ ...style, template: template.id as any })}
-                  className={`p-3 rounded-lg border-2 transition-all duration-200 ${
-                    style.template === template.id
-                      ? "border-purple-500 bg-purple-50"
-                      : "border-gray-200 hover:border-purple-300"
-                  }`}
-                >
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">{template.preview}</div>
-                    <div className="font-medium text-sm">{template.name}</div>
-                    <div className="text-xs text-gray-500 mt-1">{template.description}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+          <TemplateSelector
+            selectedTemplate={style.template as "classic" | "modern" | "creative"}
+            onTemplateChange={(template) => onStyleChange({ ...style, template })}
+          />
 
           <div>
             <Label className="text-sm font-medium text-gray-700 mb-3 block">

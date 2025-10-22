@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import type { LetterFormData } from "@/types/letter";
 import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
+import { ImportFromCVButton } from "./ImportFromCVButton";
+import { useForm } from "react-hook-form";
 
 const AUTOSAVE_KEY = "letter_draft";
 
@@ -36,6 +38,7 @@ export function LetterFormSteps() {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<LetterFormData>({
     defaultValues: {
       prenom: "",
@@ -51,6 +54,21 @@ export function LetterFormSteps() {
       disponibilite: "",
     },
   });
+
+  // Fonction pour importer les données depuis un CV
+  const handleImportFromCV = (data: {
+    prenom: string;
+    nom: string;
+    email: string;
+    telephone: string;
+    adresse: string;
+  }) => {
+    setValue("prenom", data.prenom);
+    setValue("nom", data.nom);
+    setValue("email", data.email);
+    setValue("telephone", data.telephone);
+    setValue("adresse", data.adresse);
+  };
 
   // Observer les valeurs du formulaire pour la validation
   const formValues = watch();
@@ -285,6 +303,10 @@ export function LetterFormSteps() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Bouton Import depuis CV */}
+                <div className="flex justify-end mb-4">
+                  <ImportFromCVButton onImport={handleImportFromCV} />
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="prenom">
