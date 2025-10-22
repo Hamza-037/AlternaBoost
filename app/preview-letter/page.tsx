@@ -11,10 +11,11 @@ import { Separator } from "@/components/ui/separator";
 import { HeaderV2 } from "@/components/landing/HeaderV2";
 import { Footer } from "@/components/landing/Footer";
 import { LetterCustomizer } from "@/components/letter/LetterCustomizer";
-import { EditableLetterContent } from "@/components/letter/EditableLetterContent";
-import { ClassicLetterTemplate } from "@/components/letter/templates/ClassicLetterTemplate";
-import { ModernLetterTemplate } from "@/components/letter/templates/ModernLetterTemplate";
-import { CreativeLetterTemplate } from "@/components/letter/templates/CreativeLetterTemplate";
+import { 
+  ClassicLetterLayout,
+  ModernLetterLayout,
+  CreativeLetterLayout,
+} from "@/components/letter/LetterLayouts";
 import type { GeneratedLetter, LetterStyle, LetterSection } from "@/types/letter";
 import { toast } from "sonner";
 import {
@@ -175,35 +176,38 @@ export default function PreviewLetterPageV3() {
     }
   };
 
-  const renderLetterPreview = () => {
+  const renderLetterLayout = () => {
     if (!letterData) return null;
 
-    const templateProps = {
-      prenom: letterData.prenom,
-      nom: letterData.nom,
-      email: letterData.email,
-      telephone: letterData.telephone,
-      adresse: letterData.adresse,
-      entreprise: letterData.entreprise,
-      destinataire: letterData.destinataire,
-      posteVise: letterData.posteVise,
-      generatedContent: letterData.contenuGenere,
+    const layoutProps = {
+      letterData: {
+        prenom: letterData.prenom,
+        nom: letterData.nom,
+        email: letterData.email,
+        telephone: letterData.telephone,
+        adresse: letterData.adresse,
+        entreprise: letterData.entreprise,
+        destinataire: letterData.destinataire,
+        posteVise: letterData.posteVise,
+        contenuGenere: letterData.contenuGenere,
+      },
       primaryColor: letterStyle.colorScheme.primary,
+      secondaryColor: letterStyle.colorScheme.secondary,
+      headingFont: letterStyle.typography.headingFont,
+      bodyFont: letterStyle.typography.bodyFont,
+      onContentChange: handleContentChange,
+      onRegenerateParagraph: handleRegenerateParagraph,
     };
 
     switch (letterStyle.template) {
-      case "modern":
-        return <ModernLetterTemplate {...templateProps} />;
-      case "creative":
-        return (
-          <CreativeLetterTemplate
-            {...templateProps}
-            accentColor={letterStyle.colorScheme.secondary}
-          />
-        );
       case "classic":
+        return <ClassicLetterLayout {...layoutProps} />;
+      case "modern":
+        return <ModernLetterLayout {...layoutProps} />;
+      case "creative":
+        return <CreativeLetterLayout {...layoutProps} />;
       default:
-        return <ClassicLetterTemplate {...templateProps} />;
+        return <ModernLetterLayout {...layoutProps} />;
     }
   };
 
@@ -393,96 +397,8 @@ export default function PreviewLetterPageV3() {
                   </Badge>
                 </div>
 
-                {/* Contenu de la lettre avec styling selon template */}
-                <div className="relative">
-                  {/* Contenu éditable avec style du template */}
-                  <div 
-                    className="bg-white p-12 min-h-[1000px]"
-                    style={{
-                      fontFamily: letterStyle.typography.bodyFont,
-                    }}
-                  >
-                    {/* Header de la lettre avec couleur du template */}
-                    <div 
-                      className="mb-8 pb-6 border-b-2"
-                      style={{ 
-                        borderColor: letterStyle.colorScheme.primary,
-                      }}
-                    >
-                      <h2 
-                        className="text-2xl font-bold"
-                        style={{ 
-                          color: letterStyle.template === "classic" ? "#111827" : letterStyle.colorScheme.primary,
-                          fontFamily: letterStyle.typography.headingFont,
-                        }}
-                      >
-                        {letterData.prenom} {letterData.nom}
-                      </h2>
-                      <div className="mt-2 text-sm text-gray-600 space-y-1">
-                        <p>📧 {letterData.email}</p>
-                        <p>📱 {letterData.telephone}</p>
-                        <p>📍 {letterData.adresse}</p>
-                      </div>
-                    </div>
-
-                    {/* Infos destinataire */}
-                    <div className="mb-8 text-sm">
-                      <p className="font-semibold text-gray-900">{letterData.entreprise}</p>
-                      {letterData.destinataire && (
-                        <p className="text-gray-600">À l'attention de {letterData.destinataire}</p>
-                      )}
-                      <p className="mt-4 text-gray-600">
-                        Le {new Date().toLocaleDateString("fr-FR", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </p>
-                    </div>
-
-                    {/* Objet avec couleur selon template */}
-                    <div className="mb-8">
-                      <p className="text-sm">
-                        <span 
-                          className="font-semibold"
-                          style={{ color: letterStyle.template === "creative" ? letterStyle.colorScheme.primary : "#111827" }}
-                        >
-                          Objet :
-                        </span>{" "}
-                        Candidature au poste de {letterData.posteVise}
-                      </p>
-                    </div>
-
-                    {/* Formule d'appel */}
-                    <p className="mb-6 text-gray-800">
-                      {letterData.destinataire ? `${letterData.destinataire},` : "Madame, Monsieur,"}
-                    </p>
-
-                    {/* Contenu éditable */}
-                    <EditableLetterContent
-                      content={letterData.contenuGenere}
-                      onContentChange={handleContentChange}
-                      onRegenerateParagraph={handleRegenerateParagraph}
-                      primaryColor={letterStyle.colorScheme.primary}
-                      template={letterStyle.template}
-                    />
-
-                    {/* Formule de politesse */}
-                    <div className="mt-8 pt-6 border-t border-gray-200">
-                      <p className="text-gray-800 mb-8">
-                        Je vous prie d'agréer, {letterData.destinataire || "Madame, Monsieur"}, l'expression de mes salutations distinguées.
-                      </p>
-                      <p 
-                        className="font-semibold"
-                        style={{ 
-                          color: letterStyle.template === "classic" ? "#111827" : letterStyle.colorScheme.primary 
-                        }}
-                      >
-                        {letterData.prenom} {letterData.nom}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {/* Rendu du layout selon le template sélectionné */}
+                {renderLetterLayout()}
               </Card>
             </motion.div>
           </div>
