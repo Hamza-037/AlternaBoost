@@ -415,5 +415,3 @@ export function CreativeLetterLayout({
   );
 }
 
-/ /   T e m p l a t e   E X E C U T I V E   -   L u x e   e t   s o p h i s t i c a t i o n   p o u r   p o s t e s   d e   d i r e c t i o n  
- 
