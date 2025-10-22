@@ -22,7 +22,6 @@ import {
 import type { LetterFormData } from "@/types/letter";
 import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 import { ImportFromCVButton } from "./ImportFromCVButton";
-import { useForm } from "react-hook-form";
 
 const AUTOSAVE_KEY = "letter_draft";
 
