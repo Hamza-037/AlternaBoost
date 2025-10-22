@@ -16,6 +16,7 @@ import {
   ModernLetterLayout,
   CreativeLetterLayout,
 } from "@/components/letter/LetterLayouts";
+import { ExecutiveLetterLayout } from "@/components/letter/ExecutiveTemplate";
 import type { GeneratedLetter, LetterStyle, LetterSection } from "@/types/letter";
 import { toast } from "sonner";
 import {
@@ -206,6 +207,9 @@ export default function PreviewLetterPageV3() {
         return <ModernLetterLayout {...layoutProps} />;
       case "creative":
         return <CreativeLetterLayout {...layoutProps} />;
+      case "minimal":
+        // Minimal = Executive pour les lettres
+        return <ExecutiveLetterLayout {...layoutProps} />;
       default:
         return <ModernLetterLayout {...layoutProps} />;
     }
